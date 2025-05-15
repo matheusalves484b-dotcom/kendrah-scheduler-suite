@@ -112,7 +112,7 @@ const LandingPage = () => {
           <div className="flex justify-center">
             <div className="kendrah-card max-w-lg border-2 border-kendrah-purple">
               <div className="text-center">
-                <h3 className="text-xl font-bold text-kendrah-purple">Plano Completo</h3>
+                <h3 className="text-xl font-bold text-fuchsia-600">Plano Premium</h3>
                 <div className="mt-4">
                   <span className="text-4xl font-bold text-kendrah-black">R$ 39,90</span>
                   <span className="text-gray-500 ml-2">/mês</span>
