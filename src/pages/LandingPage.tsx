@@ -110,12 +110,12 @@ const LandingPage = () => {
           </div>
           
           <div className="flex justify-center">
-            <div className="kendrah-card max-w-lg border-2 border-kendrah-purple">
+            <div className="kendrah-card max-w-lg border-2 border-kendrah-purple bg-gray-950">
               <div className="text-center">
-                <h3 className="text-xl font-bold text-fuchsia-600">Plano Premium</h3>
+                <h3 className="text-xl font-bold text-kendrah-accent">Plano Premium</h3>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-kendrah-black">R$ 39,90</span>
-                  <span className="text-gray-500 ml-2">/mês</span>
+                  <span className="text-4xl font-bold text-kendrah-accent">R$ 39,90</span>
+                  <span className="ml-2 text-zinc-500">/mês</span>
                 </div>
                 <p className="mt-2 text-gray-500">Cobrado mensalmente</p>
               </div>
@@ -125,7 +125,7 @@ const LandingPage = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-kendrah-purple mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span>{feature}</span>
+                    <span className="text-zinc-50">{feature}</span>
                   </div>)}
               </div>
               
