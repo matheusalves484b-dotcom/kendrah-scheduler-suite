@@ -9,6 +9,10 @@ import LoginPage from "./pages/Auth/LoginPage";
 import RegisterPage from "./pages/Auth/RegisterPage";
 import DashboardHome from "./pages/Dashboard/DashboardHome";
 import CalendarPage from "./pages/Dashboard/CalendarPage";
+import ServicesPage from "./pages/Dashboard/ServicesPage";
+import ClientsPage from "./pages/Dashboard/ClientsPage";
+import AvailabilityPage from "./pages/Dashboard/AvailabilityPage";
+import SettingsPage from "./pages/Dashboard/SettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +29,10 @@ const App = () => (
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/dashboard" element={<DashboardHome />} />
           <Route path="/dashboard/calendar" element={<CalendarPage />} />
+          <Route path="/dashboard/services" element={<ServicesPage />} />
+          <Route path="/dashboard/clients" element={<ClientsPage />} />
+          <Route path="/dashboard/availability" element={<AvailabilityPage />} />
+          <Route path="/dashboard/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
