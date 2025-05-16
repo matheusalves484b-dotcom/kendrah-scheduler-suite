@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { X, Plus, Edit, Trash2, Clock, DollarSign } from "lucide-react";
@@ -83,13 +82,19 @@ const ServicesPage = () => {
           if (editingService) {
             resolve({
               ...editingService,
-              ...values
+              ...values,
+              // Ensure required fields are present
+              name: values.name,
+              duration: values.duration
             });
           } else {
             resolve({
               id: `${Date.now()}`,
               userId: "current-user",
-              ...values
+              name: values.name,
+              description: values.description,
+              duration: values.duration,
+              price: values.price
             });
           }
         }, 500);

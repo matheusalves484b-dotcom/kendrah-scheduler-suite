@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -175,10 +174,13 @@ const SettingsPage = () => {
       // This would be a real API call
       console.log("Updating public URL:", values);
       
-      // Simulate API call
+      // Simulate API call - ensure slug is always present
       return new Promise<{slug: string}>((resolve) => {
         setTimeout(() => {
-          resolve(values);
+          // Make sure slug is explicitly passed to resolve
+          resolve({
+            slug: values.slug
+          });
         }, 600);
       });
     },

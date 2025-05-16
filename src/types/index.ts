@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   name: string;
@@ -51,4 +50,13 @@ export interface CalendarEvent {
   start: Date;
   end: Date;
   resource?: any;
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  userId: string;
+  createdAt: Date;
 }

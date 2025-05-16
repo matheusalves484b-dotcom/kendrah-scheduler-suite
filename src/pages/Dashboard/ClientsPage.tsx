@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit, Trash2, User, Mail, Phone, Search } from "lucide-react";
@@ -13,16 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import DashboardLayout from "@/components/Dashboard/DashboardLayout";
 import DashboardHeader from "@/components/Dashboard/DashboardHeader";
-
-// Client interface
-interface Client {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  userId: string;
-  createdAt: Date;
-}
+import { Client } from "@/types";
 
 // Mock clients for demonstration - would be replaced with real API calls
 const mockClients: Client[] = [
@@ -103,14 +93,20 @@ const ClientsPage = () => {
           if (editingClient) {
             resolve({
               ...editingClient,
-              ...values
+              ...values,
+              // Ensure required fields are present
+              name: values.name,
+              email: values.email,
+              phone: values.phone
             });
           } else {
             resolve({
               id: `${Date.now()}`,
               userId: "current-user",
               createdAt: new Date(),
-              ...values
+              name: values.name,
+              email: values.email,
+              phone: values.phone
             });
           }
         }, 500);
