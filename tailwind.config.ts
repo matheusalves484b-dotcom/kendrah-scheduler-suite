@@ -23,7 +23,9 @@ export default {
       colors: {
         kendrah: {
           purple: "#7D3C98",
-          black: "#1C1C1C"
+          black: "#1C1C1C",
+          gray: "#E0E0E0",  // Added kendrah-gray color
+          light: "#F5F5F5"  // Added kendrah-light color for other classes that might need it
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
