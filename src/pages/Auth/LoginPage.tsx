@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,6 +12,11 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get the intended destination if redirected from a protected route
+  const from = location.state?.from?.pathname || "/dashboard";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,14 +35,27 @@ const LoginPage = () => {
     // Simulate login - replace with actual authentication
     try {
       setTimeout(() => {
+        // Set authentication state
+        localStorage.setItem("isAuthenticated", "true");
+        
+        // Example user data
+        localStorage.setItem("userData", JSON.stringify({
+          name: "Usuário Teste",
+          email: email,
+          subscription: {
+            status: "trial",
+            trialDaysLeft: 7,
+          }
+        }));
+        
         // Example login success
         toast({
           title: "Login realizado",
           description: "Você entrou na sua conta com sucesso",
         });
         
-        // Redirect to dashboard (would use react-router navigation)
-        window.location.href = '/dashboard';
+        // Redirect to the intended destination
+        navigate(from);
       }, 1500);
     } catch (error) {
       toast({
@@ -45,7 +63,6 @@ const LoginPage = () => {
         description: "Verifique suas credenciais e tente novamente",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
