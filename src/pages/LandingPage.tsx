@@ -110,7 +110,7 @@ const LandingPage = () => {
           </div>
           
           <div className="flex justify-center">
-            <div className="kendrah-card max-w-lg border-2 border-kendrah-purple bg-gray-950">
+            <div className="kendrah-card max-w-lg border-2 border-kendrah-purple bg-gray-900">
               <div className="text-center">
                 <h3 className="text-xl font-bold text-kendrah-accent text-zinc-50">Plano Premium</h3>
                 <div className="mt-4">
