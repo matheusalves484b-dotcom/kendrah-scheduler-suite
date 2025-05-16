@@ -193,7 +193,7 @@ const LandingPage = () => {
             Comece agora mesmo com 14 dias de teste grátis. Sem compromisso, sem cartão de crédito.
           </p>
           <Link to="/register">
-            <Button className="text-lg bg-white text-kendrah-purple hover:bg-white/90 px-8 py-6">
+            <Button className="text-lg px-8 py-6 bg-zinc-900 hover:bg-zinc-800 text-zinc-50">
               Criar Minha Conta Grátis
             </Button>
           </Link>
