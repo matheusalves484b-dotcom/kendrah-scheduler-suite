@@ -21,7 +21,7 @@ const LandingPage = () => {
               </p>
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
                 <Link to="/register">
-                  <Button className="text-lg bg-white text-kendrah-purple hover:bg-white/90 px-8 py-6">
+                  <Button className="text-lg px-8 py-6 text-kendrah-purple bg-zinc-50">
                     Teste Grátis por 14 Dias
                   </Button>
                 </Link>
@@ -112,12 +112,12 @@ const LandingPage = () => {
           <div className="flex justify-center">
             <div className="kendrah-card max-w-lg border-2 border-kendrah-purple bg-gray-950">
               <div className="text-center">
-                <h3 className="text-xl font-bold text-kendrah-accent">Plano Premium</h3>
+                <h3 className="text-xl font-bold text-kendrah-accent text-zinc-50">Plano Premium</h3>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-kendrah-accent">R$ 39,90</span>
-                  <span className="ml-2 text-zinc-500">/mês</span>
+                  <span className="text-4xl font-bold text-kendrah-accent text-kendrah-purple">R$ 39,90</span>
+                  <span className="ml-2 text-zinc-400">/mês</span>
                 </div>
-                <p className="mt-2 text-gray-500">Cobrado mensalmente</p>
+                <p className="mt-2 text-zinc-400">Cobrado mensalmente</p>
               </div>
               
               <div className="mt-8 space-y-4">
