@@ -16,6 +16,7 @@ import SettingsPage from "./pages/Dashboard/SettingsPage";
 import SubscriptionPage from "./pages/Dashboard/SubscriptionPage";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Footer from "./components/Footer";
 
 const queryClient = new QueryClient();
 
@@ -25,50 +26,71 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          
-          {/* Protected Dashboard Routes */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <DashboardHome />
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/calendar" element={
-            <ProtectedRoute>
-              <CalendarPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/services" element={
-            <ProtectedRoute>
-              <ServicesPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/clients" element={
-            <ProtectedRoute>
-              <ClientsPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/availability" element={
-            <ProtectedRoute>
-              <AvailabilityPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/subscription" element={
-            <ProtectedRoute>
-              <SubscriptionPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/settings" element={
-            <ProtectedRoute>
-              <SettingsPage />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <div className="flex flex-col min-h-screen">
+          <Routes>
+            <Route path="/" element={
+              <>
+                <LandingPage />
+              </>
+            } />
+            <Route path="/login" element={
+              <div className="flex flex-col min-h-screen">
+                <LoginPage />
+                <Footer />
+              </div>
+            } />
+            <Route path="/register" element={
+              <div className="flex flex-col min-h-screen">
+                <RegisterPage />
+                <Footer />
+              </div>
+            } />
+            
+            {/* Protected Dashboard Routes */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <DashboardHome />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/calendar" element={
+              <ProtectedRoute>
+                <CalendarPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/services" element={
+              <ProtectedRoute>
+                <ServicesPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/clients" element={
+              <ProtectedRoute>
+                <ClientsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/availability" element={
+              <ProtectedRoute>
+                <AvailabilityPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/subscription" element={
+              <ProtectedRoute>
+                <SubscriptionPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/settings" element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="*" element={
+              <div className="flex flex-col min-h-screen">
+                <NotFound />
+                <Footer />
+              </div>
+            } />
+          </Routes>
+        </div>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

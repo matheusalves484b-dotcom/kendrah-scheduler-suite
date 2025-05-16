@@ -1,5 +1,6 @@
 
 import { Navigate, useLocation } from "react-router-dom";
+import Footer from "./Footer";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -15,7 +16,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return <>{children}</>;
+  return (
+    <div className="min-h-screen flex flex-col">
+      {children}
+      <Footer />
+    </div>
+  );
 };
 
 export default ProtectedRoute;
