@@ -18,6 +18,14 @@ import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/Footer";
 
+// Institutional Pages
+import FeaturesPage from "./pages/InstitutionalPages/FeaturesPage";
+import PricingPage from "./pages/InstitutionalPages/PricingPage";
+import ContactPage from "./pages/InstitutionalPages/ContactPage";
+import FAQPage from "./pages/InstitutionalPages/FAQPage";
+import TermsPage from "./pages/InstitutionalPages/TermsPage";
+import PrivacyPage from "./pages/InstitutionalPages/PrivacyPage";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -45,6 +53,14 @@ const App = () => (
                 <Footer />
               </div>
             } />
+            
+            {/* Institutional Pages */}
+            <Route path="/features" element={<FeaturesPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/faq" element={<FAQPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
             
             {/* Protected Dashboard Routes */}
             <Route path="/dashboard" element={

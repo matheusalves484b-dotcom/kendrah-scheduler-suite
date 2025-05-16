@@ -1,10 +1,16 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  // Check if the current path is the path we're linking to
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
 
   return (
     <nav className="bg-white border-b border-kendrah-gray/20">
@@ -18,14 +24,37 @@ const Navbar = () => {
           
           {/* Desktop menu */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/features" className="text-kendrah-black hover:text-kendrah-purple transition-colors">
+            <Link 
+              to="/features" 
+              className={`transition-colors ${isActive('/features') 
+                ? 'text-kendrah-purple font-medium' 
+                : 'text-kendrah-black hover:text-kendrah-purple'}`}
+            >
               Funcionalidades
             </Link>
-            <Link to="/pricing" className="text-kendrah-black hover:text-kendrah-purple transition-colors">
+            <Link 
+              to="/pricing" 
+              className={`transition-colors ${isActive('/pricing') 
+                ? 'text-kendrah-purple font-medium' 
+                : 'text-kendrah-black hover:text-kendrah-purple'}`}
+            >
               Preços
             </Link>
-            <Link to="/contact" className="text-kendrah-black hover:text-kendrah-purple transition-colors">
+            <Link 
+              to="/contact" 
+              className={`transition-colors ${isActive('/contact') 
+                ? 'text-kendrah-purple font-medium' 
+                : 'text-kendrah-black hover:text-kendrah-purple'}`}
+            >
               Contato
+            </Link>
+            <Link 
+              to="/faq" 
+              className={`transition-colors ${isActive('/faq') 
+                ? 'text-kendrah-purple font-medium' 
+                : 'text-kendrah-black hover:text-kendrah-purple'}`}
+            >
+              FAQ
             </Link>
             <Link to="/login">
               <Button variant="outline" className="border-kendrah-purple text-kendrah-purple hover:bg-kendrah-purple/10">
@@ -62,21 +91,48 @@ const Navbar = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden mt-4 pb-4 animate-fade-in">
             <div className="flex flex-col space-y-4">
-              <Link to="/features" className="text-kendrah-black hover:text-kendrah-purple transition-colors py-2">
+              <Link 
+                to="/features" 
+                className={`py-2 ${isActive('/features') 
+                  ? 'text-kendrah-purple font-medium' 
+                  : 'text-kendrah-black hover:text-kendrah-purple'}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
                 Funcionalidades
               </Link>
-              <Link to="/pricing" className="text-kendrah-black hover:text-kendrah-purple transition-colors py-2">
+              <Link 
+                to="/pricing" 
+                className={`py-2 ${isActive('/pricing') 
+                  ? 'text-kendrah-purple font-medium' 
+                  : 'text-kendrah-black hover:text-kendrah-purple'}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
                 Preços
               </Link>
-              <Link to="/contact" className="text-kendrah-black hover:text-kendrah-purple transition-colors py-2">
+              <Link 
+                to="/contact" 
+                className={`py-2 ${isActive('/contact') 
+                  ? 'text-kendrah-purple font-medium' 
+                  : 'text-kendrah-black hover:text-kendrah-purple'}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
                 Contato
               </Link>
-              <Link to="/login" className="py-2">
+              <Link 
+                to="/faq" 
+                className={`py-2 ${isActive('/faq') 
+                  ? 'text-kendrah-purple font-medium' 
+                  : 'text-kendrah-black hover:text-kendrah-purple'}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                FAQ
+              </Link>
+              <Link to="/login" className="py-2" onClick={() => setIsMobileMenuOpen(false)}>
                 <Button variant="outline" className="border-kendrah-purple text-kendrah-purple hover:bg-kendrah-purple/10 w-full">
                   Login
                 </Button>
               </Link>
-              <Link to="/register" className="py-2">
+              <Link to="/register" className="py-2" onClick={() => setIsMobileMenuOpen(false)}>
                 <Button className="bg-kendrah-purple hover:bg-kendrah-purple/90 w-full">
                   Teste Grátis
                 </Button>
