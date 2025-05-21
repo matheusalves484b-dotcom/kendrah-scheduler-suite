@@ -6,8 +6,18 @@ import { calendarEvents } from '@/lib/fakeData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import AppointmentCalendar from '@/components/Dashboard/Calendar/AppointmentCalendar';
+import { format } from 'date-fns';
+import { pt } from 'date-fns/locale';
 
 const CalendarPage = () => {
+  const formatDate = (date: Date) => {
+    return format(new Date(date), 'dd/MM/yyyy', { locale: pt });
+  };
+  
+  const formatTime = (date: Date) => {
+    return format(new Date(date), 'HH:mm', { locale: pt });
+  };
+  
   return (
     <div className="flex h-screen bg-kendrah-gray/30">
       <Sidebar />
@@ -85,13 +95,13 @@ const CalendarPage = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {new Date(event.start).toLocaleDateString('pt-BR')}
+                            {formatDate(event.start)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {new Date(event.start).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} - 
-                            {new Date(event.end).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            {formatTime(event.start)} - 
+                            {formatTime(event.end)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">

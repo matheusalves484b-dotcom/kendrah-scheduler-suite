@@ -1,28 +1,63 @@
+
 import { useState, useCallback } from 'react';
 import { Calendar, momentLocalizer, Views } from 'react-big-calendar';
 import moment from 'moment';
+import 'moment/locale/pt-br'; // Import Portuguese (Brazil) locale
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { CalendarEvent } from '@/types';
 import AppointmentModal from './AppointmentModal';
 
-// Setup the localizer for react-big-calendar
+// Setup the localizer for react-big-calendar with Portuguese (Brazil) locale
+moment.locale('pt-br');
 const localizer = momentLocalizer(moment);
+
+// Customize calendar messages for Portuguese (Brazil)
+const messages = {
+  allDay: 'Dia inteiro',
+  previous: 'Anterior',
+  next: 'Próximo',
+  today: 'Hoje',
+  month: 'Mês',
+  week: 'Semana',
+  day: 'Dia',
+  agenda: 'Agenda',
+  date: 'Data',
+  time: 'Hora',
+  event: 'Evento',
+  noEventsInRange: 'Não há eventos neste período',
+  showMore: total => `+ ${total} evento(s)`
+};
+
+// Format dates in Brazilian format (DD/MM/YYYY)
+const formats = {
+  dateFormat: 'DD/MM/YYYY',
+  dayFormat: 'DD ddd',
+  monthHeaderFormat: 'MMMM YYYY',
+  dayHeaderFormat: 'dddd, DD [de] MMMM [de] YYYY',
+  dayRangeHeaderFormat: ({ start, end }) => 
+    `${moment(start).format('DD MMM')} — ${moment(end).format('DD MMM YYYY')}`
+};
+
 interface AppointmentCalendarProps {
   events: CalendarEvent[];
   onEventClick?: (event: CalendarEvent) => void;
 }
+
 const AppointmentCalendar = ({
   events
 }: AppointmentCalendarProps) => {
   const [view, setView] = useState(Views.WEEK);
   const [date, setDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  
   const handleEventClick = useCallback((event: CalendarEvent) => {
     setSelectedEvent(event);
   }, []);
+  
   const closeModal = useCallback(() => {
     setSelectedEvent(null);
   }, []);
+  
   const eventStyleGetter = useCallback(() => {
     return {
       className: 'bg-kendrah-purple',
@@ -36,12 +71,34 @@ const AppointmentCalendar = ({
       }
     };
   }, []);
-  return <div className="calendar- pt-br -container bg-white rounded-lg shadow border border-kendrah-gray/40 h-[700px] flex flex-col">
-      <Calendar localizer={localizer} events={events} startAccessor="start" endAccessor="end" style={{
-      height: '100%'
-    }} views={['month', 'week', 'day']} defaultView={Views.WEEK} onView={setView} view={view} date={date} onNavigate={setDate} onSelectEvent={handleEventClick} eventPropGetter={eventStyleGetter} tooltipAccessor={event => `${event.title}`} popup />
+  
+  return (
+    <div className="calendar-container bg-white rounded-lg shadow border border-kendrah-gray/40 h-[700px] flex flex-col">
+      <Calendar 
+        localizer={localizer} 
+        events={events} 
+        startAccessor="start" 
+        endAccessor="end" 
+        style={{
+          height: '100%'
+        }} 
+        views={['month', 'week', 'day']} 
+        defaultView={Views.WEEK} 
+        onView={setView} 
+        view={view} 
+        date={date} 
+        onNavigate={setDate} 
+        onSelectEvent={handleEventClick} 
+        eventPropGetter={eventStyleGetter} 
+        tooltipAccessor={event => `${event.title}`}
+        popup
+        messages={messages}
+        formats={formats}
+      />
       
       {selectedEvent && <AppointmentModal appointment={selectedEvent.resource} isOpen={Boolean(selectedEvent)} onClose={closeModal} />}
-    </div>;
+    </div>
+  );
 };
+
 export default AppointmentCalendar;
