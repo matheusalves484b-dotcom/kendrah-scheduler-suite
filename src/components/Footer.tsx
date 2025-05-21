@@ -1,12 +1,8 @@
-
 import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Twitter } from 'lucide-react';
-
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-
-  return (
-    <footer className="bg-[#1C1C1C] text-white py-8 mt-auto">
+  return <footer className="bg-[#1C1C1C] text-white py-8 mt-auto">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
@@ -44,39 +40,19 @@ const Footer = () => {
           <p className="text-gray-400">
             &copy; {currentYear} Kendrah. Todos os direitos reservados.
           </p>
-          <div className="flex space-x-4 mt-4 md:mt-0">
-            <a 
-              href="https://facebook.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              aria-label="Facebook" 
-              className="text-gray-400 hover:text-[#7D3C98] transition-colors"
-            >
-              <Facebook className="h-5 w-5" />
+          <div className="flex space-x-4 mt-4 md:mt-0 bg-transparent">
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-gray-400 hover:text-[#7D3C98] transition-colors">
+              
             </a>
-            <a 
-              href="https://instagram.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              aria-label="Instagram" 
-              className="text-gray-400 hover:text-[#7D3C98] transition-colors"
-            >
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-gray-400 hover:text-[#7D3C98] transition-colors">
               <Instagram className="h-5 w-5" />
             </a>
-            <a 
-              href="https://twitter.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              aria-label="Twitter" 
-              className="text-gray-400 hover:text-[#7D3C98] transition-colors"
-            >
-              <Twitter className="h-5 w-5" />
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-gray-400 hover:text-[#7D3C98] transition-colors">
+              
             </a>
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
