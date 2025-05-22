@@ -1,8 +1,28 @@
+
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram, Twitter } from 'lucide-react';
+import FooterSection from './footer/FooterSection';
+import CopyrightInfo from './footer/CopyrightInfo';
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  return <footer className="bg-[#1C1C1C] text-white py-8 mt-auto">
+  
+  const quickLinks = [
+    { label: 'Funcionalidades', url: '/features' },
+    { label: 'Preços', url: '/pricing' },
+    { label: 'Login', url: '/login' },
+    { label: 'Teste Grátis', url: '/register' },
+    { label: 'FAQ', url: '/faq' }
+  ];
+  
+  const supportLinks = [
+    { label: 'Contato', url: '/contact' },
+    { label: 'FAQ', url: '/faq' },
+    { label: 'Termos de Uso', url: '/terms' },
+    { label: 'Política de Privacidade', url: '/privacy' }
+  ];
+
+  return (
+    <footer className="bg-[#1C1C1C] text-white py-8 mt-auto">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
@@ -14,45 +34,14 @@ const Footer = () => {
             </p>
           </div>
           
-          <div>
-            <h3 className="font-semibold text-lg mb-4">Links Rápidos</h3>
-            <ul className="space-y-2">
-              <li><Link to="/features" className="text-gray-300 hover:text-[#7D3C98] transition-colors">Funcionalidades</Link></li>
-              <li><Link to="/pricing" className="text-gray-300 hover:text-[#7D3C98] transition-colors">Preços</Link></li>
-              <li><Link to="/login" className="text-gray-300 hover:text-[#7D3C98] transition-colors">Login</Link></li>
-              <li><Link to="/register" className="text-gray-300 hover:text-[#7D3C98] transition-colors">Teste Grátis</Link></li>
-              <li><Link to="/faq" className="text-gray-300 hover:text-[#7D3C98] transition-colors">FAQ</Link></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h3 className="font-semibold text-lg mb-4">Suporte</h3>
-            <ul className="space-y-2">
-              <li><Link to="/contact" className="text-gray-300 hover:text-[#7D3C98] transition-colors">Contato</Link></li>
-              <li><Link to="/faq" className="text-gray-300 hover:text-[#7D3C98] transition-colors">FAQ</Link></li>
-              <li><Link to="/terms" className="text-gray-300 hover:text-[#7D3C98] transition-colors">Termos de Uso</Link></li>
-              <li><Link to="/privacy" className="text-gray-300 hover:text-[#7D3C98] transition-colors">Política de Privacidade</Link></li>
-            </ul>
-          </div>
+          <FooterSection title="Links Rápidos" links={quickLinks} />
+          <FooterSection title="Suporte" links={supportLinks} />
         </div>
         
-        <div className="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400">
-            &copy; {currentYear} Kendrah. Todos os direitos reservados.
-          </p>
-          <div className="flex space-x-4 mt-4 md:mt-0 bg-transparent">
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-gray-400 hover:text-[#7D3C98] transition-colors">
-              
-            </a>
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-gray-400 hover:text-[#7D3C98] transition-colors">
-              <Instagram className="h-5 w-5" />
-            </a>
-            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-gray-400 hover:text-[#7D3C98] transition-colors">
-              
-            </a>
-          </div>
-        </div>
+        <CopyrightInfo year={currentYear} />
       </div>
-    </footer>;
+    </footer>
+  );
 };
+
 export default Footer;
