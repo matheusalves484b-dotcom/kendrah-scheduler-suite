@@ -12,7 +12,7 @@ const PricingSection = () => {
         </div>
         
         <div className="flex justify-center">
-          <div className="kendrah-card max-w-lg border-2 border-kendrah-purple bg-gray-900 rounded-3xl">
+          <div className="kendrah-card max-w-lg border-2 border-kendrah-purple rounded-3xl bg-gray-900">
             <div className="text-center">
               <h3 className="text-xl font-bold text-kendrah-accent text-zinc-50">Plano Premium</h3>
               <div className="mt-4">
@@ -22,12 +22,12 @@ const PricingSection = () => {
               <p className="mt-2 text-zinc-400">Cobrado mensalmente</p>
             </div>
             
-            <div className="mt-8 space-y-4">
-              {features.map((feature, index) => <div key={index} className="flex items-center bg-gray-900">
+            <div className="mt-8 space-y-4 bg-gray-900">
+              {features.map((feature, index) => <div key={index} className="flex items-center bg-transparent">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-kendrah-purple mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-zinc-50">{feature}</span>
+                  <span className="text-zinc-50 text-lg">{feature}</span>
                 </div>)}
             </div>
             
