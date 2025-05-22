@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { Calendar, momentLocalizer, Views } from 'react-big-calendar';
 import moment from 'moment';
@@ -34,30 +33,27 @@ const formats = {
   dayFormat: 'DD ddd',
   monthHeaderFormat: 'MMMM YYYY',
   dayHeaderFormat: 'dddd, DD [de] MMMM [de] YYYY',
-  dayRangeHeaderFormat: ({ start, end }) => 
-    `${moment(start).format('DD MMM')} — ${moment(end).format('DD MMM YYYY')}`
+  dayRangeHeaderFormat: ({
+    start,
+    end
+  }) => `${moment(start).format('DD MMM')} — ${moment(end).format('DD MMM YYYY')}`
 };
-
 interface AppointmentCalendarProps {
   events: CalendarEvent[];
   onEventClick?: (event: CalendarEvent) => void;
 }
-
 const AppointmentCalendar = ({
   events
 }: AppointmentCalendarProps) => {
   const [view, setView] = useState(Views.WEEK);
   const [date, setDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  
   const handleEventClick = useCallback((event: CalendarEvent) => {
     setSelectedEvent(event);
   }, []);
-  
   const closeModal = useCallback(() => {
     setSelectedEvent(null);
   }, []);
-  
   const eventStyleGetter = useCallback(() => {
     return {
       className: 'bg-kendrah-purple',
@@ -71,34 +67,12 @@ const AppointmentCalendar = ({
       }
     };
   }, []);
-  
-  return (
-    <div className="calendar-container bg-white rounded-lg shadow border border-kendrah-gray/40 h-[700px] flex flex-col">
-      <Calendar 
-        localizer={localizer} 
-        events={events} 
-        startAccessor="start" 
-        endAccessor="end" 
-        style={{
-          height: '100%'
-        }} 
-        views={['month', 'week', 'day']} 
-        defaultView={Views.WEEK} 
-        onView={setView} 
-        view={view} 
-        date={date} 
-        onNavigate={setDate} 
-        onSelectEvent={handleEventClick} 
-        eventPropGetter={eventStyleGetter} 
-        tooltipAccessor={event => `${event.title}`}
-        popup
-        messages={messages}
-        formats={formats}
-      />
+  return <div className="calendar-container rounded-lg shadow border border-kendrah-gray/40 h-[700px] flex flex-col bg-transparent">
+      <Calendar localizer={localizer} events={events} startAccessor="start" endAccessor="end" style={{
+      height: '100%'
+    }} views={['month', 'week', 'day']} defaultView={Views.WEEK} onView={setView} view={view} date={date} onNavigate={setDate} onSelectEvent={handleEventClick} eventPropGetter={eventStyleGetter} tooltipAccessor={event => `${event.title}`} popup messages={messages} formats={formats} />
       
       {selectedEvent && <AppointmentModal appointment={selectedEvent.resource} isOpen={Boolean(selectedEvent)} onClose={closeModal} />}
-    </div>
-  );
+    </div>;
 };
-
 export default AppointmentCalendar;

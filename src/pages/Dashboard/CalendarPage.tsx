@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Sidebar from '@/components/Dashboard/Sidebar';
 import DashboardHeader from '@/components/Dashboard/DashboardHeader';
@@ -8,29 +7,24 @@ import { Button } from '@/components/ui/button';
 import AppointmentCalendar from '@/components/Dashboard/Calendar/AppointmentCalendar';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
-
 const CalendarPage = () => {
   const formatDate = (date: Date) => {
-    return format(new Date(date), 'dd/MM/yyyy', { locale: pt });
+    return format(new Date(date), 'dd/MM/yyyy', {
+      locale: pt
+    });
   };
-  
   const formatTime = (date: Date) => {
-    return format(new Date(date), 'HH:mm', { locale: pt });
+    return format(new Date(date), 'HH:mm', {
+      locale: pt
+    });
   };
-  
-  return (
-    <div className="flex h-screen bg-kendrah-gray/30">
+  return <div className="flex h-screen bg-kendrah-gray/30">
       <Sidebar />
       <div className="flex-1 p-8 overflow-auto">
-        <DashboardHeader
-          title="Agenda"
-          subtitle="Gerencie seus agendamentos e visualize sua agenda"
-          actionLabel="Novo Agendamento"
-          actionPath="/dashboard/appointments/new"
-        />
+        <DashboardHeader title="Agenda" subtitle="Gerencie seus agendamentos e visualize sua agenda" actionLabel="Novo Agendamento" actionPath="/dashboard/appointments/new" />
 
         <div className="mb-6">
-          <Tabs defaultValue="calendar" className="w-full">
+          <Tabs defaultValue="calendar" className="w-full bg-transparent">
             <div className="flex justify-between items-center mb-6">
               <TabsList>
                 <TabsTrigger value="calendar">Calendário</TabsTrigger>
@@ -38,14 +32,14 @@ const CalendarPage = () => {
               </TabsList>
               
               <div className="flex space-x-2">
-                <Button variant="outline" className="text-kendrah-black border-kendrah-black hover:bg-kendrah-black/10">
+                <Button variant="outline" className="text-kendrah-black border-kendrah-black hover:bg-kendrah-black/10 bg-zinc-950 hover:bg-zinc-800 text-zinc-50">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                   </svg>
                   Filtrar
                 </Button>
                 
-                <Button variant="outline" className="text-kendrah-black border-kendrah-black hover:bg-kendrah-black/10">
+                <Button variant="outline" className="text-kendrah-black border-kendrah-black hover:bg-kendrah-black/10 bg-zinc-950 hover:bg-zinc-800 text-zinc-50">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                   </svg>
@@ -84,8 +78,7 @@ const CalendarPage = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {calendarEvents.map((event) => (
-                      <tr key={event.id}>
+                    {calendarEvents.map(event => <tr key={event.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="font-medium text-gray-900">{event.resource.customerName}</div>
                           <div className="text-sm text-gray-500">{event.resource.customerEmail}</div>
@@ -105,16 +98,8 @@ const CalendarPage = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            event.resource.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                            event.resource.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                            event.resource.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                            'bg-blue-100 text-blue-800'
-                          }`}>
-                            {event.resource.status === 'confirmed' ? 'Confirmado' :
-                             event.resource.status === 'pending' ? 'Pendente' :
-                             event.resource.status === 'cancelled' ? 'Cancelado' :
-                             'Concluído'}
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${event.resource.status === 'confirmed' ? 'bg-green-100 text-green-800' : event.resource.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : event.resource.status === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}>
+                            {event.resource.status === 'confirmed' ? 'Confirmado' : event.resource.status === 'pending' ? 'Pendente' : event.resource.status === 'cancelled' ? 'Cancelado' : 'Concluído'}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -122,8 +107,7 @@ const CalendarPage = () => {
                             Detalhes
                           </Button>
                         </td>
-                      </tr>
-                    ))}
+                      </tr>)}
                   </tbody>
                 </table>
               </div>
@@ -131,8 +115,6 @@ const CalendarPage = () => {
           </Tabs>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default CalendarPage;
