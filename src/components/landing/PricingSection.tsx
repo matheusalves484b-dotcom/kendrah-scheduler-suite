@@ -5,10 +5,8 @@ const PricingSection = () => {
   return <section className="py-20 bg-kendrah-gray/20 bg-transparent">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4 text-kendrah-black text-zinc-900">Simples e Transparente</h2>
-          <p className="text-xl max-w-3xl mx-auto text-zinc-800">
-            Sem taxas ocultas, sem complicações. Apenas um preço justo por tudo que você precisa.
-          </p>
+          <h2 className="text-3xl font-bold mb-4 text-kendrah-black text-zinc-900">➼ Prezamos pela honestidade e transparência ➼</h2>
+          <p className="max-w-3xl mx-auto text-zinc-800 text-lg">Plano sem taxas ocultas, sem complicações. Apenas um preço justo por tudo que você precisa.</p>
         </div>
         
         <div className="flex justify-center bg-transparent">
