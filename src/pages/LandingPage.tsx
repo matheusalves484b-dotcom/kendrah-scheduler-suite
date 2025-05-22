@@ -12,7 +12,7 @@ const LandingPage = () => {
         <div className="container mx-auto px-6">
           <div className="flex flex-col lg:flex-row items-center">
             <div className="lg:w-1/2 lg:pr-10 mb-10 lg:mb-0">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+              <h1 className="text-4xl font-bold mb-6 leading-tight md:text-4xl">
                 Automatize sua agenda. <br />
                 Simplifique sua rotina.
               </h1>
@@ -21,7 +21,7 @@ const LandingPage = () => {
               </p>
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
                 <Link to="/register">
-                  <Button className="text-lg px-8 py-6 text-kendrah-purple bg-zinc-50">
+                  <Button className="text-lg px-8 py-6 text-kendrah-purple bg-white">
                     Teste Grátis por 14 Dias
                   </Button>
                 </Link>
@@ -34,7 +34,7 @@ const LandingPage = () => {
               <p className="mt-4 text-sm text-gray-300">Sem necessidade de cartão de crédito</p>
             </div>
             <div className="lg:w-1/2">
-              <img src="/placeholder.svg" alt="Kendrah Dashboard" className="rounded-lg shadow-2xl" />
+              <img alt="Kendrah Dashboard" src="/lovable-uploads/44ca7fde-ed90-4bac-b28a-5ca01e22a155.png" className="rounded-lg shadow-2xl object-scale-down" />
             </div>
           </div>
         </div>
