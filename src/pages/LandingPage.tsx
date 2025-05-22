@@ -21,12 +21,12 @@ const LandingPage = () => {
               </p>
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
                 <Link to="/register">
-                  <Button className="text-lg px-8 py-6 text-kendrah-purple bg-white">
+                  <Button className="text-lg px-8 py-6 text-kendrah-purple bg-white text-zinc-950">
                     Teste Grátis por 14 Dias
                   </Button>
                 </Link>
                 <Link to="/login">
-                  <Button variant="outline" className="text-lg text-white border-white px-8 py-6 bg-zinc-900 hover:bg-zinc-800">
+                  <Button variant="outline" className="text-lg text-white border-white px-8 py-6 bg-gray-900 hover:bg-gray-800">
                     Área do Cliente
                   </Button>
                 </Link>
