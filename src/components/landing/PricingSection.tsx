@@ -2,16 +2,16 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 const PricingSection = () => {
   const features = ["Agendamentos ilimitados", "Notificações por WhatsApp", "Link de agendamento personalizado", "Cadastro ilimitado de serviços", "Horários personalizados", "Relatórios detalhados", "Suporte prioritário", "Atualizações e novidades"];
-  return <section className="py-20 bg-kendrah-gray/20">
+  return <section className="py-20 bg-kendrah-gray/20 bg-gray-900">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4 text-kendrah-black">Preço Simples e Transparente</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <h2 className="text-3xl font-bold mb-4 text-kendrah-black text-zinc-50">Simples e Transparente</h2>
+          <p className="text-xl max-w-3xl mx-auto text-zinc-200">
             Sem taxas ocultas, sem complicações. Apenas um preço justo por tudo que você precisa.
           </p>
         </div>
         
-        <div className="flex justify-center">
+        <div className="flex justify-center bg-gray-900">
           <div className="kendrah-card max-w-lg border-2 border-kendrah-purple rounded-3xl bg-gray-900">
             <div className="text-center">
               <h3 className="text-xl font-bold text-kendrah-accent text-zinc-50">Plano Premium</h3>
