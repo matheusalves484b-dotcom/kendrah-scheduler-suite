@@ -20,7 +20,7 @@ const PricingSection = () => {
               <p className="mt-2 text-zinc-600">Cobrado mensalmente</p>
             </div>
             
-            <div className="mt-8 space-y-4 bg-zinc-50">
+            <div className="mt-8 space-y-4 bg-transparent">
               {features.map((feature, index) => <div key={index} className="flex items-center bg-transparent">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-kendrah-purple mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
