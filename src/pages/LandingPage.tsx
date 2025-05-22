@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -83,11 +84,10 @@ const LandingPage = () => {
             description: "Configure sua disponibilidade com flexibilidade para cada dia da semana."
           }, {
             icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
                   </svg>,
-            title: "Integrações",
-            description: "Conecte com ferramentas como Zapier e Make para automatizar ainda mais seus processos."
+            title: "Relatórios e Histórico",
+            description: "Acompanhe seu histórico de agendamentos e tenha relatórios detalhados sobre sua agenda."
           }].map((feature, index) => <div key={index} className="kendrah-card flex flex-col items-center text-center hover:border-kendrah-purple/40 transition-colors">
                 <div className="text-kendrah-purple mb-4">
                   {feature.icon}
@@ -121,7 +121,7 @@ const LandingPage = () => {
               </div>
               
               <div className="mt-8 space-y-4">
-                {["Agendamentos ilimitados", "Notificações por WhatsApp", "Link de agendamento personalizado", "Cadastro ilimitado de serviços", "Horários personalizados", "Integrações com Zapier e Make", "Suporte prioritário", "Atualizações e novidades"].map((feature, index) => <div key={index} className="flex items-center bg-gray-900">
+                {["Agendamentos ilimitados", "Notificações por WhatsApp", "Link de agendamento personalizado", "Cadastro ilimitado de serviços", "Horários personalizados", "Relatórios detalhados", "Suporte prioritário", "Atualizações e novidades"].map((feature, index) => <div key={index} className="flex items-center bg-gray-900">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-kendrah-purple mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>

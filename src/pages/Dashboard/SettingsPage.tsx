@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { User } from "@/types";
 
 // Mock user data
@@ -23,7 +23,6 @@ const mockUser: User = {
   createdAt: new Date("2023-01-01"),
   trialEndsAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), // 10 days from now
   isSubscribed: false,
-  webhookUrl: "https://hook.eu1.make.com/abcdefg123456",
   whatsappNumber: "5511987654321"
 };
 
@@ -35,7 +34,6 @@ const profileFormSchema = z.object({
 });
 
 const integrationFormSchema = z.object({
-  webhookUrl: z.string().url("URL do webhook inválida").optional().or(z.literal("")),
   whatsappNumber: z.string()
     .min(10, "Número de WhatsApp deve ter pelo menos 10 dígitos")
     .optional()
@@ -83,11 +81,9 @@ const SettingsPage = () => {
   const integrationForm = useForm<IntegrationFormValues>({
     resolver: zodResolver(integrationFormSchema),
     defaultValues: {
-      webhookUrl: "",
       whatsappNumber: "",
     },
     values: user ? {
-      webhookUrl: user.webhookUrl || "",
       whatsappNumber: user.whatsappNumber || "",
     } : undefined,
   });
@@ -146,7 +142,6 @@ const SettingsPage = () => {
         setTimeout(() => {
           resolve({
             ...mockUser,
-            webhookUrl: values.webhookUrl || undefined,
             whatsappNumber: values.whatsappNumber || undefined
           });
         }, 600);
@@ -234,7 +229,7 @@ const SettingsPage = () => {
       <div className="container mx-auto py-8">
         <DashboardHeader
           title="Configurações"
-          subtitle="Gerencie suas preferências e integrações"
+          subtitle="Gerencie suas preferências e notificações"
         />
 
         {isLoading ? (
@@ -245,7 +240,7 @@ const SettingsPage = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="mb-6">
               <TabsTrigger value="profile">Perfil</TabsTrigger>
-              <TabsTrigger value="integrations">Integrações</TabsTrigger>
+              <TabsTrigger value="integrations">WhatsApp</TabsTrigger>
               <TabsTrigger value="booking">Link de agendamento</TabsTrigger>
             </TabsList>
 
@@ -327,13 +322,13 @@ const SettingsPage = () => {
               </Card>
             </TabsContent>
 
-            {/* Integrations tab */}
+            {/* WhatsApp tab (renamed from Integrations) */}
             <TabsContent value="integrations">
               <Card>
                 <CardHeader>
-                  <CardTitle>Integrações</CardTitle>
+                  <CardTitle>WhatsApp</CardTitle>
                   <CardDescription>
-                    Configure integrações com WhatsApp e automatizações
+                    Configure suas notificações de WhatsApp
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -359,47 +354,13 @@ const SettingsPage = () => {
                         )}
                       />
 
-                      <FormField
-                        control={integrationForm.control}
-                        name="webhookUrl"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>URL do Webhook</FormLabel>
-                            <FormControl>
-                              <Input 
-                                {...field} 
-                                placeholder="https://hook.eu1.make.com/..." 
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              Webhook para integrações com Make, Zapier ou outras ferramentas
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <Alert>
-                        <AlertDescription>
-                          <p className="mb-2">Variáveis disponíveis para uso no webhook:</p>
-                          <ul className="text-sm space-y-1 list-disc pl-5">
-                            <li><code className="text-xs bg-muted px-1 rounded">{"{{nome}}"}</code> - Nome do cliente</li>
-                            <li><code className="text-xs bg-muted px-1 rounded">{"{{email}}"}</code> - Email do cliente</li>
-                            <li><code className="text-xs bg-muted px-1 rounded">{"{{telefone}}"}</code> - Telefone do cliente</li>
-                            <li><code className="text-xs bg-muted px-1 rounded">{"{{data}}"}</code> - Data do agendamento</li>
-                            <li><code className="text-xs bg-muted px-1 rounded">{"{{hora}}"}</code> - Horário do agendamento</li>
-                            <li><code className="text-xs bg-muted px-1 rounded">{"{{servico}}"}</code> - Nome do serviço</li>
-                          </ul>
-                        </AlertDescription>
-                      </Alert>
-
                       <div className="flex justify-end">
                         <Button 
                           type="submit"
                           className="bg-kendrah-purple hover:bg-kendrah-purple/90"
                           disabled={integrationMutation.isPending}
                         >
-                          {integrationMutation.isPending ? "Salvando..." : "Salvar integrações"}
+                          {integrationMutation.isPending ? "Salvando..." : "Salvar configurações"}
                         </Button>
                       </div>
                     </form>
