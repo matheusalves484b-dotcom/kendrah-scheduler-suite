@@ -121,7 +121,7 @@ const LandingPage = () => {
               </div>
               
               <div className="mt-8 space-y-4">
-                {["Agendamentos ilimitados", "Notificações por WhatsApp", "Link de agendamento personalizado", "Cadastro ilimitado de serviços", "Horários personalizados", "Integrações com Zapier e Make", "Suporte prioritário", "Atualizações e novidades"].map((feature, index) => <div key={index} className="flex items-center">
+                {["Agendamentos ilimitados", "Notificações por WhatsApp", "Link de agendamento personalizado", "Cadastro ilimitado de serviços", "Horários personalizados", "Integrações com Zapier e Make", "Suporte prioritário", "Atualizações e novidades"].map((feature, index) => <div key={index} className="flex items-center bg-gray-900">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-kendrah-purple mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
