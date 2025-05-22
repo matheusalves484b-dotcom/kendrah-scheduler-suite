@@ -26,7 +26,7 @@ const LandingPage = () => {
                   </Button>
                 </Link>
                 <Link to="/login">
-                  <Button variant="outline" className="text-lg text-white border-white px-8 py-6 bg-gray-900 hover:bg-gray-800">
+                  <Button variant="outline" className="text-lg text-white border-white px-8 py-6 bg-zinc-950 hover:bg-zinc-800">
                     Área do Cliente
                   </Button>
                 </Link>
