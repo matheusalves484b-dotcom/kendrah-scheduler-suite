@@ -1,10 +1,7 @@
-
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-
 const HeroSection = () => {
-  return (
-    <section className="bg-gradient-to-br from-kendrah-purple to-kendrah-black text-white py-20">
+  return <section className="bg-gradient-to-br from-kendrah-purple to-kendrah-black text-white py-20">
       <div className="container mx-auto px-6">
         <div className="flex flex-col lg:flex-row items-center">
           <div className="lg:w-1/2 lg:pr-10 mb-10 lg:mb-0">
@@ -30,12 +27,10 @@ const HeroSection = () => {
             <p className="mt-4 text-sm text-gray-300">Sem necessidade de cartão de crédito</p>
           </div>
           <div className="lg:w-1/2">
-            <img alt="Kendrah Dashboard" src="/lovable-uploads/44ca7fde-ed90-4bac-b28a-5ca01e22a155.png" className="rounded-lg shadow-2xl object-scale-down" />
+            <img alt="Kendrah Dashboard" className="rounded-lg shadow-2xl object-scale-down" src="/lovable-uploads/3cb7ac49-9e22-4c45-83db-279995a935ba.png" />
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default HeroSection;
