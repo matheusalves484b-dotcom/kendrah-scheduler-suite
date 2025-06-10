@@ -14,6 +14,7 @@ import ClientsPage from "./pages/Dashboard/ClientsPage";
 import AvailabilityPage from "./pages/Dashboard/AvailabilityPage";
 import SettingsPage from "./pages/Dashboard/SettingsPage";
 import SubscriptionPage from "./pages/Dashboard/SubscriptionPage";
+import BookingPage from "./pages/BookingPage";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/Footer";

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { X, Plus, Edit, Trash2, Clock, DollarSign } from "lucide-react";
@@ -12,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import DashboardLayout from "@/components/Dashboard/DashboardLayout";
 import DashboardHeader from "@/components/Dashboard/DashboardHeader";
+import CopyBookingLink from "@/components/CopyBookingLink";
 import { Service } from "@/types";
 
 // Mock services for demonstration - would be replaced with real API calls
@@ -249,7 +251,7 @@ const ServicesPage = () => {
                     </p>
                   )}
 
-                  <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-4 text-sm mb-4">
                     <div className="flex items-center">
                       <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
                       <span>{service.duration} min</span>
@@ -260,6 +262,17 @@ const ServicesPage = () => {
                         <span>R$ {service.price}</span>
                       </div>
                     )}
+                  </div>
+
+                  {/* Booking link section */}
+                  <div className="border-t pt-4">
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs text-muted-foreground">Link de agendamento:</span>
+                      <CopyBookingLink 
+                        serviceId={service.id} 
+                        serviceName={service.name} 
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
