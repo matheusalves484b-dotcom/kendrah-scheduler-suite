@@ -1,5 +1,5 @@
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -15,7 +15,8 @@ import {
   FormDescription,
   FormMessage,
 } from "@/components/ui/form";
-import { User } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
+import { Profile } from "@/types";
 
 // Form validation schema
 const publicUrlFormSchema = z.object({
@@ -28,10 +29,25 @@ const publicUrlFormSchema = z.object({
 type PublicUrlFormValues = z.infer<typeof publicUrlFormSchema>;
 
 interface BookingUrlFormProps {
-  user: User;
+  userId: string;
 }
 
-const BookingUrlForm = ({ user }: BookingUrlFormProps) => {
+const BookingUrlForm = ({ userId }: BookingUrlFormProps) => {
+  // Fetch current profile data
+  const { data: profile, isLoading: profileLoading } = useQuery({
+    queryKey: ['profile', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+      return data as Profile;
+    },
+  });
+
   // Public URL form
   const publicUrlForm = useForm<PublicUrlFormValues>({
     resolver: zodResolver(publicUrlFormSchema),
@@ -39,25 +55,20 @@ const BookingUrlForm = ({ user }: BookingUrlFormProps) => {
       slug: "",
     },
     values: {
-      slug: user?.id ? user.id.toLowerCase() : "",
+      slug: profile?.slug || "",
     },
   });
 
   // Update public URL mutation
   const publicUrlMutation = useMutation({
     mutationFn: async (values: PublicUrlFormValues) => {
-      // This would be a real API call
-      console.log("Updating public URL:", values);
-      
-      // Simulate API call - ensure slug is always present
-      return new Promise<{ slug: string }>((resolve) => {
-        setTimeout(() => {
-          // Make sure slug is explicitly passed to resolve
-          resolve({
-            slug: values.slug,
-          });
-        }, 600);
-      });
+      const { error } = await supabase
+        .from('profiles')
+        .update({ slug: values.slug })
+        .eq('id', userId);
+
+      if (error) throw error;
+      return values;
     },
     onSuccess: () => {
       toast({
@@ -65,10 +76,10 @@ const BookingUrlForm = ({ user }: BookingUrlFormProps) => {
         description: "Sua URL de agendamentos foi atualizada com sucesso.",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar sua URL pública.",
+        description: error.message || "Não foi possível atualizar sua URL pública.",
         variant: "destructive",
       });
       console.error(error);
@@ -95,6 +106,10 @@ const BookingUrlForm = ({ user }: BookingUrlFormProps) => {
   const onSubmit = (data: PublicUrlFormValues) => {
     publicUrlMutation.mutate(data);
   };
+
+  if (profileLoading) {
+    return <div>Carregando...</div>;
+  }
 
   return (
     <Form {...publicUrlForm}>

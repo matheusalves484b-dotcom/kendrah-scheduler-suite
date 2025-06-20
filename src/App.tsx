@@ -15,6 +15,7 @@ import AvailabilityPage from "./pages/Dashboard/AvailabilityPage";
 import SettingsPage from "./pages/Dashboard/SettingsPage";
 import SubscriptionPage from "./pages/Dashboard/SubscriptionPage";
 import BookingPage from "./pages/BookingPage";
+import BookingSlugPage from "./pages/BookingSlugPage";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/Footer";
@@ -62,6 +63,9 @@ const App = () => (
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
+            
+            {/* Booking Routes */}
+            <Route path="/agendar/:slug" element={<BookingSlugPage />} />
             
             {/* Protected Dashboard Routes */}
             <Route path="/dashboard" element={

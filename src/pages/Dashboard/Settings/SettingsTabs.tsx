@@ -1,17 +1,17 @@
 
 import { useState } from "react";
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
 } from "@/components/ui/tabs";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription
 } from "@/components/ui/card";
 import ProfileForm from "./ProfileForm";
 import WhatsAppForm from "./WhatsAppForm";
@@ -73,7 +73,7 @@ const SettingsTabs = ({ user }: SettingsTabsProps) => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <BookingUrlForm user={user} />
+            <BookingUrlForm userId={user.id} />
           </CardContent>
         </Card>
       </TabsContent>
