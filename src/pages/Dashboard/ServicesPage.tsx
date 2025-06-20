@@ -9,73 +9,66 @@ import AddServiceCard from "@/components/Dashboard/Services/AddServiceCard";
 import ServiceDialog from "@/components/Dashboard/Services/ServiceDialog";
 import { ServiceFormValues } from "@/components/Dashboard/Services/ServiceForm";
 import { Service } from "@/types";
-
-// Mock services for demonstration - would be replaced with real API calls
-const mockServices: Service[] = [
-  {
-    id: "1",
-    name: "Consulta padrão",
-    description: "Sessão de 50 minutos",
-    duration: 50,
-    price: 120,
-    user_id: "current-user",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  },
-  {
-    id: "2",
-    name: "Sessão estendida",
-    description: "Sessão de 90 minutos",
-    duration: 90,
-    price: 200,
-    user_id: "current-user",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  }
-];
+import { supabase } from "@/integrations/supabase/client";
+import { generateSlug } from "@/lib/slugUtils";
 
 const ServicesPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const queryClient = useQueryClient();
 
-  // Fetch services
+  // Fetch services from Supabase
   const { data: services = [], isLoading } = useQuery({
     queryKey: ["services"],
     queryFn: async () => {
-      console.log("Fetching services...");
-      return mockServices;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { data, error } = await supabase
+        .from('services')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data as Service[];
     }
   });
 
   // Create or update service mutation
   const mutation = useMutation({
     mutationFn: async (values: ServiceFormValues) => {
-      console.log("Saving service:", values);
-      
-      return new Promise<Service>((resolve) => {
-        setTimeout(() => {
-          if (editingService) {
-            resolve({
-              ...editingService,
-              ...values,
-              name: values.name,
-              duration: values.duration
-            });
-          } else {
-            resolve({
-              id: `${Date.now()}`,
-              user_id: "current-user",
-              name: values.name,
-              description: values.description,
-              duration: values.duration,
-              price: values.price,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            });
-          }
-        }, 500);
-      });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const serviceData = {
+        name: values.name,
+        description: values.description || null,
+        duration: values.duration,
+        price: values.price || null,
+        user_id: user.id
+      };
+
+      if (editingService) {
+        const { data, error } = await supabase
+          .from('services')
+          .update(serviceData)
+          .eq('id', editingService.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data as Service;
+      } else {
+        const { data, error } = await supabase
+          .from('services')
+          .insert([serviceData])
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data as Service;
+      }
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["services"] });
@@ -85,7 +78,7 @@ const ServicesPage = () => {
       });
       closeDialog();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Erro",
         description: `Não foi possível ${editingService ? "atualizar" : "criar"} o serviço.`,
@@ -98,13 +91,12 @@ const ServicesPage = () => {
   // Delete service mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      console.log(`Deleting service with ID: ${id}`);
-      
-      return new Promise<void>((resolve) => {
-        setTimeout(() => {
-          resolve();
-        }, 500);
-      });
+      const { error } = await supabase
+        .from('services')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["services"] });
@@ -113,7 +105,7 @@ const ServicesPage = () => {
         description: "O serviço foi excluído com sucesso.",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: "Erro",
         description: "Não foi possível excluir o serviço.",
