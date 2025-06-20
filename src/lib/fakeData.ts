@@ -29,7 +29,9 @@ export const services: Service[] = [
     description: 'Primeira consulta para avaliação e planejamento',
     duration: 60, // 60 minutes
     price: 150,
-    userId: currentUser.id
+    user_id: currentUser.id,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   },
   {
     id: generateId(),
@@ -37,7 +39,9 @@ export const services: Service[] = [
     description: 'Sessão para acompanhamento e ajustes',
     duration: 45, // 45 minutes
     price: 120,
-    userId: currentUser.id
+    user_id: currentUser.id,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   },
   {
     id: generateId(),
@@ -45,7 +49,9 @@ export const services: Service[] = [
     description: 'Consulta rápida para dúvidas específicas',
     duration: 30, // 30 minutes
     price: 80,
-    userId: currentUser.id
+    user_id: currentUser.id,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   }
 ];
 
@@ -59,69 +65,65 @@ const createAppointmentDate = (dayOffset: number, hour: number, minute: number) 
 export const appointments: Appointment[] = [
   {
     id: generateId(),
-    serviceId: services[0].id,
-    serviceName: services[0].name,
-    customerId: generateId(),
-    customerName: 'Maria Oliveira',
-    customerEmail: 'maria@exemplo.com',
-    customerPhone: '(11) 91234-5678',
-    startTime: createAppointmentDate(1, 10, 0), // Tomorrow at 10:00
-    endTime: createAppointmentDate(1, 11, 0),  // Tomorrow at 11:00
+    service_id: services[0].id,
+    service_name: services[0].name,
+    customer_name: 'Maria Oliveira',
+    customer_email: 'maria@exemplo.com',
+    customer_phone: '(11) 91234-5678',
+    start_time: createAppointmentDate(1, 10, 0).toISOString(), // Tomorrow at 10:00
+    end_time: createAppointmentDate(1, 11, 0).toISOString(),  // Tomorrow at 11:00
     status: 'confirmed',
     notes: 'Cliente nova, primeira sessão',
-    createdAt: new Date(),
-    userId: currentUser.id
+    user_id: currentUser.id,
+    created_at: new Date().toISOString()
   },
   {
     id: generateId(),
-    serviceId: services[1].id,
-    serviceName: services[1].name,
-    customerId: generateId(),
-    customerName: 'Carlos Santos',
-    customerEmail: 'carlos@exemplo.com',
-    customerPhone: '(11) 98877-6655',
-    startTime: createAppointmentDate(2, 14, 0), // Day after tomorrow at 14:00
-    endTime: createAppointmentDate(2, 14, 45),  // Day after tomorrow at 14:45
+    service_id: services[1].id,
+    service_name: services[1].name,
+    customer_name: 'Carlos Santos',
+    customer_email: 'carlos@exemplo.com',
+    customer_phone: '(11) 98877-6655',
+    start_time: createAppointmentDate(2, 14, 0).toISOString(), // Day after tomorrow at 14:00
+    end_time: createAppointmentDate(2, 14, 45).toISOString(),  // Day after tomorrow at 14:45
     status: 'confirmed',
-    createdAt: new Date(),
-    userId: currentUser.id
+    user_id: currentUser.id,
+    created_at: new Date().toISOString()
   },
   {
     id: generateId(),
-    serviceId: services[2].id,
-    serviceName: services[2].name,
-    customerId: generateId(),
-    customerName: 'Ana Pereira',
-    customerEmail: 'ana@exemplo.com',
-    customerPhone: '(11) 97788-9900',
-    startTime: createAppointmentDate(0, 16, 0), // Today at 16:00
-    endTime: createAppointmentDate(0, 16, 30),  // Today at 16:30
+    service_id: services[2].id,
+    service_name: services[2].name,
+    customer_name: 'Ana Pereira',
+    customer_email: 'ana@exemplo.com',
+    customer_phone: '(11) 97788-9900',
+    start_time: createAppointmentDate(0, 16, 0).toISOString(), // Today at 16:00
+    end_time: createAppointmentDate(0, 16, 30).toISOString(),  // Today at 16:30
     status: 'pending',
-    createdAt: new Date(),
-    userId: currentUser.id
+    user_id: currentUser.id,
+    created_at: new Date().toISOString()
   },
   {
     id: generateId(),
-    serviceId: services[0].id,
-    serviceName: services[0].name,
-    customerId: generateId(),
-    customerName: 'Roberto Almeida',
-    customerEmail: 'roberto@exemplo.com',
-    customerPhone: '(11) 92233-4455',
-    startTime: createAppointmentDate(3, 11, 0), // 3 days from now at 11:00
-    endTime: createAppointmentDate(3, 12, 0),  // 3 days from now at 12:00
+    service_id: services[0].id,
+    service_name: services[0].name,
+    customer_name: 'Roberto Almeida',
+    customer_email: 'roberto@exemplo.com',
+    customer_phone: '(11) 92233-4455',
+    start_time: createAppointmentDate(3, 11, 0).toISOString(), // 3 days from now at 11:00
+    end_time: createAppointmentDate(3, 12, 0).toISOString(),  // 3 days from now at 12:00
     status: 'confirmed',
-    createdAt: new Date(),
-    userId: currentUser.id
+    user_id: currentUser.id,
+    created_at: new Date().toISOString()
   }
 ];
 
 // Convert appointments to calendar events
 export const calendarEvents = appointments.map(appointment => ({
   id: appointment.id,
-  title: `${appointment.customerName} - ${appointment.serviceName}`,
-  start: appointment.startTime,
-  end: appointment.endTime,
+  title: `${appointment.customer_name} - ${appointment.service_name}`,
+  start: new Date(appointment.start_time),
+  end: new Date(appointment.end_time),
   resource: appointment
 }));
 

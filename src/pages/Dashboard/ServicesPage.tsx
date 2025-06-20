@@ -18,7 +18,9 @@ const mockServices: Service[] = [
     description: "Sessão de 50 minutos",
     duration: 50,
     price: 120,
-    userId: "current-user"
+    user_id: "current-user",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   },
   {
     id: "2",
@@ -26,7 +28,9 @@ const mockServices: Service[] = [
     description: "Sessão de 90 minutos",
     duration: 90,
     price: 200,
-    userId: "current-user"
+    user_id: "current-user",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   }
 ];
 
@@ -61,11 +65,13 @@ const ServicesPage = () => {
           } else {
             resolve({
               id: `${Date.now()}`,
-              userId: "current-user",
+              user_id: "current-user",
               name: values.name,
               description: values.description,
               duration: values.duration,
-              price: values.price
+              price: values.price,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
             });
           }
         }, 500);

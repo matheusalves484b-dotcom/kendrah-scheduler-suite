@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import Sidebar from '@/components/Dashboard/Sidebar';
 import DashboardHeader from '@/components/Dashboard/DashboardHeader';
@@ -7,21 +8,30 @@ import { Button } from '@/components/ui/button';
 import AppointmentCalendar from '@/components/Dashboard/Calendar/AppointmentCalendar';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
+
 const CalendarPage = () => {
   const formatDate = (date: Date) => {
     return format(new Date(date), 'dd/MM/yyyy', {
       locale: pt
     });
   };
+
   const formatTime = (date: Date) => {
     return format(new Date(date), 'HH:mm', {
       locale: pt
     });
   };
-  return <div className="flex h-screen bg-kendrah-gray/30">
+
+  return (
+    <div className="flex h-screen bg-kendrah-gray/30">
       <Sidebar />
       <div className="flex-1 p-8 overflow-auto">
-        <DashboardHeader title="Agenda" subtitle="Gerencie seus agendamentos e visualize sua agenda" actionLabel="Novo Agendamento" actionPath="/dashboard/appointments/new" />
+        <DashboardHeader 
+          title="Agenda" 
+          subtitle="Gerencie seus agendamentos e visualize sua agenda" 
+          actionLabel="Novo Agendamento" 
+          actionPath="/dashboard/appointments/new" 
+        />
 
         <div className="mb-6">
           <Tabs defaultValue="calendar" className="w-full bg-transparent">
@@ -78,13 +88,14 @@ const CalendarPage = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {calendarEvents.map(event => <tr key={event.id}>
+                    {calendarEvents.map((event) => (
+                      <tr key={event.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="font-medium text-gray-900">{event.resource.customerName}</div>
-                          <div className="text-sm text-gray-500">{event.resource.customerEmail}</div>
+                          <div className="font-medium text-gray-900">{event.resource.customer_name}</div>
+                          <div className="text-sm text-gray-500">{event.resource.customer_email}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{event.resource.serviceName}</div>
+                          <div className="text-sm text-gray-900">{event.resource.service_name}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
@@ -98,8 +109,16 @@ const CalendarPage = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${event.resource.status === 'confirmed' ? 'bg-green-100 text-green-800' : event.resource.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : event.resource.status === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}>
-                            {event.resource.status === 'confirmed' ? 'Confirmado' : event.resource.status === 'pending' ? 'Pendente' : event.resource.status === 'cancelled' ? 'Cancelado' : 'Concluído'}
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            event.resource.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                            event.resource.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            event.resource.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                            'bg-blue-100 text-blue-800'
+                          }`}>
+                            {event.resource.status === 'confirmed' ? 'Confirmado' :
+                             event.resource.status === 'pending' ? 'Pendente' :
+                             event.resource.status === 'cancelled' ? 'Cancelado' :
+                             'Concluído'}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -107,7 +126,8 @@ const CalendarPage = () => {
                             Detalhes
                           </Button>
                         </td>
-                      </tr>)}
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -115,6 +135,8 @@ const CalendarPage = () => {
           </Tabs>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default CalendarPage;

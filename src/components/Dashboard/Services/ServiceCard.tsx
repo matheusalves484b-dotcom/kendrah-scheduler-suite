@@ -67,10 +67,7 @@ const ServiceCard = ({ service, onEdit, onDelete }: ServiceCardProps) => {
         <div className="border-t pt-4">
           <div className="flex flex-col gap-2">
             <span className="text-xs text-muted-foreground">Link de agendamento:</span>
-            <CopyBookingLink 
-              serviceId={service.id} 
-              serviceName={service.name} 
-            />
+            <CopyBookingLink userId={service.user_id} />
           </div>
         </div>
       </CardContent>

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Sidebar from '@/components/Dashboard/Sidebar';
 import DashboardHeader from '@/components/Dashboard/DashboardHeader';
@@ -16,8 +15,8 @@ const DashboardHome = () => {
   const today = new Date();
   const upcomingAppointments = appointments.filter(appointment => 
     appointment.status !== 'cancelled' && 
-    differenceInDays(appointment.startTime, today) >= 0 &&
-    differenceInDays(appointment.startTime, today) <= 7
+    differenceInDays(new Date(appointment.start_time), today) >= 0 &&
+    differenceInDays(new Date(appointment.start_time), today) <= 7
   );
 
   return (
@@ -69,7 +68,7 @@ const DashboardHome = () => {
               value="87%"
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-kendrah-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               }
               trend={{ value: 5, isPositive: true }}
@@ -98,16 +97,16 @@ const DashboardHome = () => {
                             </svg>
                           </div>
                           <div>
-                            <h4 className="font-medium">{appointment.customerName}</h4>
-                            <p className="text-sm text-gray-500">{appointment.serviceName}</p>
+                            <h4 className="font-medium">{appointment.customer_name}</h4>
+                            <p className="text-sm text-gray-500">{appointment.service_name}</p>
                           </div>
                         </div>
                         <div className="text-right">
                           <p className="font-medium">
-                            {appointment.startTime.toLocaleDateString('pt-BR')}
+                            {new Date(appointment.start_time).toLocaleDateString('pt-BR')}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {appointment.startTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            {new Date(appointment.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
                       </div>
