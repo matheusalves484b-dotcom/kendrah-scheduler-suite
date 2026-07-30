@@ -1,47 +1,65 @@
 import { Link } from 'react-router-dom';
+import { Check, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
 const PricingSection = () => {
   const features = ["Agendamentos ilimitados", "Notificações por WhatsApp", "Link de agendamento personalizado", "Cadastro ilimitado de serviços", "Horários personalizados", "Relatórios detalhados", "Suporte prioritário", "Atualizações e novidades"];
-  return <section className="py-20 bg-kendrah-gray/20 bg-transparent">
+
+  return (
+    <section className="py-24 bg-transparent">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold mb-4 text-kendrah-black text-zinc-900">➼ Prezamos pela honestidade e transparência ➼</h2>
-          <p className="max-w-3xl mx-auto text-zinc-800 text-lg">Plano sem taxas ocultas, sem complicações. Apenas um preço justo por tudo que você precisa.</p>
+        <div className="text-center mb-14">
+          <span className="inline-flex items-center gap-2 rounded-full border border-kendrah-purple/20 bg-kendrah-purple/5 px-4 py-1.5 text-sm font-medium text-kendrah-purple">
+            <ShieldCheck className="h-4 w-4" />
+            Preço justo, sem letras miúdas
+          </span>
+          <h2 className="mt-5 text-3xl font-bold tracking-tight text-kendrah-black md:text-4xl">
+            Prezamos pela honestidade e transparência
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-zinc-600">
+            Sabemos como é frustrante descobrir uma cobrança extra depois. Aqui é um plano só,
+            com tudo incluído: você sabe exatamente quanto paga desde o primeiro dia.
+          </p>
         </div>
-        
-        <div className="flex justify-center bg-transparent">
-          <div className="kendrah-card max-w-lg border-2 border-kendrah-purple rounded-3xl bg-transparent">
+
+        <div className="flex justify-center">
+          <div className="relative w-full max-w-lg rounded-3xl border border-kendrah-purple/25 bg-background/70 p-8 shadow-elegant backdrop-blur-sm">
             <div className="text-center">
-              <h3 className="text-xl font-bold text-kendrah-accent text-black">Plano Premium</h3>
-              <div className="mt-4">
-                <span className="text-4xl font-bold text-kendrah-accent text-kendrah-purple">R$ 39,90</span>
-                <span className="ml-2 text-zinc-600">/mês</span>
+              <h3 className="text-xl font-bold text-kendrah-black">Plano Premium</h3>
+              <p className="mt-1 text-sm text-zinc-500">Tudo o que a sua agenda precisa</p>
+              <div className="mt-5 flex items-end justify-center gap-2">
+                <span className="text-5xl font-bold text-kendrah-purple">R$ 39,90</span>
+                <span className="pb-2 text-zinc-500">/mês</span>
               </div>
-              <p className="mt-2 text-zinc-600">Cobrado mensalmente</p>
+              <p className="mt-2 text-sm text-zinc-500">Cobrado mensalmente. Cancele quando quiser.</p>
             </div>
-            
-            <div className="mt-8 space-y-4 bg-transparent">
-              {features.map((feature, index) => <div key={index} className="flex items-center bg-transparent">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-kendrah-purple mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-lg text-zinc-700">{feature}</span>
-                </div>)}
+
+            <div className="mt-8 space-y-3">
+              {features.map((feature) => (
+                <div key={feature} className="flex items-center gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-kendrah-purple/10">
+                    <Check className="h-3.5 w-3.5 text-kendrah-purple" />
+                  </span>
+                  <span className="text-zinc-700">{feature}</span>
+                </div>
+              ))}
             </div>
-            
+
             <div className="mt-8">
-              <Link to="/register" className="w-full">
-                <Button className="kendrah-button w-full py-6">
-                  Experimente Grátis por 14 Dias
+              <Link to="/register" className="block w-full">
+                <Button className="kendrah-button w-full py-6 text-base">
+                  Experimente grátis por 14 dias
                 </Button>
               </Link>
-              <p className="text-sm text-center mt-3 text-gray-500">
-                Sem necessidade de cartão de crédito para o teste
+              <p className="mt-3 text-center text-sm text-zinc-500">
+                Sem cartão de crédito. Se não fizer sentido, é só não continuar.
               </p>
             </div>
           </div>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default PricingSection;
