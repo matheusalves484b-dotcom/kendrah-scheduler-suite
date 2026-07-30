@@ -34,6 +34,8 @@ interface WhatsAppFormProps {
 }
 
 const WhatsAppForm = ({ user }: WhatsAppFormProps) => {
+  const queryClient = useQueryClient();
+
   // Integration form
   const integrationForm = useForm<IntegrationFormValues>({
     resolver: zodResolver(integrationFormSchema),
@@ -48,34 +50,42 @@ const WhatsAppForm = ({ user }: WhatsAppFormProps) => {
   // Update integrations mutation
   const integrationMutation = useMutation({
     mutationFn: async (values: IntegrationFormValues) => {
-      // This would be a real API call
-      console.log("Updating integrations:", values);
-      
-      // Simulate API call
-      return new Promise<User>((resolve) => {
-        setTimeout(() => {
-          resolve({
-            ...user,
-            whatsappNumber: values.whatsappNumber || undefined,
-          });
-        }, 600);
-      });
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) throw new Error("Sessão expirada. Faça login novamente.");
+
+      const whatsapp = (values.whatsappNumber || "").replace(/\D/g, "");
+
+      const { error } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            id: authUser.id,
+            whatsapp_number: whatsapp || null,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "id" }
+        );
+
+      if (error) throw error;
+      return whatsapp;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userData"] });
       toast({
-        title: "Integrações atualizadas",
-        description: "Suas configurações de integração foram atualizadas com sucesso.",
+        title: "WhatsApp salvo",
+        description: "Seu número de contato foi atualizado com sucesso.",
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar suas integrações.",
+        description: error.message || "Não foi possível salvar seu número.",
         variant: "destructive",
       });
       console.error(error);
     },
   });
+
 
   // Form submission handler
   const onSubmit = (data: IntegrationFormValues) => {
