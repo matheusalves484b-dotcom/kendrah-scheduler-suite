@@ -64,8 +64,8 @@ const CalendarPage = () => {
             </TabsContent>
             
             <TabsContent value="list" className="mt-0">
-              <div className="kendrah-card">
-                <table className="min-w-full divide-y divide-gray-200">
+              <div className="kendrah-card p-2 sm:p-6 overflow-x-auto">
+                <table className="min-w-[720px] w-full divide-y divide-gray-200">
                   <thead>
                     <tr>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
