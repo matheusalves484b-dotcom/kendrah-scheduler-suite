@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -31,32 +32,31 @@ const LoginPage = () => {
     }
     
     setIsLoading(true);
-    
-    // Simulate login - replace with actual authentication
+
     try {
-      setTimeout(() => {
-        // Set authentication state
-        localStorage.setItem("isAuthenticated", "true");
-        
-        // Example user data
-        localStorage.setItem("userData", JSON.stringify({
-          name: "Usuário Teste",
-          email: email,
-          subscription: {
-            status: "trial",
-            trialDaysLeft: 7,
-          }
-        }));
-        
-        // Example login success
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (error) {
         toast({
-          title: "Login realizado",
-          description: "Você entrou na sua conta com sucesso",
+          title: "Erro ao fazer login",
+          description: error.message === "Invalid login credentials"
+            ? "E-mail ou senha incorretos."
+            : error.message,
+          variant: "destructive",
         });
-        
-        // Redirect to the intended destination
-        navigate(from);
-      }, 1500);
+        setIsLoading(false);
+        return;
+      }
+
+      toast({
+        title: "Login realizado",
+        description: "Você entrou na sua conta com sucesso",
+      });
+
+      navigate(from, { replace: true });
     } catch (error) {
       toast({
         title: "Erro ao fazer login",
