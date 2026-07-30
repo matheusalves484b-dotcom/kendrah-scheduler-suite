@@ -1,12 +1,13 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
+import { supabase } from '@/integrations/supabase/client';
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
@@ -16,6 +17,7 @@ const RegisterPage = () => {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,26 +50,49 @@ const RegisterPage = () => {
     }
     
     setIsLoading(true);
-    
-    // Simulate registration - replace with actual registration
+
     try {
-      setTimeout(() => {
-        // Example registration success
+      const { error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: { name: name.trim() },
+        },
+      });
+
+      if (error) {
         toast({
-          title: "Conta criada",
-          description: "Sua conta foi criada com sucesso!",
+          title: "Erro ao criar conta",
+          description: error.message.includes("already registered")
+            ? "Este e-mail já está cadastrado. Faça login."
+            : error.message,
+          variant: "destructive",
         });
-        
-        // Redirect to dashboard (would use react-router navigation)
-        window.location.href = '/dashboard';
-      }, 2000);
+        setIsLoading(false);
+        return;
+      }
+
+      const { data: sessionData } = await supabase.auth.getSession();
+
+      toast({
+        title: "Conta criada",
+        description: sessionData.session
+          ? "Sua conta foi criada com sucesso!"
+          : "Confirme seu e-mail para acessar sua conta.",
+      });
+
+      if (sessionData.session) {
+        navigate("/dashboard", { replace: true });
+      } else {
+        navigate("/login", { replace: true });
+      }
     } catch (error) {
       toast({
         title: "Erro ao criar conta",
         description: "Houve um problema ao criar sua conta. Tente novamente.",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
