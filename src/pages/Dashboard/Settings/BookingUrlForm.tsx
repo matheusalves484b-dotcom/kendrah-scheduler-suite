@@ -33,6 +33,7 @@ interface BookingUrlFormProps {
 }
 
 const BookingUrlForm = ({ userId }: BookingUrlFormProps) => {
+  const queryClient = useQueryClient();
   // Fetch current profile data
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['profile', userId],
@@ -41,7 +42,7 @@ const BookingUrlForm = ({ userId }: BookingUrlFormProps) => {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data as Profile;
