@@ -80,7 +80,7 @@ const SubscriptionPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <h1 className="text-2xl font-bold mb-6">Assinatura</h1>
         
         {isLoading ? (

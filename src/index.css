@@ -130,6 +130,27 @@
   @apply py-2 font-medium;
 }
 
+/* Mobile calendar adjustments */
+@media (max-width: 767px) {
+  .calendar-container .rbc-toolbar {
+    @apply flex-col items-stretch gap-2 text-sm;
+  }
+
+  .calendar-container .rbc-toolbar .rbc-toolbar-label {
+    @apply py-1 text-center;
+  }
+
+  .calendar-container .rbc-toolbar button {
+    @apply px-2 py-1 text-xs;
+  }
+
+  .calendar-container .rbc-header,
+  .calendar-container .rbc-event,
+  .calendar-container .rbc-label {
+    @apply text-xs;
+  }
+}
+
 /* Additional custom components */
 .kendrah-gradient {
   background: linear-gradient(135deg, #7D3C98 0%, #9B59B6 100%);

@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Calendar, momentLocalizer, Views } from 'react-big-calendar';
 import moment from 'moment';
 import 'moment/locale/pt-br'; // Import Portuguese (Brazil) locale
@@ -45,9 +46,16 @@ interface AppointmentCalendarProps {
 const AppointmentCalendar = ({
   events
 }: AppointmentCalendarProps) => {
+  const isMobile = useIsMobile();
   const [view, setView] = useState(Views.WEEK);
   const [date, setDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+
+  // Switch to a readable view when on small screens
+  useEffect(() => {
+    setView(isMobile ? Views.DAY : Views.WEEK);
+  }, [isMobile]);
+
   const handleEventClick = useCallback((event: CalendarEvent) => {
     setSelectedEvent(event);
   }, []);
@@ -67,10 +75,11 @@ const AppointmentCalendar = ({
       }
     };
   }, []);
-  return <div className="calendar-container rounded-lg shadow border border-kendrah-gray/40 h-[700px] flex flex-col bg-transparent">
+  return <div className="calendar-container rounded-lg shadow border border-kendrah-gray/40 h-[520px] sm:h-[620px] lg:h-[700px] flex flex-col bg-transparent overflow-x-auto">
       <Calendar localizer={localizer} events={events} startAccessor="start" endAccessor="end" style={{
-      height: '100%'
-    }} views={['month', 'week', 'day']} defaultView={Views.WEEK} onView={setView} view={view} date={date} onNavigate={setDate} onSelectEvent={handleEventClick} eventPropGetter={eventStyleGetter} tooltipAccessor={event => `${event.title}`} popup messages={messages} formats={formats} />
+      height: '100%',
+      minWidth: isMobile ? '320px' : undefined
+    }} views={isMobile ? ['day', 'week'] : ['month', 'week', 'day']} defaultView={Views.WEEK} onView={setView} view={view} date={date} onNavigate={setDate} onSelectEvent={handleEventClick} eventPropGetter={eventStyleGetter} tooltipAccessor={event => `${event.title}`} popup messages={messages} formats={formats} />
       
       {selectedEvent && <AppointmentModal appointment={selectedEvent.resource} isOpen={Boolean(selectedEvent)} onClose={closeModal} />}
     </div>;

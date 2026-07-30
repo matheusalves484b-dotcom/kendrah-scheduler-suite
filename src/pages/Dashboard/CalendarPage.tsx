@@ -23,9 +23,10 @@ const CalendarPage = () => {
   };
 
   return (
-    <div className="flex h-screen bg-kendrah-gray/30">
+    <div className="flex min-h-screen bg-kendrah-gray/30">
       <Sidebar />
-      <div className="flex-1 p-8 overflow-auto">
+      <div className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 overflow-auto lg:pl-64 pt-14 lg:pt-8">
+
         <DashboardHeader 
           title="Agenda" 
           subtitle="Gerencie seus agendamentos e visualize sua agenda" 
@@ -35,10 +36,10 @@ const CalendarPage = () => {
 
         <div className="mb-6">
           <Tabs defaultValue="calendar" className="w-full bg-transparent">
-            <div className="flex justify-between items-center mb-6">
-              <TabsList>
-                <TabsTrigger value="calendar">Calendário</TabsTrigger>
-                <TabsTrigger value="list">Lista</TabsTrigger>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-6">
+              <TabsList className="w-full sm:w-auto">
+                <TabsTrigger value="calendar" className="flex-1 sm:flex-none">Calendário</TabsTrigger>
+                <TabsTrigger value="list" className="flex-1 sm:flex-none">Lista</TabsTrigger>
               </TabsList>
               
               <div className="flex space-x-2">
@@ -63,8 +64,8 @@ const CalendarPage = () => {
             </TabsContent>
             
             <TabsContent value="list" className="mt-0">
-              <div className="kendrah-card">
-                <table className="min-w-full divide-y divide-gray-200">
+              <div className="kendrah-card p-2 sm:p-6 overflow-x-auto">
+                <table className="min-w-[720px] w-full divide-y divide-gray-200">
                   <thead>
                     <tr>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

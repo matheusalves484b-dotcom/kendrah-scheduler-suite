@@ -17,7 +17,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-64 pt-14 lg:pt-0">
+
         <TrialBanner 
           trialEndDate={mockUser.trialEndsAt}
           isSubscribed={mockUser.isSubscribed}
