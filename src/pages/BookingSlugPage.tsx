@@ -102,11 +102,31 @@ const BookingSlugPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!selectedService || !selectedDate || !selectedTime || !customerName || !customerEmail || !customerPhone) {
+
+    const parsed = bookingSchema.safeParse({
+      service: selectedService,
+      date: selectedDate,
+      time: selectedTime,
+      name: customerName,
+      email: customerEmail,
+      phone: customerPhone,
+      notes,
+    });
+
+    if (!parsed.success) {
       toast({
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha todos os campos obrigatórios.",
+        title: "Verifique os dados",
+        description: parsed.error.issues[0].message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const startDateTime = new Date(`${parsed.data.date}T${parsed.data.time}:00`);
+    if (startDateTime.getTime() <= Date.now()) {
+      toast({
+        title: "Horário inválido",
+        description: "Escolha um horário no futuro.",
         variant: "destructive",
       });
       return;
@@ -118,16 +138,15 @@ const BookingSlugPage = () => {
       const selectedServiceData = services.find(s => s.id === selectedService);
       if (!selectedServiceData || !profile) return;
 
-      // Create start and end times
-      const startDateTime = new Date(`${selectedDate}T${selectedTime}:00`);
       const endDateTime = new Date(startDateTime.getTime() + selectedServiceData.duration * 60000);
 
       const appointmentData: Omit<Appointment, 'id' | 'created_at'> = {
         service_id: selectedService,
         service_name: selectedServiceData.name,
-        customer_name: customerName,
-        customer_email: customerEmail,
-        customer_phone: customerPhone,
+        customer_name: parsed.data.name,
+        customer_email: parsed.data.email,
+        customer_phone: parsed.data.phone,
+
         start_time: startDateTime.toISOString(),
         end_time: endDateTime.toISOString(),
         status: 'pending',
