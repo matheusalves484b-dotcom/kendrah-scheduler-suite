@@ -13,6 +13,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { Profile, Service, Appointment } from '@/types';
 import { format, addDays, startOfDay, isBefore, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { z } from 'zod';
+
+const bookingSchema = z.object({
+  service: z.string().uuid({ message: "Selecione um serviço." }),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Selecione uma data." }),
+  time: z.string().regex(/^\d{2}:\d{2}$/, { message: "Selecione um horário." }),
+  name: z.string().trim().min(2, { message: "Informe seu nome completo." }).max(100, { message: "Nome muito longo (máx. 100 caracteres)." }),
+  email: z.string().trim().email({ message: "Informe um e-mail válido." }).max(255, { message: "E-mail muito longo." }),
+  phone: z.string().trim().min(8, { message: "Informe um telefone válido." }).max(20, { message: "Telefone muito longo." })
+    .refine((v) => {
+      const digits = v.replace(/\D/g, '').length;
+      return digits >= 8 && digits <= 15;
+    }, { message: "Informe um telefone válido." }),
+  notes: z.string().trim().max(1000, { message: "Observações muito longas (máx. 1000 caracteres)." }).optional(),
+});
 
 const BookingSlugPage = () => {
   const { slug } = useParams<{ slug: string }>();
