@@ -62,24 +62,34 @@ const BookingUrlForm = ({ userId }: BookingUrlFormProps) => {
   // Update public URL mutation
   const publicUrlMutation = useMutation({
     mutationFn: async (values: PublicUrlFormValues) => {
-      const { error } = await supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Sessão expirada. Faça login novamente.");
+
+      const { data, error } = await supabase
         .from('profiles')
         .update({ slug: values.slug })
-        .eq('id', userId);
+        .eq('id', user.id)
+        .select()
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error("Perfil não encontrado para atualizar o link.");
       return values;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
       toast({
         title: "URL pública atualizada",
         description: "Sua URL de agendamentos foi atualizada com sucesso.",
       });
     },
     onError: (error: any) => {
+      const duplicate = error?.code === '23505';
       toast({
         title: "Erro",
-        description: error.message || "Não foi possível atualizar sua URL pública.",
+        description: duplicate
+          ? "Esse link já está sendo usado. Escolha outro nome."
+          : error.message || "Não foi possível atualizar sua URL pública.",
         variant: "destructive",
       });
       console.error(error);
