@@ -23,9 +23,10 @@ const CalendarPage = () => {
   };
 
   return (
-    <div className="flex h-screen bg-kendrah-gray/30">
+    <div className="flex min-h-screen bg-kendrah-gray/30">
       <Sidebar />
-      <div className="flex-1 p-8 overflow-auto">
+      <div className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 overflow-auto lg:pl-64 pt-14 lg:pt-8">
+
         <DashboardHeader 
           title="Agenda" 
           subtitle="Gerencie seus agendamentos e visualize sua agenda" 
