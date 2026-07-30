@@ -21,10 +21,8 @@ const PainSolutionSection = () => {
     <section className="bg-soft-gradient py-20 md:py-28">
       <div className="container mx-auto px-6">
         <div className="mx-auto mb-14 max-w-2xl text-center">
-          <span className="text-sm font-semibold uppercase tracking-[0.2em] text-kendrah-purple">
-            Dor &amp; Solução
-          </span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-kendrah-black md:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-kendrah-black md:text-4xl">
+
             Você não abriu seu negócio para virar secretária de si mesma
           </h2>
           <p className="mt-4 text-lg text-gray-600">
