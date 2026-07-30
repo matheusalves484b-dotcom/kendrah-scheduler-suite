@@ -1,5 +1,6 @@
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -31,6 +32,8 @@ interface ProfileFormProps {
 }
 
 const ProfileForm = ({ user }: ProfileFormProps) => {
+  const queryClient = useQueryClient();
+
   // Profile form
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -49,34 +52,45 @@ const ProfileForm = ({ user }: ProfileFormProps) => {
   // Update profile mutation
   const profileMutation = useMutation({
     mutationFn: async (values: ProfileFormValues) => {
-      // This would be a real API call
-      console.log("Updating profile:", values);
-      
-      // Simulate API call
-      return new Promise<User>((resolve) => {
-        setTimeout(() => {
-          resolve({
-            ...user,
-            ...values,
-          });
-        }, 600);
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) throw new Error("Sessão expirada. Faça login novamente.");
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert(
+          {
+            id: authUser.id,
+            business_name: values.name,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "id" }
+        );
+      if (profileError) throw profileError;
+
+      const { error: authError } = await supabase.auth.updateUser({
+        data: { name: values.name, phone: values.phoneNumber || "" },
       });
+      if (authError) throw authError;
+
+      return values;
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userData"] });
       toast({
         title: "Perfil atualizado",
         description: "Seus dados foram atualizados com sucesso.",
       });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar seu perfil.",
+        description: error.message || "Não foi possível atualizar seu perfil.",
         variant: "destructive",
       });
       console.error(error);
     },
   });
+
 
   // Form submission handler
   const onSubmit = (data: ProfileFormValues) => {
