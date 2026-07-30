@@ -34,10 +34,16 @@ const BookingSlugPage = () => {
   const [notes, setNotes] = useState('');
 
   // Available times (simplified - in a real app you'd fetch from availability_slots)
-  const availableTimes = [
+  const allTimes = [
     '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
     '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00'
   ];
+
+  // Hide times already in the past when booking for today
+  const availableTimes = allTimes.filter((time) => {
+    if (!selectedDate) return true;
+    return new Date(`${selectedDate}T${time}:00`).getTime() > Date.now();
+  });
 
   // Generate next 30 days
   const availableDates = Array.from({ length: 30 }, (_, i) => {
