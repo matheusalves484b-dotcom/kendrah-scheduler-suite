@@ -1,15 +1,16 @@
 
-import { useState } from 'react';
 import Sidebar from '@/components/Dashboard/Sidebar';
 import DashboardHeader from '@/components/Dashboard/DashboardHeader';
-import { calendarEvents } from '@/lib/fakeData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import AppointmentCalendar from '@/components/Dashboard/Calendar/AppointmentCalendar';
+import { useAppointments } from '@/hooks/useAppointments';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
 const CalendarPage = () => {
+  const { events, appointments, loading, error } = useAppointments();
+
   const formatDate = (date: Date) => {
     return format(new Date(date), 'dd/MM/yyyy', {
       locale: pt
@@ -21,6 +22,7 @@ const CalendarPage = () => {
       locale: pt
     });
   };
+
 
   return (
     <div className="flex min-h-screen bg-kendrah-gray/30">
