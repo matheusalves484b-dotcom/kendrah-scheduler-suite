@@ -62,8 +62,15 @@ const CalendarPage = () => {
             </div>
             
             <TabsContent value="calendar" className="mt-0">
-              <AppointmentCalendar events={calendarEvents} />
+              {loading ? (
+                <div className="kendrah-card p-8 text-center text-gray-500">Carregando agendamentos...</div>
+              ) : error ? (
+                <div className="kendrah-card p-8 text-center text-red-600">{error}</div>
+              ) : (
+                <AppointmentCalendar events={events} />
+              )}
             </TabsContent>
+
             
             <TabsContent value="list" className="mt-0">
               <div className="kendrah-card p-2 sm:p-6 overflow-x-auto">
