@@ -1,21 +1,37 @@
-
 import { useQuery } from "@tanstack/react-query";
 import DashboardLayout from "@/components/Dashboard/DashboardLayout";
 import DashboardHeader from "@/components/Dashboard/DashboardHeader";
 import SettingsTabs from "./Settings/SettingsTabs";
-import { mockUser } from "./Settings/mockData";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@/types";
 
 const SettingsPage = () => {
-  // Query to get user data
+  // Query to get the authenticated user data + profile
   const { data: user, isLoading } = useQuery({
     queryKey: ["userData"],
-    queryFn: async () => {
-      // This would be a real API call
-      console.log("Fetching user data...");
-      return mockUser;
-    }
+    queryFn: async (): Promise<User | null> => {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (!authUser) return null;
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", authUser.id)
+        .maybeSingle();
+
+      return {
+        id: authUser.id,
+        name: profile?.business_name || (authUser.user_metadata?.name as string) || "",
+        email: authUser.email || "",
+        phoneNumber: (authUser.user_metadata?.phone as string) || "",
+        createdAt: new Date(authUser.created_at),
+        trialEndsAt: new Date(new Date(authUser.created_at).getTime() + 14 * 24 * 60 * 60 * 1000),
+        isSubscribed: false,
+        whatsappNumber: profile?.whatsapp_number || "",
+      };
+    },
   });
-  
+
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-6 sm:py-8">
