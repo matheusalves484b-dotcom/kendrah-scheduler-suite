@@ -13,6 +13,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { Profile, Service, Appointment } from '@/types';
 import { format, addDays, startOfDay, isBefore, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { z } from 'zod';
+
+const bookingSchema = z.object({
+  service: z.string().uuid({ message: "Selecione um serviço." }),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Selecione uma data." }),
+  time: z.string().regex(/^\d{2}:\d{2}$/, { message: "Selecione um horário." }),
+  name: z.string().trim().min(2, { message: "Informe seu nome completo." }).max(100, { message: "Nome muito longo (máx. 100 caracteres)." }),
+  email: z.string().trim().email({ message: "Informe um e-mail válido." }).max(255, { message: "E-mail muito longo." }),
+  phone: z.string().trim().min(8, { message: "Informe um telefone válido." }).max(20, { message: "Telefone muito longo." })
+    .refine((v) => {
+      const digits = v.replace(/\D/g, '').length;
+      return digits >= 8 && digits <= 15;
+    }, { message: "Informe um telefone válido." }),
+  notes: z.string().trim().max(1000, { message: "Observações muito longas (máx. 1000 caracteres)." }).optional(),
+});
 
 const BookingSlugPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -34,10 +49,16 @@ const BookingSlugPage = () => {
   const [notes, setNotes] = useState('');
 
   // Available times (simplified - in a real app you'd fetch from availability_slots)
-  const availableTimes = [
+  const allTimes = [
     '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
     '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00'
   ];
+
+  // Hide times already in the past when booking for today
+  const availableTimes = allTimes.filter((time) => {
+    if (!selectedDate) return true;
+    return new Date(`${selectedDate}T${time}:00`).getTime() > Date.now();
+  });
 
   // Generate next 30 days
   const availableDates = Array.from({ length: 30 }, (_, i) => {
@@ -96,11 +117,31 @@ const BookingSlugPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!selectedService || !selectedDate || !selectedTime || !customerName || !customerEmail || !customerPhone) {
+
+    const parsed = bookingSchema.safeParse({
+      service: selectedService,
+      date: selectedDate,
+      time: selectedTime,
+      name: customerName,
+      email: customerEmail,
+      phone: customerPhone,
+      notes,
+    });
+
+    if (!parsed.success) {
       toast({
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha todos os campos obrigatórios.",
+        title: "Verifique os dados",
+        description: parsed.error.issues[0].message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const startDateTime = new Date(`${parsed.data.date}T${parsed.data.time}:00`);
+    if (startDateTime.getTime() <= Date.now()) {
+      toast({
+        title: "Horário inválido",
+        description: "Escolha um horário no futuro.",
         variant: "destructive",
       });
       return;
@@ -112,20 +153,19 @@ const BookingSlugPage = () => {
       const selectedServiceData = services.find(s => s.id === selectedService);
       if (!selectedServiceData || !profile) return;
 
-      // Create start and end times
-      const startDateTime = new Date(`${selectedDate}T${selectedTime}:00`);
       const endDateTime = new Date(startDateTime.getTime() + selectedServiceData.duration * 60000);
 
       const appointmentData: Omit<Appointment, 'id' | 'created_at'> = {
         service_id: selectedService,
         service_name: selectedServiceData.name,
-        customer_name: customerName,
-        customer_email: customerEmail,
-        customer_phone: customerPhone,
+        customer_name: parsed.data.name,
+        customer_email: parsed.data.email,
+        customer_phone: parsed.data.phone,
+
         start_time: startDateTime.toISOString(),
         end_time: endDateTime.toISOString(),
         status: 'pending',
-        notes: notes || undefined,
+        notes: parsed.data.notes || undefined,
         user_id: profile.id,
       };
 
