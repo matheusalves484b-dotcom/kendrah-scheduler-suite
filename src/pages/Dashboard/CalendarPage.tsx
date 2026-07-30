@@ -98,7 +98,13 @@ const CalendarPage = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {calendarEvents.map((event) => (
+                    {loading && (
+                      <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-500">Carregando agendamentos...</td></tr>
+                    )}
+                    {!loading && events.length === 0 && (
+                      <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-500">Nenhum agendamento ainda. Compartilhe seu link de agendamento para começar.</td></tr>
+                    )}
+                    {events.map((event) => (
                       <tr key={event.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="font-medium text-gray-900">{event.resource.customer_name}</div>
@@ -138,6 +144,7 @@ const CalendarPage = () => {
                         </td>
                       </tr>
                     ))}
+
                   </tbody>
                 </table>
               </div>
