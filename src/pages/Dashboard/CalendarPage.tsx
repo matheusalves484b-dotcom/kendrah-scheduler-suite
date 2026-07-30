@@ -36,10 +36,10 @@ const CalendarPage = () => {
 
         <div className="mb-6">
           <Tabs defaultValue="calendar" className="w-full bg-transparent">
-            <div className="flex justify-between items-center mb-6">
-              <TabsList>
-                <TabsTrigger value="calendar">Calendário</TabsTrigger>
-                <TabsTrigger value="list">Lista</TabsTrigger>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-6">
+              <TabsList className="w-full sm:w-auto">
+                <TabsTrigger value="calendar" className="flex-1 sm:flex-none">Calendário</TabsTrigger>
+                <TabsTrigger value="list" className="flex-1 sm:flex-none">Lista</TabsTrigger>
               </TabsList>
               
               <div className="flex space-x-2">
