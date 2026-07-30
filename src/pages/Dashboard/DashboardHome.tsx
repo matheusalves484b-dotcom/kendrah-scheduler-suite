@@ -1,16 +1,17 @@
-import { useState } from 'react';
 import Sidebar from '@/components/Dashboard/Sidebar';
 import DashboardHeader from '@/components/Dashboard/DashboardHeader';
 import StatsCard from '@/components/Dashboard/StatsCard';
-import { appointments, currentUser, calendarEvents } from '@/lib/fakeData';
+import { currentUser } from '@/lib/fakeData';
+import { useAppointments } from '@/hooks/useAppointments';
 import { differenceInDays } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TrialBanner from '@/components/TrialBanner';
 
 const DashboardHome = () => {
+  const { appointments } = useAppointments();
+
   // Calculate upcoming appointments (next 7 days)
   const today = new Date();
   const upcomingAppointments = appointments.filter(appointment => 
@@ -18,6 +19,7 @@ const DashboardHome = () => {
     differenceInDays(new Date(appointment.start_time), today) >= 0 &&
     differenceInDays(new Date(appointment.start_time), today) <= 7
   );
+
 
   return (
     <div className="flex min-h-screen bg-kendrah-gray/30">

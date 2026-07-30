@@ -1,15 +1,16 @@
 
-import { useState } from 'react';
 import Sidebar from '@/components/Dashboard/Sidebar';
 import DashboardHeader from '@/components/Dashboard/DashboardHeader';
-import { calendarEvents } from '@/lib/fakeData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import AppointmentCalendar from '@/components/Dashboard/Calendar/AppointmentCalendar';
+import { useAppointments } from '@/hooks/useAppointments';
 import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
 const CalendarPage = () => {
+  const { events, appointments, loading, error } = useAppointments();
+
   const formatDate = (date: Date) => {
     return format(new Date(date), 'dd/MM/yyyy', {
       locale: pt
@@ -21,6 +22,7 @@ const CalendarPage = () => {
       locale: pt
     });
   };
+
 
   return (
     <div className="flex min-h-screen bg-kendrah-gray/30">
@@ -60,8 +62,15 @@ const CalendarPage = () => {
             </div>
             
             <TabsContent value="calendar" className="mt-0">
-              <AppointmentCalendar events={calendarEvents} />
+              {loading ? (
+                <div className="kendrah-card p-8 text-center text-gray-500">Carregando agendamentos...</div>
+              ) : error ? (
+                <div className="kendrah-card p-8 text-center text-red-600">{error}</div>
+              ) : (
+                <AppointmentCalendar events={events} />
+              )}
             </TabsContent>
+
             
             <TabsContent value="list" className="mt-0">
               <div className="kendrah-card p-2 sm:p-6 overflow-x-auto">
@@ -89,7 +98,13 @@ const CalendarPage = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {calendarEvents.map((event) => (
+                    {loading && (
+                      <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-500">Carregando agendamentos...</td></tr>
+                    )}
+                    {!loading && events.length === 0 && (
+                      <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-500">Nenhum agendamento ainda. Compartilhe seu link de agendamento para começar.</td></tr>
+                    )}
+                    {events.map((event) => (
                       <tr key={event.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="font-medium text-gray-900">{event.resource.customer_name}</div>
@@ -129,6 +144,7 @@ const CalendarPage = () => {
                         </td>
                       </tr>
                     ))}
+
                   </tbody>
                 </table>
               </div>
