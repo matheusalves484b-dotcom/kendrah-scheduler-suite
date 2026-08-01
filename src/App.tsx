@@ -16,6 +16,7 @@ import SettingsPage from "./pages/Dashboard/SettingsPage";
 import SubscriptionPage from "./pages/Dashboard/SubscriptionPage";
 import BookingPage from "./pages/BookingPage";
 import BookingSlugPage from "./pages/BookingSlugPage";
+import BookingConfirmedPage from "./pages/BookingConfirmedPage";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/Footer";
@@ -66,6 +67,7 @@ const App = () => (
             
             {/* Booking Routes */}
             <Route path="/agendar/:slug" element={<BookingSlugPage />} />
+            <Route path="/agendamento-confirmado" element={<BookingConfirmedPage />} />
             
             {/* Protected Dashboard Routes */}
             <Route path="/dashboard" element={

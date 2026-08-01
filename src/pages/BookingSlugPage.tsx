@@ -177,19 +177,21 @@ const BookingSlugPage = () => {
         throw error;
       }
 
-      toast({
-        title: "Agendamento confirmado!",
-        description: "Seu agendamento foi realizado com sucesso. Você receberá uma confirmação em breve.",
+      navigate('/agendamento-confirmado', {
+        state: {
+          serviceName: selectedServiceData.name,
+          startTime: startDateTime.toISOString(),
+          endTime: endDateTime.toISOString(),
+          customerName: parsed.data.name,
+          businessName: profile.business_name,
+          whatsappNumber: profile.whatsapp_number,
+          slug,
+          price: selectedServiceData.price ?? null,
+          duration: selectedServiceData.duration ?? null,
+        },
       });
 
-      // Reset form
-      setSelectedService('');
-      setSelectedDate('');
-      setSelectedTime('');
-      setCustomerName('');
-      setCustomerEmail('');
-      setCustomerPhone('');
-      setNotes('');
+
 
     } catch (error) {
       console.error('Error creating appointment:', error);
