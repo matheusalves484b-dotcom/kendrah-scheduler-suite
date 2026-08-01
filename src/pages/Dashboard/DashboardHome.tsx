@@ -33,7 +33,7 @@ const DashboardHome = () => {
         <div className="p-4 sm:p-6 lg:p-8">
 
           <DashboardHeader
-            title={`Olá, ${currentUser.name}`}
+            title={profileLoading ? 'Olá' : `Olá, ${profile?.displayName ?? 'Prestador'}`}
             subtitle="Bem-vindo ao seu painel de agendamentos"
           />
           
