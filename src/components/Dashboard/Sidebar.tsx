@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { CalendarIcon, Users, Settings, Package, Clock, CreditCard, Menu, X } from 'lucide-react';
+import { CalendarIcon, Users, Settings, Package, Clock, CreditCard, Menu, X, UserCircle } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import LogoutButton from '@/components/LogoutButton';
 
@@ -39,6 +39,11 @@ const Sidebar = () => {
       name: "Assinatura",
       href: "/dashboard/subscription",
       icon: <CreditCard className="h-5 w-5" />,
+    },
+    {
+      name: "Meu perfil",
+      href: "/dashboard/profile",
+      icon: <UserCircle className="h-5 w-5" />,
     },
     {
       name: "Configurações",

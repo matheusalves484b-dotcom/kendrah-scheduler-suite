@@ -13,6 +13,7 @@ import ServicesPage from "./pages/Dashboard/ServicesPage";
 import ClientsPage from "./pages/Dashboard/ClientsPage";
 import AvailabilityPage from "./pages/Dashboard/AvailabilityPage";
 import SettingsPage from "./pages/Dashboard/SettingsPage";
+import ProfilePage from "./pages/Dashboard/ProfilePage";
 import SubscriptionPage from "./pages/Dashboard/SubscriptionPage";
 import BookingPage from "./pages/BookingPage";
 import BookingSlugPage from "./pages/BookingSlugPage";
@@ -98,6 +99,11 @@ const App = () => (
             <Route path="/dashboard/subscription" element={
               <ProtectedRoute>
                 <SubscriptionPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/profile" element={
+              <ProtectedRoute>
+                <ProfilePage />
               </ProtectedRoute>
             } />
             <Route path="/dashboard/settings" element={
