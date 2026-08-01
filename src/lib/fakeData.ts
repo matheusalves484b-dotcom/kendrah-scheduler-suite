@@ -5,8 +5,8 @@ import { addDays, addMinutes, setHours, setMinutes } from 'date-fns';
 // Helper function to generate a random ID
 const generateId = () => Math.random().toString(36).substring(2, 15);
 
-// Trial end date (14 days from now)
-const trialEndDate = addDays(new Date(), 14);
+// Trial end date (7 days from now)
+const trialEndDate = addDays(new Date(), 7);
 
 // Mock user data
 export const currentUser: User = {
