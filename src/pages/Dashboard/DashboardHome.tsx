@@ -2,6 +2,7 @@ import Sidebar from '@/components/Dashboard/Sidebar';
 import DashboardHeader from '@/components/Dashboard/DashboardHeader';
 import StatsCard from '@/components/Dashboard/StatsCard';
 import { currentUser } from '@/lib/fakeData';
+import { useProfile } from '@/hooks/useProfile';
 import { useAppointments } from '@/hooks/useAppointments';
 import { differenceInDays } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
