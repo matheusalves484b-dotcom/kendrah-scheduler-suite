@@ -17,6 +17,7 @@ const LoginPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
 
   // Get the intended destination if redirected from a protected route
   const from = location.state?.from?.pathname || "/dashboard";
