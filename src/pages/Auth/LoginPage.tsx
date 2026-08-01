@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { fetchProviderProfile } from '@/hooks/useProfile';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -15,6 +17,7 @@ const LoginPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
 
   // Get the intended destination if redirected from a protected route
   const from = location.state?.from?.pathname || "/dashboard";
@@ -51,8 +54,14 @@ const LoginPage = () => {
         return;
       }
 
+      // Carrega os dados do prestador antes de entrar no painel
+      const profile = await queryClient.fetchQuery({
+        queryKey: ['provider-profile'],
+        queryFn: fetchProviderProfile,
+      });
+
       toast({
-        title: "Login realizado",
+        title: profile ? `Bem-vindo(a), ${profile.displayName}` : "Login realizado",
         description: "Você entrou na sua conta com sucesso",
       });
 

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ProviderProfile {
@@ -6,61 +7,57 @@ export interface ProviderProfile {
   displayName: string;
   businessName: string | null;
   email: string | null;
+  slug: string | null;
+  whatsappNumber: string | null;
 }
 
+export const fetchProviderProfile = async (): Promise<ProviderProfile | null> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data } = await supabase
+    .from('profiles')
+    .select('id, business_name, slug, whatsapp_number')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  const metaName =
+    (user.user_metadata?.name as string | undefined) ||
+    (user.user_metadata?.full_name as string | undefined);
+
+  return {
+    id: user.id,
+    displayName:
+      metaName?.trim() ||
+      data?.business_name?.trim() ||
+      user.email?.split('@')[0] ||
+      'Prestador',
+    businessName: data?.business_name ?? null,
+    email: user.email ?? null,
+    slug: data?.slug ?? null,
+    whatsappNumber: data?.whatsapp_number ?? null,
+  };
+};
+
 export const useProfile = () => {
-  const [profile, setProfile] = useState<ProviderProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ['provider-profile'],
+    queryFn: fetchProviderProfile,
+    staleTime: 1000 * 60 * 5,
+  });
 
   useEffect(() => {
-    let active = true;
-
-    const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        if (active) {
-          setProfile(null);
-          setLoading(false);
-        }
-        return;
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        queryClient.setQueryData(['provider-profile'], null);
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['provider-profile'] });
       }
-
-      const { data } = await supabase
-        .from('profiles')
-        .select('id, business_name')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      const metaName =
-        (user.user_metadata?.name as string | undefined) ||
-        (user.user_metadata?.full_name as string | undefined);
-
-      if (active) {
-        setProfile({
-          id: user.id,
-          displayName:
-            metaName?.trim() ||
-            data?.business_name?.trim() ||
-            user.email?.split('@')[0] ||
-            'Prestador',
-          businessName: data?.business_name ?? null,
-          email: user.email ?? null,
-        });
-        setLoading(false);
-      }
-    };
-
-    load();
-
-    const { data: sub } = supabase.auth.onAuthStateChange(() => {
-      load();
     });
+    return () => sub.subscription.unsubscribe();
+  }, [queryClient]);
 
-    return () => {
-      active = false;
-      sub.subscription.unsubscribe();
-    };
-  }, []);
-
-  return { profile, loading };
+  return { profile: profile ?? null, loading: isLoading };
 };
