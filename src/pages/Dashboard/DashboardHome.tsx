@@ -12,6 +12,8 @@ import TrialBanner from '@/components/TrialBanner';
 
 const DashboardHome = () => {
   const { appointments } = useAppointments();
+  const { profile, loading: profileLoading } = useProfile();
+
 
   // Calculate upcoming appointments (next 7 days)
   const today = new Date();
