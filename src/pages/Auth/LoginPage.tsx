@@ -135,7 +135,7 @@ const LoginPage = () => {
             <p className="text-sm text-gray-500">
               Não tem uma conta?{' '}
               <Link to="/register" className="text-kendrah-purple hover:underline font-medium">
-                Teste grátis por 14 dias
+                Teste grátis por 7 dias
               </Link>
             </p>
           </div>

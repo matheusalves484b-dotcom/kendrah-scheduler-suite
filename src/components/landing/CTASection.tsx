@@ -13,7 +13,7 @@ const CTASection = () => {
           Pronto para simplificar sua rotina?
         </h2>
         <p className="mx-auto mt-5 max-w-2xl text-lg text-white/80">
-          Comece agora com 14 dias de teste grátis. Configure sua agenda em minutos
+          Comece agora com 7 dias grátis, cancele quando quiser. Configure sua agenda em minutos
           e receba o primeiro agendamento ainda hoje.
         </p>
 
@@ -27,7 +27,7 @@ const CTASection = () => {
         </div>
 
         <ul className="mx-auto mt-10 flex max-w-2xl flex-col items-center justify-center gap-4 text-sm text-white/75 sm:flex-row sm:gap-8">
-          <li className="flex items-center gap-2"><CreditCard className="h-4 w-4" /> Sem cartão de crédito</li>
+          <li className="flex items-center gap-2"><CreditCard className="h-4 w-4" /> 7 dias grátis</li>
           <li className="flex items-center gap-2"><Zap className="h-4 w-4" /> Configuração em minutos</li>
           <li className="flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> Cancele quando quiser</li>
         </ul>

@@ -108,7 +108,7 @@ const RegisterPage = () => {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Crie sua conta</CardTitle>
           <CardDescription>
-            Experimente grátis por 14 dias, sem necessidade de cartão de crédito
+            Experimente grátis por 7 dias, cancele quando quiser
           </CardDescription>
         </CardHeader>
         <CardContent>

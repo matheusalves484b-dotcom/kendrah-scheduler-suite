@@ -100,11 +100,11 @@ const FeaturesPage = () => {
             </h2>
             <Link to="/register">
               <Button size="lg" className="bg-kendrah-purple hover:bg-kendrah-purple/90 text-white font-medium px-8 py-6 text-lg h-auto">
-                Teste Grátis por 14 Dias
+                Teste Grátis por 7 Dias
               </Button>
             </Link>
             <p className="mt-4 text-gray-600">
-              Sem necessidade de cartão de crédito
+              Cancele quando quiser
             </p>
           </div>
         </section>

@@ -14,7 +14,7 @@ const HeroSection = () => {
           <div className="animate-fade-in">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium backdrop-blur">
               <Sparkles className="h-4 w-4" />
-              14 dias grátis · sem cartão de crédito
+              7 dias grátis · cancele quando quiser
             </span>
 
             <h1 className="mt-6 text-4xl font-bold leading-[1.1] tracking-tight md:text-5xl xl:text-6xl">

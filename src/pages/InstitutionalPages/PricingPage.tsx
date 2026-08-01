@@ -42,7 +42,7 @@ const PricingPage = () => {
                 <CardHeader className="text-center">
                   <CardTitle className="text-2xl font-bold">Teste Gratuito</CardTitle>
                   <div className="mt-4 mb-2">
-                    <span className="text-4xl font-bold">14 dias</span>
+                    <span className="text-4xl font-bold">7 dias</span>
                   </div>
                   <CardDescription>Acesso completo a todas as funcionalidades</CardDescription>
                 </CardHeader>
