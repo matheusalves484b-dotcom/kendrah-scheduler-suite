@@ -88,59 +88,77 @@ const testimonials: TestimonialProps[] = [
     quote:
       'O que mais gosto é a página de agendamento com a minha cara. Passa profissionalismo antes mesmo do cliente chegar no estúdio.',
   },
+  {
+    name: 'Fernanda Lima',
+    role: 'Depiladora',
+    quote:
+      'Minha agenda vive cheia e eu não perco mais tempo confirmando horário uma por uma. O sistema faz isso por mim enquanto atendo.',
+  },
+  {
+    name: 'Thiago Barros',
+    role: 'Quiropraxista',
+    quote:
+      'Antes eu anotava tudo num caderno e às vezes esquecia sessão marcada. Hoje abro o painel e a semana inteira está ali, organizada.',
+  },
+  {
+    name: 'Renata Alves',
+    role: 'Cabeleireira',
+    quote:
+      'As clientes agendam de madrugada, no domingo, na hora que quiserem. Eu só acordo e vejo o dia já montado.',
+  },
+  {
+    name: 'Gustavo Pinto',
+    role: 'Professor de Música',
+    quote:
+      'Dou aula para 20 alunos por semana. Reagendar era um caos, agora é dois cliques e todo mundo recebe o aviso.',
+  },
+  {
+    name: 'Sofia Andrade',
+    role: 'Designer de Sobrancelhas',
+    quote:
+      'O link personalizado deu outra cara ao meu trabalho. As clientes comentam que parece um estúdio bem maior do que é.',
+  },
+  {
+    name: 'Marcos Vinícius',
+    role: 'Psicólogo',
+    quote:
+      'Discrição e organização são essenciais no meu consultório. O Kendrah entrega os dois sem complicar nada.',
+  },
 ];
 
-const MarqueeRow = ({
-  items,
-  duration,
-}: {
-  items: TestimonialProps[];
-  duration: string;
-}) => (
-  <div className="marquee-mask overflow-hidden">
-    <div
-      className="animate-marquee-left flex w-max gap-6 hover:[animation-play-state:paused]"
-      style={{ ['--marquee-duration' as string]: duration }}
-    >
-      {[...items, ...items].map((t, i) => (
-        <TestimonialCard key={`${t.name}-${i}`} {...t} />
-      ))}
+const TestimonialsSection = () => (
+  <section className="overflow-hidden bg-white py-24">
+    <div className="container mx-auto px-6">
+      <div className="mb-14 text-center">
+        <span className="inline-flex items-center gap-2 rounded-full border border-kendrah-purple/20 bg-kendrah-purple/5 px-4 py-1.5 text-sm font-medium text-kendrah-purple">
+          <MessageSquareHeart className="h-4 w-4" />
+          Histórias de quem usa todo dia
+        </span>
+        <h2 className="mt-5 text-3xl font-bold tracking-tight text-kendrah-black md:text-4xl">
+          O que nossos clientes dizem
+        </h2>
+        <p className="mx-auto mt-4 max-w-2xl text-lg text-zinc-600">
+          Não precisa acreditar só na nossa palavra. Veja como profissionais como você
+          organizaram a agenda e pararam de perder horários.
+        </p>
+      </div>
     </div>
-  </div>
+
+    <div className="marquee-mask overflow-hidden">
+      <div
+        className="animate-marquee-left flex w-max gap-6 hover:[animation-play-state:paused]"
+        style={{ ['--marquee-duration' as string]: '90s' }}
+      >
+        {[...testimonials, ...testimonials].map((t, i) => (
+          <TestimonialCard key={`${t.name}-${i}`} {...t} />
+        ))}
+      </div>
+    </div>
+
+    <p className="mt-10 text-center text-sm text-zinc-500">
+      Passe o mouse sobre um depoimento para pausar.
+    </p>
+  </section>
 );
-
-const TestimonialsSection = () => {
-  const firstRow = testimonials.slice(0, 5);
-  const secondRow = testimonials.slice(5);
-
-  return (
-    <section className="overflow-hidden bg-white py-24">
-      <div className="container mx-auto px-6">
-        <div className="mb-14 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-kendrah-purple/20 bg-kendrah-purple/5 px-4 py-1.5 text-sm font-medium text-kendrah-purple">
-            <MessageSquareHeart className="h-4 w-4" />
-            Histórias de quem usa todo dia
-          </span>
-          <h2 className="mt-5 text-3xl font-bold tracking-tight text-kendrah-black md:text-4xl">
-            O que nossos clientes dizem
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-zinc-600">
-            Não precisa acreditar só na nossa palavra. Veja como profissionais como você
-            organizaram a agenda e pararam de perder horários.
-          </p>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-6">
-        <MarqueeRow items={firstRow} duration="55s" />
-        <MarqueeRow items={secondRow} duration="70s" />
-      </div>
-
-      <p className="mt-10 text-center text-sm text-zinc-500">
-        Passe o mouse sobre um depoimento para pausar.
-      </p>
-    </section>
-  );
-};
 
 export default TestimonialsSection;
