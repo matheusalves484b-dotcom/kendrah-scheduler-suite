@@ -14,8 +14,8 @@ import {
 const FAQPage = () => {
   const faqs = [
     {
-      question: "Como funciona o teste gratuito de 14 dias?",
-      answer: "Você tem acesso completo ao sistema durante 14 dias sem cobrança. Não é necessário cartão de crédito para iniciar o teste. Ao final do período, você pode escolher assinar o plano ou cancelar sem compromisso."
+      question: "Como funciona o teste gratuito de 7 dias?",
+      answer: "Você tem acesso completo ao sistema durante 7 dias. Você pode cancelar quando quiser. Ao final do período, você pode escolher assinar o plano ou cancelar sem compromisso."
     },
     {
       question: "Posso cancelar quando quiser?",

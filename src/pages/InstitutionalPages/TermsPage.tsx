@@ -64,7 +64,7 @@ const TermsPage = () => {
 
               <h2 className="text-2xl font-semibold mt-8 mb-4">5. Teste Gratuito</h2>
               <p>
-                Oferecemos um teste gratuito de 14 dias para novos usuários. Durante o período de teste, você terá acesso a todos os recursos incluídos em nosso plano pago. Ao final do período de teste, sua conta será automaticamente convertida para uma conta básica (gratuita) com recursos limitados, a menos que você opte por assinar um plano pago.
+                Oferecemos um teste gratuito de 7 dias para novos usuários. Durante o período de teste, você terá acesso a todos os recursos incluídos em nosso plano pago. Ao final do período de teste, sua conta será automaticamente convertida para uma conta básica (gratuita) com recursos limitados, a menos que você opte por assinar um plano pago.
               </p>
 
               <h2 className="text-2xl font-semibold mt-8 mb-4">6. Cancelamento e Reembolsos</h2>

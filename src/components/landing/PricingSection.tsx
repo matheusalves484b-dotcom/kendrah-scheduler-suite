@@ -48,11 +48,11 @@ const PricingSection = () => {
             <div className="mt-8">
               <Link to="/register" className="block w-full">
                 <Button className="kendrah-button w-full py-6 text-base">
-                  Experimente grátis por 14 dias
+                  Experimente grátis por 7 dias
                 </Button>
               </Link>
               <p className="mt-3 text-center text-sm text-zinc-500">
-                Sem cartão de crédito. Se não fizer sentido, é só não continuar.
+                7 dias grátis, cancele quando quiser.
               </p>
             </div>
           </div>
