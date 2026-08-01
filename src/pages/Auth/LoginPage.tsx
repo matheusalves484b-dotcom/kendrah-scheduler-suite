@@ -53,8 +53,14 @@ const LoginPage = () => {
         return;
       }
 
+      // Carrega os dados do prestador antes de entrar no painel
+      const profile = await queryClient.fetchQuery({
+        queryKey: ['provider-profile'],
+        queryFn: fetchProviderProfile,
+      });
+
       toast({
-        title: "Login realizado",
+        title: profile ? `Bem-vindo(a), ${profile.displayName}` : "Login realizado",
         description: "Você entrou na sua conta com sucesso",
       });
 
