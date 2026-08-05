@@ -1,0 +1,26 @@
+{
+  "name": "Kendrah — Agendamento online",
+  "short_name": "Kendrah",
+  "description": "Organize sua agenda com link de agendamento próprio, confirmação por WhatsApp e menos faltas.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1C1C1C",
+  "theme_color": "#7D3C98",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
