@@ -9,6 +9,8 @@ Deno.serve(async (req: Request) => {
     const token = url.searchParams.get("hub.verify_token");
     const challenge = url.searchParams.get("hub.challenge");
 
+    console.log("Token recebido:", token, "| Token esperado:", VERIFY_TOKEN, "| Iguais?", token === VERIFY_TOKEN);
+
     if (mode === "subscribe" && token === VERIFY_TOKEN) {
       return new Response(challenge ?? "", {
         status: 200,
