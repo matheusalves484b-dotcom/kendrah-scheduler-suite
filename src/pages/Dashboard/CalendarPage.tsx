@@ -1,5 +1,7 @@
 
+import { useState } from 'react';
 import Sidebar from '@/components/Dashboard/Sidebar';
+import NewAppointmentDialog from '@/components/Dashboard/Calendar/NewAppointmentDialog';
 import DashboardHeader from '@/components/Dashboard/DashboardHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -9,7 +11,8 @@ import { format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 
 const CalendarPage = () => {
-  const { events, appointments, loading, error } = useAppointments();
+  const { events, appointments, loading, error, refetch } = useAppointments();
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const formatDate = (date: Date) => {
     return format(new Date(date), 'dd/MM/yyyy', {
@@ -33,8 +36,11 @@ const CalendarPage = () => {
           title="Agenda" 
           subtitle="Gerencie seus agendamentos e visualize sua agenda" 
           actionLabel="Novo Agendamento" 
-          actionPath="/dashboard/appointments/new" 
+          actionPath="#"
+          onActionClick={() => setDialogOpen(true)}
         />
+
+        <NewAppointmentDialog open={dialogOpen} onOpenChange={setDialogOpen} onCreated={refetch} />
 
         <div className="mb-6">
           <Tabs defaultValue="calendar" className="w-full bg-transparent">
