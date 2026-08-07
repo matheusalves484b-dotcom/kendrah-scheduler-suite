@@ -174,8 +174,18 @@ const BookingSlugPage = () => {
         .insert([appointmentData]);
 
       if (error) {
+        if (error.message?.includes('APPOINTMENT_CONFLICT')) {
+          toast({
+            title: "Horário indisponível",
+            description: "Este horário acabou de ser ocupado. Por favor, escolha outro horário.",
+            variant: "destructive",
+          });
+          setSelectedTime('');
+          return;
+        }
         throw error;
       }
+
 
       navigate('/agendamento-confirmado', {
         state: {
