@@ -164,7 +164,7 @@ const BookingSlugPage = () => {
 
         start_time: startDateTime.toISOString(),
         end_time: endDateTime.toISOString(),
-        status: 'pending',
+        status: 'confirmed',
         notes: parsed.data.notes || undefined,
         user_id: profile.id,
       };
