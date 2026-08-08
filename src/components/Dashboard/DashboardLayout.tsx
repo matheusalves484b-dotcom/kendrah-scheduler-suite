@@ -8,21 +8,13 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-  // Mock user data for demonstration
-  const mockUser = {
-    trialEndsAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), // 10 days from now
-    isSubscribed: false
-  };
-
   return (
     <div className="flex min-h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0 lg:pl-64 pt-14 lg:pt-0">
 
-        <TrialBanner 
-          trialEndDate={mockUser.trialEndsAt}
-          isSubscribed={mockUser.isSubscribed}
-        />
+        <TrialBanner />
+
         <main className="flex-1 overflow-auto">
           {children}
         </main>
