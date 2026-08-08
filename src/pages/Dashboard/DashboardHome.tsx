@@ -28,7 +28,7 @@ const DashboardHome = () => {
     <div className="flex min-h-screen bg-kendrah-gray/30">
       <Sidebar />
       <div className="flex-1 min-w-0 overflow-auto lg:pl-64 pt-14 lg:pt-0">
-        <TrialBanner trialEndDate={currentUser.trialEndsAt} isSubscribed={currentUser.isSubscribed} />
+        <TrialBanner />
         
         <div className="p-4 sm:p-6 lg:p-8">
 
