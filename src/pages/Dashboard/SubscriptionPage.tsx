@@ -1,203 +1,168 @@
-
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from "@/components/ui/use-toast";
 import DashboardLayout from '@/components/Dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { useSubscription, daysLeft } from '@/hooks/useSubscription';
+import { Check, RefreshCw } from 'lucide-react';
 
-interface SubscriptionData {
-  name: string;
-  status: 'trial' | 'active' | 'expired';
-  trialDaysLeft?: number;
-  expiresAt?: Date;
-  price: string;
-}
+const INCLUDED = [
+  'Agendamentos ilimitados',
+  'Cadastro de clientes',
+  'Configuração de disponibilidade',
+  'Notificações via WhatsApp',
+  'Suporte por email',
+];
 
 const SubscriptionPage = () => {
-  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { data, isLoading, refetch, isFetching } = useSubscription();
+  const [busy, setBusy] = useState(false);
+  const [params, setParams] = useSearchParams();
 
   useEffect(() => {
-    // Simulate loading subscription data
-    // Replace with actual API call to get subscription data
-    setTimeout(() => {
-      // Mock subscription data - replace with API call
-      const mockSubscription: SubscriptionData = {
-        name: "Plano Mensal",
-        status: "trial", // or 'active', 'expired'
-        trialDaysLeft: 7,
-        price: "R$ 39,90",
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
-      };
-      
-      setSubscription(mockSubscription);
-      setIsLoading(false);
-    }, 1000);
-  }, []);
+    const checkout = params.get('checkout');
+    if (!checkout) return;
+    if (checkout === 'success') {
+      toast({ title: 'Pagamento recebido!', description: 'Estamos confirmando sua assinatura.' });
+      refetch();
+    } else {
+      toast({ title: 'Pagamento cancelado', description: 'Você pode assinar quando quiser.' });
+    }
+    params.delete('checkout');
+    setParams(params, { replace: true });
+  }, [params, setParams, refetch]);
 
-  const handleSubscribe = () => {
-    // In a real app, this would redirect to your payment processor
-    // For demo, we'll just show a success toast
-    toast({
-      title: "Redirecionando para pagamento",
-      description: "Você será redirecionado para a plataforma de pagamento."
-    });
-    
-    // Mock redirect to payment gateway
-    // window.location.href = 'https://payment-gateway.com/checkout/kendrah-subscription';
-    
-    // For demo, let's simulate a successful payment after 3 seconds
-    setTimeout(() => {
-      setSubscription(prev => prev ? {
-        ...prev,
-        status: 'active',
-        trialDaysLeft: undefined,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
-      } : null);
-      
+  const invokeFn = async (fn: 'create-checkout' | 'customer-portal') => {
+    setBusy(true);
+    try {
+      const { data: res, error } = await supabase.functions.invoke(fn);
+      if (error) throw error;
+      if (res?.url) window.open(res.url, '_blank');
+    } catch (e) {
       toast({
-        title: "Assinatura ativada!",
-        description: "Sua assinatura foi ativada com sucesso.",
-        variant: "default",
+        title: 'Não foi possível continuar',
+        description: e instanceof Error ? e.message : 'Tente novamente em instantes.',
+        variant: 'destructive',
       });
-    }, 3000);
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <Badge className="bg-green-500">Ativa</Badge>;
-      case 'trial':
-        return <Badge className="bg-blue-500">Em teste</Badge>;
-      case 'expired':
-        return <Badge className="bg-red-500">Expirada</Badge>;
-      default:
-        return null;
+    } finally {
+      setBusy(false);
     }
   };
+
+  const trialDays = daysLeft(data?.trial_end ?? null);
+  const status: 'active' | 'trial' | 'expired' = data?.subscribed
+    ? 'active'
+    : trialDays > 0
+      ? 'trial'
+      : 'expired';
+
+  const statusBadge = {
+    active: <Badge className="bg-green-600">Ativa</Badge>,
+    trial: <Badge className="bg-blue-500">Em teste</Badge>,
+    expired: <Badge className="bg-red-500">Expirada</Badge>,
+  }[status];
 
   return (
     <DashboardLayout>
       <div className="p-4 sm:p-6">
-        <h1 className="text-2xl font-bold mb-6">Assinatura</h1>
-        
+        <div className="flex items-center justify-between mb-6 gap-3">
+          <h1 className="text-2xl font-bold">Assinatura</h1>
+          <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
+            Atualizar
+          </Button>
+        </div>
+
         {isLoading ? (
           <div className="flex justify-center items-center h-48">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-kendrah-purple"></div>
           </div>
-        ) : subscription ? (
-          <Card>
+        ) : (
+          <Card className="max-w-2xl">
             <CardHeader>
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-start gap-4">
                 <div>
-                  <CardTitle className="text-xl">{subscription.name}</CardTitle>
-                  <CardDescription className="text-lg font-medium mt-1">{subscription.price}/mês</CardDescription>
+                  <CardTitle className="text-xl">Plano Mensal</CardTitle>
+                  <CardDescription className="text-lg font-medium mt-1">R$ 39,90/mês</CardDescription>
                 </div>
-                {getStatusBadge(subscription.status)}
+                {statusBadge}
               </div>
             </CardHeader>
+
             <CardContent>
-              {subscription.status === 'trial' && subscription.trialDaysLeft && (
+              {status === 'trial' && (
                 <div className="bg-kendrah-purple/10 p-4 rounded-md">
                   <p className="font-medium">
-                    Seu período de teste termina em {subscription.trialDaysLeft} dias
+                    Seu período de teste termina em {trialDays} {trialDays === 1 ? 'dia' : 'dias'}
                   </p>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Assine agora para continuar utilizando todos os recursos
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Assine agora para continuar usando todos os recursos. Cancele quando quiser.
                   </p>
                 </div>
               )}
-              
-              {subscription.status === 'active' && subscription.expiresAt && (
+
+              {status === 'active' && (
                 <div className="bg-green-50 p-4 rounded-md">
                   <p className="font-medium text-green-700">
-                    Sua assinatura está ativa até {subscription.expiresAt.toLocaleDateString('pt-BR')}
+                    {data?.cancel_at_period_end ? 'Assinatura ativa até' : 'Renovação automática em'}{' '}
+                    {data?.subscription_end
+                      ? new Date(data.subscription_end).toLocaleDateString('pt-BR')
+                      : '—'}
                   </p>
-                  <p className="text-sm text-gray-600 mt-1">
-                    A renovação acontecerá automaticamente
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {data?.cancel_at_period_end
+                      ? 'Sua assinatura não será renovada.'
+                      : 'A renovação acontece automaticamente.'}
                   </p>
                 </div>
               )}
-              
-              {subscription.status === 'expired' && (
+
+              {status === 'expired' && (
                 <div className="bg-red-50 p-4 rounded-md">
-                  <p className="font-medium text-red-700">
-                    Sua assinatura expirou
-                  </p>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Renove agora para continuar utilizando o sistema
+                  <p className="font-medium text-red-700">Seu período de teste terminou</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Assine para continuar recebendo agendamentos.
                   </p>
                 </div>
               )}
-              
+
               <div className="mt-6">
                 <h3 className="font-medium mb-2">O que está incluso:</h3>
                 <ul className="space-y-2">
-                  <li className="flex items-center">
-                    <svg className="w-5 h-5 text-kendrah-purple mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
-                    </svg>
-                    Agendamentos ilimitados
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-5 h-5 text-kendrah-purple mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
-                    </svg>
-                    Cadastro de clientes
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-5 h-5 text-kendrah-purple mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
-                    </svg>
-                    Configuração de disponibilidade
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-5 h-5 text-kendrah-purple mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
-                    </svg>
-                    Suporte por email
-                  </li>
+                  {INCLUDED.map((item) => (
+                    <li key={item} className="flex items-center text-sm">
+                      <Check className="w-4 h-4 text-kendrah-purple mr-2 shrink-0" />
+                      {item}
+                    </li>
+                  ))}
                 </ul>
               </div>
             </CardContent>
+
             <CardFooter>
-              {(subscription.status === 'trial' || subscription.status === 'expired') && (
-                <Button 
-                  className="w-full bg-kendrah-purple hover:bg-kendrah-purple/90" 
-                  onClick={handleSubscribe}
-                >
-                  {subscription.status === 'trial' ? 'Assinar agora' : 'Renovar assinatura'}
-                </Button>
-              )}
-              
-              {subscription.status === 'active' && (
-                <Button 
-                  variant="outline" 
+              {status === 'active' ? (
+                <Button
+                  variant="outline"
                   className="w-full border-kendrah-purple text-kendrah-purple hover:bg-kendrah-purple/10"
-                  onClick={() => {
-                    toast({
-                      title: "Gerenciando assinatura",
-                      description: "Você será redirecionado para o portal de gerenciamento."
-                    });
-                  }}
+                  disabled={busy}
+                  onClick={() => invokeFn('customer-portal')}
                 >
                   Gerenciar assinatura
+                </Button>
+              ) : (
+                <Button
+                  className="w-full bg-kendrah-purple hover:bg-kendrah-purple/90"
+                  disabled={busy}
+                  onClick={() => invokeFn('create-checkout')}
+                >
+                  {busy ? 'Abrindo pagamento...' : 'Assinar por R$ 39,90/mês'}
                 </Button>
               )}
             </CardFooter>
           </Card>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-lg text-gray-500">Não foi possível carregar os dados da assinatura.</p>
-            <Button 
-              className="mt-4 bg-kendrah-purple hover:bg-kendrah-purple/90"
-              onClick={() => setIsLoading(true)}
-            >
-              Tentar novamente
-            </Button>
-          </div>
         )}
       </div>
     </DashboardLayout>
