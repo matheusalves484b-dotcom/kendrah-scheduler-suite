@@ -94,7 +94,10 @@ const SubscriptionPage = () => {
                   <CardTitle className="text-xl">Plano Mensal</CardTitle>
                   <CardDescription className="text-lg font-medium mt-1">R$ 39,90/mês</CardDescription>
                 </div>
-                {statusBadge}
+                <div className="flex flex-col items-end gap-2">
+                  {statusBadge}
+                  {liveBadge}
+                </div>
               </div>
             </CardHeader>
 
