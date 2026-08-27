@@ -45,10 +45,15 @@ serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
+      client_reference_id: user.id,
+      metadata: { supabase_user_id: user.id },
       line_items: [{ price: PRICE_ID, quantity: 1 }],
       mode: "subscription",
       locale: "pt-BR",
       allow_promotion_codes: true,
+      subscription_data: {
+        metadata: { supabase_user_id: user.id },
+      },
       success_url: `${origin}/dashboard/subscription?checkout=success`,
       cancel_url: `${origin}/dashboard/subscription?checkout=cancelled`,
     });
