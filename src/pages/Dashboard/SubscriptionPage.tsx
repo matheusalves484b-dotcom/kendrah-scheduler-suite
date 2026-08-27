@@ -65,6 +65,12 @@ const SubscriptionPage = () => {
     expired: <Badge className="bg-red-500">Expirada</Badge>,
   }[status];
 
+  const liveBadge = data?.livemode ? (
+    <Badge className="bg-emerald-600 hover:bg-emerald-600">Pagamentos reais ativos</Badge>
+  ) : (
+    <Badge className="bg-amber-500 hover:bg-amber-500">Modo de teste</Badge>
+  );
+
   return (
     <DashboardLayout>
       <div className="p-4 sm:p-6">
@@ -88,7 +94,10 @@ const SubscriptionPage = () => {
                   <CardTitle className="text-xl">Plano Mensal</CardTitle>
                   <CardDescription className="text-lg font-medium mt-1">R$ 39,90/mês</CardDescription>
                 </div>
-                {statusBadge}
+                <div className="flex flex-col items-end gap-2">
+                  {statusBadge}
+                  {liveBadge}
+                </div>
               </div>
             </CardHeader>
 

@@ -7,6 +7,7 @@ export interface SubscriptionState {
   subscription_end: string | null;
   cancel_at_period_end?: boolean;
   trial_end: string | null;
+  livemode?: boolean;
 }
 
 export const useSubscription = () => {

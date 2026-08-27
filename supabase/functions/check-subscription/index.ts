@@ -68,6 +68,9 @@ serve(async (req) => {
       logStep("Active subscription found", { subscriptionEnd, productId });
     }
 
+    const livemode = stripeKey.startsWith("sk_live_");
+    logStep("Mode check", { livemode });
+
     return new Response(
       JSON.stringify({
         subscribed: hasActiveSub,
@@ -75,6 +78,7 @@ serve(async (req) => {
         subscription_end: subscriptionEnd,
         cancel_at_period_end: cancelAtPeriodEnd,
         trial_end: trialEnd,
+        livemode,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 },
     );
