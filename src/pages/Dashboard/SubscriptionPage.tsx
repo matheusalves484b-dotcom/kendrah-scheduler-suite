@@ -65,6 +65,12 @@ const SubscriptionPage = () => {
     expired: <Badge className="bg-red-500">Expirada</Badge>,
   }[status];
 
+  const liveBadge = data?.livemode ? (
+    <Badge className="bg-emerald-600 hover:bg-emerald-600">Pagamentos reais ativos</Badge>
+  ) : (
+    <Badge className="bg-amber-500 hover:bg-amber-500">Modo de teste</Badge>
+  );
+
   return (
     <DashboardLayout>
       <div className="p-4 sm:p-6">
