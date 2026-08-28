@@ -26,7 +26,7 @@ const CalendarPage = () => {
     if (!normalized) return toast.info(`O cliente ${name || ''} não possui telefone cadastrado.`);
     const number = normalized.startsWith('55') ? normalized : `55${normalized}`;
     const message = encodeURIComponent(`Olá, ${name || 'tudo bem'}! Aqui é do KENDRAH. Estou entrando em contato sobre o seu agendamento.`);
-    window.open(`https://wa.me/${number}?text=${message}`, '_blank', 'noopener,noreferrer');
+    window.location.href = `https://wa.me/${number}?text=${message}`;
   };
   return <div className="flex min-h-screen bg-kendrah-gray/30"><Sidebar /><div className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8 overflow-auto lg:pl-64 pt-14 lg:pt-8">
     <DashboardHeader title="Agenda" subtitle="Gerencie seus agendamentos e visualize sua agenda" actionLabel="Novo Agendamento" actionPath="#" onActionClick={() => setDialogOpen(true)} />
