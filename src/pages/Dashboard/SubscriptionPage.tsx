@@ -40,7 +40,10 @@ const SubscriptionPage = () => {
     try {
       const { data: res, error } = await supabase.functions.invoke(fn);
       if (error) throw error;
-      if (res?.url) window.open(res.url, '_blank');
+      if (res?.url) {
+        // Redireciona na mesma aba para evitar bloqueio de pop-up no Safari mobile
+        window.location.href = res.url;
+      }
     } catch (e) {
       toast({
         title: 'Não foi possível continuar',
