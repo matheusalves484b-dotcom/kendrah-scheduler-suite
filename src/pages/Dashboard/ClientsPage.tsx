@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { User, Mail, Phone, Search, CalendarDays } from "lucide-react";
+import { User, Mail, Phone, Search, CalendarDays, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import NewAppointmentDialog from "@/components/Dashboard/Calendar/NewAppointment
 import { useAppointments } from "@/hooks/useAppointments";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { toast } from "sonner";
 
 interface DerivedClient {
   key: string;
@@ -66,6 +67,18 @@ const ClientsPage = () => {
     );
   });
 
+  const openWhatsApp = (phone?: string, name?: string) => {
+    const normalized = (phone || "").replace(/\D/g, "");
+    if (!normalized) {
+      return toast.info(`O cliente ${name || ""} não possui telefone cadastrado.`);
+    }
+    const number = normalized.startsWith("55") ? normalized : `55${normalized}`;
+    const message = encodeURIComponent(
+      `Olá, ${name || "tudo bem"}! Aqui é do KENDRAH. Estou entrando em contato sobre o seu agendamento.`
+    );
+    window.location.href = `https://wa.me/${number}?text=${message}`;
+  };
+
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-6 sm:py-8">
@@ -96,7 +109,7 @@ const ClientsPage = () => {
             <CardContent className="p-6 text-center">
               {searchTerm ? (
                 <p className="text-muted-foreground">
-                  Nenhum cliente encontrado para "{searchTerm}".
+                  Nenhum cliente encontrado para &quot;{searchTerm}&quot;.
                   <Button variant="link" onClick={() => setSearchTerm("")}>Limpar busca</Button>
                 </p>
               ) : (
@@ -117,40 +130,92 @@ const ClientsPage = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="overflow-x-auto rounded-lg border">
-            <table className="w-full min-w-[640px] text-sm">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="py-3 px-4 text-left font-medium">Nome</th>
-                  <th className="py-3 px-4 text-left font-medium">Contato</th>
-                  <th className="py-3 px-4 text-left font-medium">Agendamentos</th>
-                  <th className="py-3 px-4 text-left font-medium">Último atendimento</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredClients.map((client) => (
-                  <tr key={client.key} className="border-t hover:bg-muted/50">
-                    <td className="py-3 px-4 font-medium">{client.name}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Mail size={14} /> {client.email}
+          <>
+            {/* Mobile cards */}
+            <div className="space-y-3 md:hidden">
+              {filteredClients.map((client) => (
+                <Card key={client.key}>
+                  <CardContent className="p-4">
+                    <div className="font-semibold text-gray-900">{client.name}</div>
+                    <div className="mb-3 text-sm text-gray-500">{client.email}</div>
+                    <div className="grid grid-cols-2 gap-2 text-sm mb-4">
+                      <div>
+                        <span className="text-gray-500 block text-xs">Telefone</span>
+                        <div className="flex items-center gap-1">
+                          <Phone size={14} className="text-muted-foreground" />
+                          {client.phone || "—"}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Phone size={14} /> {client.phone}
+                      <div>
+                        <span className="text-gray-500 block text-xs">Agendamentos</span>
+                        <div>{client.totalAppointments}</div>
                       </div>
-                    </td>
-                    <td className="py-3 px-4">{client.totalAppointments}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-1">
-                        <CalendarDays size={14} className="text-muted-foreground" />
-                        {format(client.lastAppointment, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                      <div className="col-span-2">
+                        <span className="text-gray-500 block text-xs">Último atendimento</span>
+                        <div className="flex items-center gap-1">
+                          <CalendarDays size={14} className="text-muted-foreground" />
+                          {format(client.lastAppointment, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                        </div>
                       </div>
-                    </td>
+                    </div>
+                    <Button
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => openWhatsApp(client.phone, client.name)}
+                    >
+                      <MessageCircle className="h-4 w-4 mr-2" /> WhatsApp
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto rounded-lg border">
+              <table className="w-full min-w-[640px] text-sm">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="py-3 px-4 text-left font-medium">Nome</th>
+                    <th className="py-3 px-4 text-left font-medium">Contato</th>
+                    <th className="py-3 px-4 text-left font-medium">Agendamentos</th>
+                    <th className="py-3 px-4 text-left font-medium">Último atendimento</th>
+                    <th className="py-3 px-4 text-left font-medium">WhatsApp</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredClients.map((client) => (
+                    <tr key={client.key} className="border-t hover:bg-muted/50">
+                      <td className="py-3 px-4 font-medium">{client.name}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <Mail size={14} /> {client.email}
+                        </div>
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <Phone size={14} /> {client.phone}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">{client.totalAppointments}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-1">
+                          <CalendarDays size={14} className="text-muted-foreground" />
+                          {format(client.lastAppointment, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-green-600 text-green-700 hover:bg-green-50"
+                          onClick={() => openWhatsApp(client.phone, client.name)}
+                        >
+                          <MessageCircle className="h-4 w-4 mr-1" /> WhatsApp
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
 
         <NewAppointmentDialog open={dialogOpen} onOpenChange={setDialogOpen} />
