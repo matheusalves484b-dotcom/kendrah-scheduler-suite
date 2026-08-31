@@ -1,140 +1,112 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+// supabase/functions/send-reminders/index.ts
+//
+// Chamada periodicamente por um pg_cron job (ex: a cada hora).
+// Busca appointments que acontecem em ~24h e ainda não receberam lembrete,
+// e dispara o template correspondente para cliente e prestador (via profiles).
+//
+// CORRIGIDO: as datas/horas agora são formatadas no fuso America/Sao_Paulo,
+// em vez de UTC, para bater com o horário real do agendamento.
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const WHATSAPP_TOKEN = Deno.env.get("WHATSAPP_TOKEN")!;
-const WHATSAPP_PHONE_NUMBER_ID = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID")!;
+import { createClient } from "jsr:@supabase/supabase-js@2";
 
-// Janela de antecedência do lembrete (em horas).
-const REMINDER_WINDOW_HOURS = 24;
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-interface AppointmentRow {
-  id: string;
-  customer_name: string;
-  customer_phone: string;
-  start_time: string;
-  service_name: string;
-  user_id: string;
-  profiles: { business_name: string } | null;
-}
-
-function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleString("pt-BR", {
+function formatarDataHoraBR(isoString: string) {
+  const data = new Date(isoString);
+  const dataFormatada = data.toLocaleDateString("pt-BR", {
     timeZone: "America/Sao_Paulo",
-    day: "2-digit",
-    month: "2-digit",
+  });
+  const horaFormatada = data.toLocaleTimeString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
     hour: "2-digit",
     minute: "2-digit",
   });
+  return { dataFormatada, horaFormatada };
 }
 
-async function sendWhatsAppMessage(toPhone: string, message: string) {
-  const to = toPhone.replace(/\D/g, "");
-
-  const response = await fetch(
-    `https://graph.facebook.com/v20.0/${WHATSAPP_PHONE_NUMBER_ID}/messages`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${WHATSAPP_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        messaging_product: "whatsapp",
-        to,
-        type: "text",
-        text: { body: message },
-      }),
-    },
-  );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(`Falha ao enviar WhatsApp para ${to}: ${JSON.stringify(data)}`);
-  }
-
-  return data;
-}
-
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
-
+Deno.serve(async (req: Request) => {
   try {
     const now = new Date();
-    const windowEnd = new Date(now.getTime() + REMINDER_WINDOW_HOURS * 60 * 60 * 1000);
+    const windowStart = new Date(now.getTime() + 23 * 60 * 60 * 1000);
+    const windowEnd = new Date(now.getTime() + 25 * 60 * 60 * 1000);
 
     const { data: appointments, error } = await supabase
       .from("appointments")
-      .select(
-        `
+      .select(`
         id,
-        customer_name,
-        customer_phone,
         start_time,
         service_name,
-        user_id,
-        profiles ( business_name )
-      `,
-      )
-      .eq("reminder_sent", false)
+        customer_name,
+        customer_phone,
+        status,
+        reminder_sent,
+        profiles (
+          business_name,
+          whatsapp_number
+        )
+      `)
+      .gte("start_time", windowStart.toISOString())
+      .lte("start_time", windowEnd.toISOString())
       .eq("status", "confirmed")
-      .gte("start_time", now.toISOString())
-      .lte("start_time", windowEnd.toISOString());
+      .eq("reminder_sent", false);
 
     if (error) throw error;
 
-    const results: { id: string; ok: boolean; error?: string }[] = [];
+    const resultados = [];
 
-    for (const appt of (appointments ?? []) as unknown as AppointmentRow[]) {
-      if (!appt.customer_phone) {
-        results.push({ id: appt.id, ok: false, error: "sem telefone" });
-        continue;
-      }
+    for (const ag of appointments ?? []) {
+      const { dataFormatada, horaFormatada } = formatarDataHoraBR(ag.start_time);
+      const businessName = ag.profiles?.business_name ?? "";
+      const providerPhone = ag.profiles?.whatsapp_number ?? "";
 
-      const businessName = appt.profiles?.business_name ?? "seu prestador";
-      const when = formatDateTime(appt.start_time);
+      // Lembrete para o cliente
+      await supabase.functions.invoke("whatsapp-send", {
+        body: {
+          to: ag.customer_phone,
+          templateName: "lembrete_agendamento",
+          headerParams: [businessName],
+          bodyParams: [businessName, ag.customer_name, dataFormatada, horaFormatada],
+        },
+      });
 
-      const message =
-        `Olá, ${appt.customer_name}! ` +
-        `Passando para lembrar do seu horário em ${businessName} ` +
-        `para ${appt.service_name} no dia ${when}. Até lá!`;
-
-      try {
-        await sendWhatsAppMessage(appt.customer_phone, message);
-
-        const { error: updateError } = await supabase
-          .from("appointments")
-          .update({ reminder_sent: true })
-          .eq("id", appt.id);
-
-        if (updateError) throw updateError;
-
-        results.push({ id: appt.id, ok: true });
-      } catch (err) {
-        console.error("Erro no lembrete", appt.id, err);
-        results.push({
-          id: appt.id,
-          ok: false,
-          error: err instanceof Error ? err.message : String(err),
+      // Lembrete para o prestador
+      if (providerPhone) {
+        await supabase.functions.invoke("whatsapp-send", {
+          body: {
+            to: providerPhone,
+            templateName: "lembrete_atendimento_prestador",
+            headerParams: [businessName],
+            bodyParams: [
+              businessName,
+              businessName,
+              ag.customer_name,
+              dataFormatada,
+              horaFormatada,
+            ],
+          },
         });
       }
+
+      await supabase
+        .from("appointments")
+        .update({ reminder_sent: true })
+        .eq("id", ag.id);
+
+      resultados.push({ id: ag.id, status: "lembrete enviado" });
     }
 
-    return new Response(JSON.stringify({ processed: results.length, results }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return new Response(JSON.stringify({ processados: resultados.length, resultados }), {
       status: 200,
+      headers: { "Content-Type": "application/json" },
     });
   } catch (err) {
-    console.error("Erro geral:", err);
-    return new Response(
-      JSON.stringify({ error: err instanceof Error ? err.message : String(err) }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 500 },
-    );
+    console.error("Erro ao enviar lembretes:", err);
+    return new Response(JSON.stringify({ error: String(err) }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 });
