@@ -8,21 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
+const MAX_FILE_SIZE = 3 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 interface ProfileData {
@@ -33,6 +23,16 @@ interface ProfileData {
   whatsapp: string;
   slug: string | null;
   logoPath: string | null;
+}
+
+// Normaliza números brasileiros para o formato internacional E.164 sem o sinal +.
+// Exemplos: (11) 99999-9999 -> 5511999999999 | 5511999999999 -> 5511999999999
+function normalizarWhatsApp(numero: string): string | null {
+  const digits = numero.replace(/\D/g, "");
+  if (!digits) return null;
+
+  if (digits.startsWith("55")) return digits;
+  return `55${digits}`;
 }
 
 const ProfilePage = () => {
@@ -50,11 +50,7 @@ const ProfilePage = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, business_name, slug, whatsapp_number, business_logo_url")
-        .eq("id", user.id)
-        .maybeSingle();
+      const { data } = await supabase.from("profiles").select("id, business_name, slug, whatsapp_number, business_logo_url").eq("id", user.id).maybeSingle();
 
       return {
         id: user.id,
@@ -86,15 +82,11 @@ const ProfilePage = () => {
         setPhotoUrl(profile.logoPath);
         return;
       }
-      const { data } = await supabase.storage
-        .from("avatars")
-        .createSignedUrl(profile.logoPath, 60 * 60);
+      const { data } = await supabase.storage.from("avatars").createSignedUrl(profile.logoPath, 60 * 60);
       if (active) setPhotoUrl(data?.signedUrl ?? null);
     };
     resolve();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [profile?.logoPath]);
 
   const saveMutation = useMutation({
@@ -102,11 +94,13 @@ const ProfilePage = () => {
       if (!profile) throw new Error("Sessão expirada. Faça login novamente.");
       if (name.trim().length < 2) throw new Error("Informe um nome com pelo menos 2 caracteres.");
 
+      const whatsappNormalizado = normalizarWhatsApp(whatsapp);
+
       const { error: profileError } = await supabase.from("profiles").upsert(
         {
           id: profile.id,
           business_name: name.trim(),
-          whatsapp_number: whatsapp.trim() || null,
+          whatsapp_number: whatsappNormalizado,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "id" }
@@ -133,11 +127,7 @@ const ProfilePage = () => {
     mutationFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) throw new Error("Sessão expirada. Faça login novamente.");
-
-      const { data, error } = await supabase.functions.invoke("delete-account", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-
+      const { data, error } = await supabase.functions.invoke("delete-account", { headers: { Authorization: `Bearer ${session.access_token}` } });
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || "Não foi possível excluir sua conta.");
     },
@@ -147,11 +137,7 @@ const ProfilePage = () => {
       window.location.replace("/login");
     },
     onError: (error: Error) => {
-      toast({
-        title: "Não foi possível excluir a conta",
-        description: error.message || "Tente novamente.",
-        variant: "destructive",
-      });
+      toast({ title: "Não foi possível excluir a conta", description: error.message || "Tente novamente.", variant: "destructive" });
     },
   });
 
@@ -159,7 +145,6 @@ const ProfilePage = () => {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file || !profile) return;
-
     if (!ACCEPTED_TYPES.includes(file.type)) {
       toast({ title: "Formato inválido", description: "Envie uma imagem JPG, PNG ou WEBP.", variant: "destructive" });
       return;
@@ -168,66 +153,36 @@ const ProfilePage = () => {
       toast({ title: "Imagem muito grande", description: "O limite é 3 MB.", variant: "destructive" });
       return;
     }
-
     setUploading(true);
     try {
       const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
       const path = `${profile.id}/avatar-${Date.now()}.${extension}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(path, file, { upsert: true, contentType: file.type });
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
       if (uploadError) throw uploadError;
-
-      const { error: updateError } = await supabase.from("profiles").upsert(
-        { id: profile.id, business_logo_url: path, updated_at: new Date().toISOString() },
-        { onConflict: "id" }
-      );
+      const { error: updateError } = await supabase.from("profiles").upsert({ id: profile.id, business_logo_url: path, updated_at: new Date().toISOString() }, { onConflict: "id" });
       if (updateError) throw updateError;
-
-      if (profile.logoPath && !profile.logoPath.startsWith("http")) {
-        await supabase.storage.from("avatars").remove([profile.logoPath]);
-      }
-
+      if (profile.logoPath && !profile.logoPath.startsWith("http")) await supabase.storage.from("avatars").remove([profile.logoPath]);
       queryClient.invalidateQueries({ queryKey: ["provider-profile-page"] });
       queryClient.invalidateQueries({ queryKey: ["provider-profile"] });
       toast({ title: "Foto atualizada", description: "Sua nova foto de perfil já está ativa." });
     } catch (error) {
-      toast({
-        title: "Erro ao enviar a foto",
-        description: error instanceof Error ? error.message : "Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setUploading(false);
-    }
+      toast({ title: "Erro ao enviar a foto", description: error instanceof Error ? error.message : "Tente novamente.", variant: "destructive" });
+    } finally { setUploading(false); }
   };
 
   const handleRemovePhoto = async () => {
     if (!profile?.logoPath) return;
     setUploading(true);
     try {
-      if (!profile.logoPath.startsWith("http")) {
-        await supabase.storage.from("avatars").remove([profile.logoPath]);
-      }
-      const { error } = await supabase
-        .from("profiles")
-        .update({ business_logo_url: null, updated_at: new Date().toISOString() })
-        .eq("id", profile.id);
+      if (!profile.logoPath.startsWith("http")) await supabase.storage.from("avatars").remove([profile.logoPath]);
+      const { error } = await supabase.from("profiles").update({ business_logo_url: null, updated_at: new Date().toISOString() }).eq("id", profile.id);
       if (error) throw error;
-
       queryClient.invalidateQueries({ queryKey: ["provider-profile-page"] });
       queryClient.invalidateQueries({ queryKey: ["provider-profile"] });
       toast({ title: "Foto removida" });
     } catch (error) {
-      toast({
-        title: "Erro ao remover",
-        description: error instanceof Error ? error.message : "Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setUploading(false);
-    }
+      toast({ title: "Erro ao remover", description: error instanceof Error ? error.message : "Tente novamente.", variant: "destructive" });
+    } finally { setUploading(false); }
   };
 
   const initials = (name || profile?.email || "P").trim().charAt(0).toUpperCase();
@@ -235,149 +190,31 @@ const ProfilePage = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto max-w-3xl px-4 py-6 sm:py-8">
-        <DashboardHeader
-          title="Meu perfil"
-          subtitle="Atualize seus dados e a foto que aparece para seus clientes"
-        />
-
+        <DashboardHeader title="Meu perfil" subtitle="Atualize seus dados e a foto que aparece para seus clientes" />
         {isLoading ? (
-          <div className="flex h-40 items-center justify-center text-muted-foreground">
-            Carregando perfil...
-          </div>
+          <div className="flex h-40 items-center justify-center text-muted-foreground">Carregando perfil...</div>
         ) : (
           <div className="space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Foto de perfil</CardTitle>
-                <CardDescription>
-                  Uma foto ajuda seus clientes a reconhecerem você na página de agendamento.
-                </CardDescription>
-              </CardHeader>
+              <CardHeader><CardTitle>Foto de perfil</CardTitle><CardDescription>Uma foto ajuda seus clientes a reconhecerem você na página de agendamento.</CardDescription></CardHeader>
               <CardContent className="flex flex-col items-center gap-5 sm:flex-row sm:items-center">
-                <Avatar className="h-24 w-24 border border-border">
-                  {photoUrl && <AvatarImage src={photoUrl} alt={`Foto de perfil de ${name || "prestador"}`} />}
-                  <AvatarFallback className="bg-kendrah-purple/10 text-2xl font-semibold text-kendrah-purple">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-
-                <div className="flex flex-col gap-3 sm:flex-1">
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
-                    >
-                      {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Camera className="mr-2 h-4 w-4" />}
-                      {photoUrl ? "Trocar foto" : "Adicionar foto"}
-                    </Button>
-                    {photoUrl && (
-                      <Button type="button" variant="outline" onClick={handleRemovePhoto} disabled={uploading}>
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Remover
-                      </Button>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground">JPG, PNG ou WEBP até 3 MB.</p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                </div>
+                <Avatar className="h-24 w-24 border border-border">{photoUrl && <AvatarImage src={photoUrl} alt={`Foto de perfil de ${name || "prestador"}`} />}<AvatarFallback className="bg-kendrah-purple/10 text-2xl font-semibold text-kendrah-purple">{initials}</AvatarFallback></Avatar>
+                <div className="flex flex-col gap-3 sm:flex-1"><div className="flex flex-wrap gap-2"><Button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}>{uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Camera className="mr-2 h-4 w-4" />}{photoUrl ? "Trocar foto" : "Adicionar foto"}</Button>{photoUrl && <Button type="button" variant="outline" onClick={handleRemovePhoto} disabled={uploading}><Trash2 className="mr-2 h-4 w-4" />Remover</Button>}</div><p className="text-xs text-muted-foreground">JPG, PNG ou WEBP até 3 MB.</p><input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFileChange} /></div>
               </CardContent>
             </Card>
-
             <Card>
-              <CardHeader>
-                <CardTitle>Dados do prestador</CardTitle>
-                <CardDescription>Essas informações aparecem no seu link de agendamento.</CardDescription>
-              </CardHeader>
+              <CardHeader><CardTitle>Dados do prestador</CardTitle><CardDescription>Essas informações aparecem no seu link de agendamento.</CardDescription></CardHeader>
               <CardContent>
-                <form
-                  className="space-y-4"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    saveMutation.mutate();
-                  }}
-                >
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nome / Nome do negócio</Label>
-                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Studio Bela" maxLength={80} />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email">E-mail</Label>
-                    <Input id="email" value={profile?.email ?? ""} disabled />
-                  </div>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Telefone</Label>
-                      <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(11) 99999-9999" maxLength={20} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="whatsapp">WhatsApp</Label>
-                      <Input id="whatsapp" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(11) 99999-9999" maxLength={20} />
-                    </div>
-                  </div>
-
-                  {profile?.slug && (
-                    <p className="text-sm text-muted-foreground">
-                      Seu link público: <span className="font-medium text-foreground">/agendar/{profile.slug}</span>
-                    </p>
-                  )}
-
-                  <Button type="submit" disabled={saveMutation.isPending}>
-                    {saveMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Salvar alterações
-                  </Button>
+                <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(); }}>
+                  <div className="space-y-2"><Label htmlFor="name">Nome / Nome do negócio</Label><Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Studio Bela" maxLength={80} /></div>
+                  <div className="space-y-2"><Label htmlFor="email">E-mail</Label><Input id="email" value={profile?.email ?? ""} disabled /></div>
+                  <div className="grid gap-4 sm:grid-cols-2"><div className="space-y-2"><Label htmlFor="phone">Telefone</Label><Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(11) 99999-9999" maxLength={20} /></div><div className="space-y-2"><Label htmlFor="whatsapp">WhatsApp</Label><Input id="whatsapp" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(11) 99999-9999" maxLength={20} /></div></div>
+                  {profile?.slug && <p className="text-sm text-muted-foreground">Seu link público: <span className="font-medium text-foreground">/agendar/{profile.slug}</span></p>}
+                  <Button type="submit" disabled={saveMutation.isPending}>{saveMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Salvar alterações</Button>
                 </form>
               </CardContent>
             </Card>
-
-            <Card className="border-destructive/30">
-              <CardHeader>
-                <CardTitle className="text-destructive">Zona de perigo</CardTitle>
-                <CardDescription>
-                  A exclusão da conta é permanente e remove seus dados, incluindo agendamentos, serviços e disponibilidade.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button type="button" variant="destructive" className="w-full sm:w-auto">
-                      <UserRoundX className="mr-2 h-4 w-4" />
-                      Excluir minha conta
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Excluir sua conta?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Esta ação é permanente. Seu perfil, agendamentos, serviços, horários e foto serão excluídos e você será desconectado. Não será possível desfazer essa ação.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel disabled={deleteAccountMutation.isPending}>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={(event) => {
-                          event.preventDefault();
-                          deleteAccountMutation.mutate();
-                        }}
-                        disabled={deleteAccountMutation.isPending}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        {deleteAccountMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {deleteAccountMutation.isPending ? "Excluindo..." : "Sim, excluir minha conta"}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </CardContent>
-            </Card>
+            <Card className="border-destructive/30"><CardHeader><CardTitle className="text-destructive">Zona de perigo</CardTitle><CardDescription>A exclusão da conta é permanente e remove seus dados, incluindo agendamentos, serviços e disponibilidade.</CardDescription></CardHeader><CardContent><AlertDialog><AlertDialogTrigger asChild><Button type="button" variant="destructive" className="w-full sm:w-auto"><UserRoundX className="mr-2 h-4 w-4" />Excluir minha conta</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Excluir sua conta?</AlertDialogTitle><AlertDialogDescription>Esta ação é permanente. Seu perfil, agendamentos, serviços, horários e foto serão excluídos e você será desconectado. Não será possível desfazer essa ação.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel disabled={deleteAccountMutation.isPending}>Cancelar</AlertDialogCancel><AlertDialogAction onClick={(event) => { event.preventDefault(); deleteAccountMutation.mutate(); }} disabled={deleteAccountMutation.isPending} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{deleteAccountMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{deleteAccountMutation.isPending ? "Excluindo..." : "Sim, excluir minha conta"}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></CardContent></Card>
           </div>
         )}
       </div>
