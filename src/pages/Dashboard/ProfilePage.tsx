@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Camera, Loader2, Trash2 } from "lucide-react";
+import { Camera, Loader2, Trash2, UserRoundX } from "lucide-react";
 import DashboardLayout from "@/components/Dashboard/DashboardLayout";
 import DashboardHeader from "@/components/Dashboard/DashboardHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -64,7 +75,6 @@ const ProfilePage = () => {
     setWhatsapp(profile.whatsapp);
   }, [profile]);
 
-  // Resolve a signed URL for the stored (private) avatar
   useEffect(() => {
     let active = true;
     const resolve = async () => {
@@ -116,6 +126,32 @@ const ProfilePage = () => {
     },
     onError: (error: Error) => {
       toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error("Sessão expirada. Faça login novamente.");
+
+      const { data, error } = await supabase.functions.invoke("delete-account", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Não foi possível excluir sua conta.");
+    },
+    onSuccess: async () => {
+      queryClient.clear();
+      await supabase.auth.signOut();
+      window.location.replace("/login");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Não foi possível excluir a conta",
+        description: error.message || "Tente novamente.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -232,20 +268,11 @@ const ProfilePage = () => {
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploading}
                     >
-                      {uploading ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Camera className="mr-2 h-4 w-4" />
-                      )}
+                      {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Camera className="mr-2 h-4 w-4" />}
                       {photoUrl ? "Trocar foto" : "Adicionar foto"}
                     </Button>
                     {photoUrl && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleRemovePhoto}
-                        disabled={uploading}
-                      >
+                      <Button type="button" variant="outline" onClick={handleRemovePhoto} disabled={uploading}>
                         <Trash2 className="mr-2 h-4 w-4" />
                         Remover
                       </Button>
@@ -278,13 +305,7 @@ const ProfilePage = () => {
                 >
                   <div className="space-y-2">
                     <Label htmlFor="name">Nome / Nome do negócio</Label>
-                    <Input
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Ex.: Studio Bela"
-                      maxLength={80}
-                    />
+                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Studio Bela" maxLength={80} />
                   </div>
 
                   <div className="space-y-2">
@@ -295,23 +316,11 @@ const ProfilePage = () => {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="phone">Telefone</Label>
-                      <Input
-                        id="phone"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="(11) 99999-9999"
-                        maxLength={20}
-                      />
+                      <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(11) 99999-9999" maxLength={20} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="whatsapp">WhatsApp</Label>
-                      <Input
-                        id="whatsapp"
-                        value={whatsapp}
-                        onChange={(e) => setWhatsapp(e.target.value)}
-                        placeholder="(11) 99999-9999"
-                        maxLength={20}
-                      />
+                      <Input id="whatsapp" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(11) 99999-9999" maxLength={20} />
                     </div>
                   </div>
 
@@ -326,6 +335,47 @@ const ProfilePage = () => {
                     Salvar alterações
                   </Button>
                 </form>
+              </CardContent>
+            </Card>
+
+            <Card className="border-destructive/30">
+              <CardHeader>
+                <CardTitle className="text-destructive">Zona de perigo</CardTitle>
+                <CardDescription>
+                  A exclusão da conta é permanente e remove seus dados, incluindo agendamentos, serviços e disponibilidade.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button type="button" variant="destructive" className="w-full sm:w-auto">
+                      <UserRoundX className="mr-2 h-4 w-4" />
+                      Excluir minha conta
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Excluir sua conta?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta ação é permanente. Seu perfil, agendamentos, serviços, horários e foto serão excluídos e você será desconectado. Não será possível desfazer essa ação.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={deleteAccountMutation.isPending}>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={(event) => {
+                          event.preventDefault();
+                          deleteAccountMutation.mutate();
+                        }}
+                        disabled={deleteAccountMutation.isPending}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {deleteAccountMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {deleteAccountMutation.isPending ? "Excluindo..." : "Sim, excluir minha conta"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </CardContent>
             </Card>
           </div>
