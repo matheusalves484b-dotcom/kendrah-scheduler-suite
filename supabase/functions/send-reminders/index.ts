@@ -4,8 +4,9 @@
 // Busca appointments que acontecem em ~24h e ainda não receberam lembrete,
 // e dispara o template correspondente para cliente e prestador (via profiles).
 //
-// CORRIGIDO: as datas/horas agora são formatadas no fuso America/Sao_Paulo,
-// em vez de UTC, para bater com o horário real do agendamento.
+// - lembrete_agendamento (cliente): TEM cabeçalho -> envia headerParams
+// - lembrete_atendimento_prestador (prestador): NÃO tem cabeçalho -> não envia headerParams
+// - Datas/horas formatadas no fuso America/Sao_Paulo
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -62,7 +63,7 @@ Deno.serve(async (req: Request) => {
       const businessName = ag.profiles?.business_name ?? "";
       const providerPhone = ag.profiles?.whatsapp_number ?? "";
 
-      // Lembrete para o cliente
+      // Lembrete para o cliente (template COM cabeçalho)
       await supabase.functions.invoke("whatsapp-send", {
         body: {
           to: ag.customer_phone,
@@ -72,13 +73,12 @@ Deno.serve(async (req: Request) => {
         },
       });
 
-      // Lembrete para o prestador
+      // Lembrete para o prestador (template SEM cabeçalho -> sem headerParams)
       if (providerPhone) {
         await supabase.functions.invoke("whatsapp-send", {
           body: {
             to: providerPhone,
             templateName: "lembrete_atendimento_prestador",
-            headerParams: [businessName],
             bodyParams: [
               businessName,
               businessName,
