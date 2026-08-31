@@ -14,6 +14,7 @@ import AvailabilityPage from "./pages/Dashboard/AvailabilityPage";
 import SettingsPage from "./pages/Dashboard/SettingsPage";
 import ProfilePage from "./pages/Dashboard/ProfilePage";
 import SubscriptionPage from "./pages/Dashboard/SubscriptionPage";
+import PublicBookingPage from "./pages/Dashboard/PublicBookingPage";
 import BookingPage from "./pages/BookingPage";
 import BookingSlugPage from "./pages/BookingSlugPage";
 import BookingConfirmedPage from "./pages/BookingConfirmedPage";
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/dashboard/subscription" element={<ProtectedRoute><SubscriptionPage /></ProtectedRoute>} />
             <Route path="/dashboard/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/dashboard/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/public" element={<ProtectedRoute><PublicBookingPage /></ProtectedRoute>} />
             <Route path="*" element={<div className="flex flex-col min-h-screen"><NotFound /><Footer /></div>} />
           </Routes>
           <PwaInstallGuide />
