@@ -16,6 +16,7 @@ import { z } from 'zod';
 
 type AvailabilityRow = { day_of_week: number; start_time: string; end_time: string; is_available: boolean };
 type BookedInterval = { start_time: string; end_time: string };
+type TimeOption = { time: string; booked: boolean };
 
 const bookingSchema = z.object({
   service: z.string().uuid({ message: 'Selecione um serviço.' }),
@@ -33,7 +34,7 @@ const toHHMM = (minutes: number) => `${String(Math.floor(minutes / 60)).padStart
 const BookingSlugPage = () => {
   const { slug } = useParams<{ slug: string }>(); const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null); const [services, setServices] = useState<Service[]>([]); const [availability, setAvailability] = useState<AvailabilityRow[]>([]); const [bookedIntervals, setBookedIntervals] = useState<BookedInterval[]>([]);
-  const [loading, setLoading] = useState(true); const [loadingTimes, setLoadingTimes] = useState(false); const [submitting, setSubmitting] = useState(false); const [notFound, setNotFound] = useState(false);
+  const [loading, setLoading] = useState(true); const [loadingTimes, setLoadingTimes] = useState(false); const [bookingTimesError, setBookingTimesError] = useState(false); const [submitting, setSubmitting] = useState(false); const [notFound, setNotFound] = useState(false);
   const [selectedService, setSelectedService] = useState(''); const [selectedDate, setSelectedDate] = useState(''); const [selectedTime, setSelectedTime] = useState(''); const [customerName, setCustomerName] = useState(''); const [customerEmail, setCustomerEmail] = useState(''); const [customerPhone, setCustomerPhone] = useState(''); const [notes, setNotes] = useState('');
 
   useEffect(() => { if (slug) fetchProfileAndServices(); }, [slug]);
@@ -55,17 +56,46 @@ const BookingSlugPage = () => {
   const availableDates = useMemo(() => Array.from({ length: 30 }, (_, i) => { const date = addDays(startOfDay(new Date()), i); return { value: format(date, 'yyyy-MM-dd'), label: format(date, "EEEE, dd 'de' MMMM", { locale: ptBR }), date, dayOfWeek: date.getDay() }; }).filter(({ date, dayOfWeek }) => !isBefore(date, startOfDay(new Date())) && availability.some(a => a.day_of_week === dayOfWeek && a.is_available)), [availability]);
 
   useEffect(() => {
-    setSelectedTime(''); if (!selectedDate || !profile) { setBookedIntervals([]); return; }
-    const loadBooked = async () => { setLoadingTimes(true); const { data, error } = await supabase.rpc('get_public_booked_intervals', { p_user_id: profile.id, p_date: selectedDate }); if (error) { console.error('Error fetching booked intervals:', error); setBookedIntervals([]); } else setBookedIntervals((data || []) as BookedInterval[]); setLoadingTimes(false); };
+    setSelectedTime(''); setBookingTimesError(false); if (!selectedDate || !profile) { setBookedIntervals([]); return; }
+    let active = true;
+    const loadBooked = async () => {
+      setLoadingTimes(true);
+      const { data, error } = await supabase.rpc('get_public_booked_intervals', { p_user_id: profile.id, p_date: selectedDate });
+      if (!active) return;
+      if (error) {
+        console.error('Error fetching booked intervals:', error);
+        setBookedIntervals([]);
+        setBookingTimesError(true);
+        toast({ title: 'Não foi possível verificar os horários', description: 'Atualize a página e tente novamente.', variant: 'destructive' });
+      } else {
+        setBookedIntervals((data || []) as BookedInterval[]);
+        setBookingTimesError(false);
+      }
+      setLoadingTimes(false);
+    };
     loadBooked();
+    return () => { active = false; };
   }, [selectedDate, profile?.id]);
 
-  const availableTimes = useMemo(() => {
-    if (!selectedDate || !selectedService) return []; const service = services.find(s => s.id === selectedService); if (!service) return [];
-    const dayOfWeek = new Date(`${selectedDate}T12:00:00`).getDay(); const daySlots = availability.filter(a => a.day_of_week === dayOfWeek && a.is_available); const result: string[] = []; const now = Date.now();
-    for (const slot of daySlots) { const start = toMinutes(slot.start_time); const end = toMinutes(slot.end_time); for (let minute = start; minute + service.duration <= end; minute += 30) { const time = toHHMM(minute); const startDateTime = new Date(`${selectedDate}T${time}:00`); const endDateTime = new Date(startDateTime.getTime() + service.duration * 60000); const overlaps = bookedIntervals.some(b => startDateTime.getTime() < new Date(b.end_time).getTime() && endDateTime.getTime() > new Date(b.start_time).getTime()); if (startDateTime.getTime() > now && !overlaps) result.push(time); } }
-    return [...new Set(result)].sort();
-  }, [selectedDate, selectedService, services, availability, bookedIntervals]);
+  const timeOptions = useMemo(() => {
+    if (!selectedDate || !selectedService || bookingTimesError) return [];
+    const service = services.find(s => s.id === selectedService); if (!service) return [];
+    const dayOfWeek = new Date(`${selectedDate}T12:00:00`).getDay(); const daySlots = availability.filter(a => a.day_of_week === dayOfWeek && a.is_available); const result: TimeOption[] = []; const now = Date.now();
+    for (const slot of daySlots) {
+      const start = toMinutes(slot.start_time); const end = toMinutes(slot.end_time);
+      for (let minute = start; minute + service.duration <= end; minute += 30) {
+        const time = toHHMM(minute); const startDateTime = new Date(`${selectedDate}T${time}:00`); const endDateTime = new Date(startDateTime.getTime() + service.duration * 60000);
+        if (startDateTime.getTime() <= now) continue;
+        const booked = bookedIntervals.some(b => startDateTime.getTime() < new Date(b.end_time).getTime() && endDateTime.getTime() > new Date(b.start_time).getTime());
+        result.push({ time, booked });
+      }
+    }
+    const unique = new Map<string, TimeOption>();
+    result.forEach(option => { if (!unique.has(option.time) || option.booked) unique.set(option.time, option); });
+    return [...unique.values()].sort((a, b) => a.time.localeCompare(b.time));
+  }, [selectedDate, selectedService, services, availability, bookedIntervals, bookingTimesError]);
+
+  const availableTimes = timeOptions.filter(option => !option.booked).map(option => option.time);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); const parsed = bookingSchema.safeParse({ service: selectedService, date: selectedDate, time: selectedTime, name: customerName, email: customerEmail, phone: customerPhone, notes });
@@ -84,8 +114,6 @@ const BookingSlugPage = () => {
         setSelectedTime(''); return;
       }
 
-      // A criação definitiva é feita por RPC SECURITY DEFINER, que valida novamente
-      // o serviço, horário, disponibilidade e conflito dentro de uma única transação.
       const { data, error } = await supabase.rpc('create_public_appointment', {
         p_user_id: profile.id,
         p_service_id: selectedServiceData.id,
@@ -130,7 +158,7 @@ const BookingSlugPage = () => {
     <Card className="max-w-2xl mx-auto"><CardHeader><CardTitle className="text-2xl text-center">Novo Agendamento</CardTitle></CardHeader><CardContent><form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2"><Label htmlFor="service">Serviço *</Label><Select value={selectedService} onValueChange={v => { setSelectedService(v); setSelectedTime(''); }}><SelectTrigger><SelectValue placeholder="Selecione um serviço" /></SelectTrigger><SelectContent>{services.map(service => <SelectItem key={service.id} value={service.id}><div className="flex justify-between items-center w-full"><span>{service.name}</span><div className="text-sm text-gray-500 ml-4">{service.duration}min{service.price && ` - R$ ${service.price.toFixed(2)}`}</div></div></SelectItem>)}</SelectContent></Select>{selectedService && <div className="text-sm text-gray-600">{services.find(s => s.id === selectedService)?.description}</div>}</div>
       <div className="space-y-2"><Label htmlFor="date">Data *</Label><Select value={selectedDate} onValueChange={v => { setSelectedDate(v); setSelectedTime(''); }}><SelectTrigger><SelectValue placeholder="Selecione uma data" /></SelectTrigger><SelectContent>{availableDates.map(date => <SelectItem key={date.value} value={date.value}>{date.label}</SelectItem>)}</SelectContent></Select>{availability.length === 0 && <p className="text-sm text-destructive">O prestador ainda não configurou dias e horários disponíveis.</p>}</div>
-      <div className="space-y-2"><Label htmlFor="time">Horário *</Label><Select value={selectedTime} onValueChange={setSelectedTime} disabled={!selectedDate || !selectedService || loadingTimes}><SelectTrigger><SelectValue placeholder={loadingTimes ? 'Carregando horários...' : 'Selecione um horário'} /></SelectTrigger><SelectContent>{availableTimes.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}</SelectContent></Select>{selectedDate && selectedService && !loadingTimes && availableTimes.length === 0 && <p className="text-sm text-muted-foreground">Não há horários disponíveis para esta data.</p>}</div>
+      <div className="space-y-2"><Label htmlFor="time">Horário *</Label><Select value={selectedTime} onValueChange={setSelectedTime} disabled={!selectedDate || !selectedService || loadingTimes || bookingTimesError}><SelectTrigger><SelectValue placeholder={loadingTimes ? 'Carregando horários...' : bookingTimesError ? 'Não foi possível verificar os horários' : 'Selecione um horário'} /></SelectTrigger><SelectContent>{timeOptions.map(option => <SelectItem key={option.time} value={option.time} disabled={option.booked} className={option.booked ? 'opacity-50' : ''}><div className="flex items-center justify-between w-full"><span>{option.time}</span><span className="ml-4 text-sm">{option.booked ? 'Indisponível' : 'Disponível'}</span></div></SelectItem>)}</SelectContent></Select>{selectedDate && selectedService && !loadingTimes && bookingTimesError && <p className="text-sm text-destructive">Não foi possível consultar os horários já reservados. Atualize a página e tente novamente.</p>}{selectedDate && selectedService && !loadingTimes && !bookingTimesError && timeOptions.length > 0 && <p className="text-xs text-muted-foreground">Horários marcados aparecem como “Indisponível” e não podem ser selecionados.</p>}{selectedDate && selectedService && !loadingTimes && !bookingTimesError && timeOptions.length > 0 && availableTimes.length === 0 && <p className="text-sm text-destructive">Todos os horários desta data já estão reservados.</p>}{selectedDate && selectedService && !loadingTimes && !bookingTimesError && timeOptions.length === 0 && <p className="text-sm text-muted-foreground">Não há horários disponíveis para esta data.</p>}</div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div className="space-y-2"><Label htmlFor="name">Nome completo *</Label><Input id="name" value={customerName} onChange={e => setCustomerName(e.target.value)} placeholder="Seu nome completo" /></div><div className="space-y-2"><Label htmlFor="phone">Telefone *</Label><Input id="phone" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} placeholder="(00) 00000-0000" /></div></div>
       <div className="space-y-2"><Label htmlFor="email">E-mail *</Label><Input id="email" type="email" value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} placeholder="seu@email.com" /></div><div className="space-y-2"><Label htmlFor="notes">Observações</Label><Textarea id="notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Alguma observação especial?" rows={3} /></div>
       <Button type="submit" className="w-full bg-kendrah-purple hover:bg-kendrah-purple/90" disabled={submitting || !selectedTime}>{submitting ? 'Agendando...' : 'Confirmar Agendamento'}</Button>
