@@ -10,6 +10,8 @@ import { useSubscription, daysLeft } from '@/hooks/useSubscription';
 import { Check, RefreshCw } from 'lucide-react';
 
 const INCLUDED = ['Agendamentos ilimitados', 'Cadastro de clientes', 'Configuração de disponibilidade', 'Notificações via WhatsApp', 'Suporte por email'];
+const SUPABASE_URL = 'https://opqzywvuasgiyubwqtgh.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wcXp5d3Z1YXNnaXl1YndxdGdoIiwiaWF0IjoxNzQ3ODgwMDcyLCJleHAiOjIwNjM0NTYwNzJ9.tczJsQ_4-eDv0jdPVITs_HErO96isZ8B2yRWB-zDmbA';
 
 const SubscriptionPage = () => {
   const { data, isLoading, refetch, isFetching } = useSubscription();
@@ -34,13 +36,25 @@ const SubscriptionPage = () => {
       if (sessionError) throw sessionError;
       if (!session?.access_token) throw new Error('Sua sessão expirou. Faça login novamente.');
 
-      const { data: res, error } = await supabase.functions.invoke(fn, {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/${fn}`, {
+        method: 'POST',
         headers: {
-          Authorization: `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_PUBLISHABLE_KEY,
+          'Authorization': `Bearer ${session.access_token}`,
         },
+        body: JSON.stringify({}),
       });
-      if (error) throw error;
-      if (res?.url) window.location.href = res.url;
+
+      const responseText = await response.text();
+      let res: { url?: string; error?: string } = {};
+      try { res = JSON.parse(responseText); } catch { /* resposta não-JSON */ }
+
+      if (!response.ok) {
+        throw new Error(res.error || `Erro ao iniciar pagamento (${response.status}).`);
+      }
+
+      if (res.url) window.location.href = res.url;
       else throw new Error('Não foi possível gerar o checkout. Tente novamente.');
     } catch (e) {
       toast({ title: 'Não foi possível continuar', description: e instanceof Error ? e.message : 'Tente novamente em instantes.', variant: 'destructive' });
