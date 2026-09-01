@@ -135,12 +135,13 @@ const BookingSlugPage = () => {
         throw error;
       }
 
-      if (!data?.success) {
-        if (data?.code === 'APPOINTMENT_CONFLICT') {
+      const result = (data ?? {}) as { success?: boolean; code?: string; error?: string };
+      if (!result.success) {
+        if (result.code === 'APPOINTMENT_CONFLICT') {
           toast({ title: 'Horário indisponível', description: 'Este horário acabou de ser ocupado. Por favor, escolha outro horário.', variant: 'destructive' });
           setSelectedTime(''); return;
         }
-        throw new Error(data?.error || 'Não foi possível concluir o agendamento.');
+        throw new Error(result.error || 'Não foi possível concluir o agendamento.');
       }
 
       navigate('/agendamento-confirmado', { state: { serviceName: selectedServiceData.name, startTime: startDateTime.toISOString(), endTime: endDateTime.toISOString(), customerName: parsed.data.name, businessName: profile.business_name, whatsappNumber: profile.whatsapp_number, slug, price: selectedServiceData.price ?? null, duration: selectedServiceData.duration ?? null } });
