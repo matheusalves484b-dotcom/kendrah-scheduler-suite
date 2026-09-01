@@ -30,9 +30,18 @@ const SubscriptionPage = () => {
   const invokeFn = async (fn: 'create-checkout' | 'customer-portal') => {
     setBusy(true);
     try {
-      const { data: res, error } = await supabase.functions.invoke(fn);
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      if (!session?.access_token) throw new Error('Sua sessão expirou. Faça login novamente.');
+
+      const { data: res, error } = await supabase.functions.invoke(fn, {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
       if (error) throw error;
       if (res?.url) window.location.href = res.url;
+      else throw new Error('Não foi possível gerar o checkout. Tente novamente.');
     } catch (e) {
       toast({ title: 'Não foi possível continuar', description: e instanceof Error ? e.message : 'Tente novamente em instantes.', variant: 'destructive' });
     } finally { setBusy(false); }
