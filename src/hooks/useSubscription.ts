@@ -3,6 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 
 export interface SubscriptionState {
   subscribed: boolean;
+  is_ambassador: boolean;
+  access_allowed: boolean;
+  access_reason: 'ambassador' | 'subscription' | 'trial' | 'expired';
   product_id: string | null;
   subscription_end: string | null;
   cancel_at_period_end?: boolean;
@@ -10,19 +13,17 @@ export interface SubscriptionState {
   livemode?: boolean;
 }
 
-export const useSubscription = () => {
-  return useQuery<SubscriptionState>({
-    queryKey: ['subscription'],
-    queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke('check-subscription');
-      if (error) throw error;
-      return data as SubscriptionState;
-    },
-    staleTime: 30 * 1000,
-    refetchInterval: 60 * 1000,
-    refetchOnWindowFocus: true,
-  });
-};
+export const useSubscription = () => useQuery<SubscriptionState>({
+  queryKey: ['subscription'],
+  queryFn: async () => {
+    const { data, error } = await supabase.functions.invoke('check-subscription');
+    if (error) throw error;
+    return data as SubscriptionState;
+  },
+  staleTime: 30 * 1000,
+  refetchInterval: 60 * 1000,
+  refetchOnWindowFocus: true,
+});
 
 export const daysLeft = (iso: string | null) => {
   if (!iso) return 0;
