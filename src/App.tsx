@@ -15,6 +15,7 @@ import SettingsPage from "./pages/Dashboard/SettingsPage";
 import ProfilePage from "./pages/Dashboard/ProfilePage";
 import SubscriptionPage from "./pages/Dashboard/SubscriptionPage";
 import PublicBookingPage from "./pages/Dashboard/PublicBookingPage";
+import AdminAmbassadorsPage from "./pages/AdminAmbassadorsPage";
 import BookingPage from "./pages/BookingPage";
 import BookingSlugPage from "./pages/BookingSlugPage";
 import BookingConfirmedPage from "./pages/BookingConfirmedPage";
@@ -22,7 +23,6 @@ import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PwaInstallGuide from "./components/PwaInstallGuide";
 import Footer from "./components/Footer";
-
 import FeaturesPage from "./pages/InstitutionalPages/FeaturesPage";
 import PricingPage from "./pages/InstitutionalPages/PricingPage";
 import ContactPage from "./pages/InstitutionalPages/ContactPage";
@@ -60,6 +60,7 @@ const App = () => (
             <Route path="/dashboard/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/dashboard/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="/dashboard/public" element={<ProtectedRoute><PublicBookingPage /></ProtectedRoute>} />
+            <Route path="/admin/ambassadors" element={<ProtectedRoute><AdminAmbassadorsPage /></ProtectedRoute>} />
             <Route path="*" element={<div className="flex flex-col min-h-screen"><NotFound /><Footer /></div>} />
           </Routes>
           <PwaInstallGuide />
