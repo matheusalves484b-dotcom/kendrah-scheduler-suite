@@ -77,8 +77,6 @@ const SubscriptionPage = () => {
     ambassador: <Badge className="bg-purple-600">Embaixador</Badge>,
   }[status];
 
-  const liveBadge = data?.livemode ? <Badge className="bg-emerald-600 hover:bg-emerald-600">Pagamentos reais ativos</Badge> : <Badge className="bg-amber-500 hover:bg-amber-500">Modo de teste</Badge>;
-
   return (
     <DashboardLayout>
       <div className="p-4 sm:p-6">
@@ -95,7 +93,7 @@ const SubscriptionPage = () => {
             <CardHeader>
               <div className="flex justify-between items-start gap-4">
                 <div><CardTitle className="text-xl">{status === 'ambassador' ? 'Plano Embaixador' : 'Plano Mensal'}</CardTitle><CardDescription className="text-lg font-medium mt-1">{status === 'ambassador' ? 'Gratuito vitalício' : 'R$ 39,90/mês'}</CardDescription></div>
-                <div className="flex flex-col items-end gap-2">{statusBadge}{status !== 'ambassador' && liveBadge}</div>
+                <div>{statusBadge}</div>
               </div>
             </CardHeader>
             <CardContent>
