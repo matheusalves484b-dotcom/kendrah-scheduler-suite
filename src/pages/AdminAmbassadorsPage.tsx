@@ -23,11 +23,25 @@ export default function AdminAmbassadorsPage() {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { navigate("/login", { replace: true }); return; }
+
     const { data: me } = await supabase.from("profiles").select("is_admin").eq("id", user.id).maybeSingle();
-    if (!me?.is_admin) { toast({ title: "Acesso negado", description: "Você não possui acesso administrativo.", variant: "destructive" }); navigate("/dashboard", { replace: true }); return; }
-    const { data, error } = await supabase.from("profiles").select("id,business_name,whatsapp_number,is_ambassador,is_admin").order("business_name");
-    if (error) toast({ title: "Erro ao carregar prestadores", description: error.message, variant: "destructive" });
-    setProviders((data ?? []) as Provider[]);
+    if (!me?.is_admin) {
+      toast({ title: "Acesso negado", description: "Você não possui acesso administrativo.", variant: "destructive" });
+      navigate("/dashboard", { replace: true });
+      return;
+    }
+
+    // A consulta direta em profiles pode ser limitada por RLS.
+    // A RPC valida o administrador no banco e retorna os prestadores autorizados.
+    const { data, error } = await supabase.rpc("admin_list_providers");
+
+    if (error) {
+      toast({ title: "Erro ao carregar prestadores", description: error.message, variant: "destructive" });
+      setProviders([]);
+    } else {
+      setProviders((data ?? []) as Provider[]);
+    }
+
     setLoading(false);
   };
 
@@ -35,16 +49,29 @@ export default function AdminAmbassadorsPage() {
 
   const toggle = async (provider: Provider) => {
     setSaving(provider.id);
-    const { error } = await supabase.rpc("admin_set_ambassador", { p_provider_id: provider.id, p_is_ambassador: !provider.is_ambassador });
-    if (error) toast({ title: "Não foi possível alterar", description: error.message, variant: "destructive" });
-    else {
+    const { error } = await supabase.rpc("admin_set_ambassador", {
+      p_provider_id: provider.id,
+      p_is_ambassador: !provider.is_ambassador,
+    });
+
+    if (error) {
+      toast({ title: "Não foi possível alterar", description: error.message, variant: "destructive" });
+    } else {
       setProviders(current => current.map(p => p.id === provider.id ? { ...p, is_ambassador: !p.is_ambassador } : p));
-      toast({ title: !provider.is_ambassador ? "Embaixador ativado" : "Embaixador removido", description: provider.business_name || "Prestador" });
+      toast({
+        title: !provider.is_ambassador ? "Embaixador ativado" : "Embaixador removido",
+        description: provider.business_name || "Prestador",
+      });
     }
     setSaving(null);
   };
 
-  const filtered = providers.filter(p => `${p.business_name ?? ""} ${p.whatsapp_number ?? ""}`.toLowerCase().includes(search.toLowerCase()));
+  const normalizedSearch = search.trim().toLocaleLowerCase("pt-BR");
+  const filtered = providers.filter(p =>
+    `${p.business_name ?? ""} ${p.whatsapp_number ?? ""}`
+      .toLocaleLowerCase("pt-BR")
+      .includes(normalizedSearch)
+  );
 
   if (loading) return <DashboardLayout><div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div></DashboardLayout>;
 
