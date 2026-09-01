@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Profile, Service, Appointment } from '@/types';
+import { Profile, Service } from '@/types';
 import { format, addDays, startOfDay, isBefore } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { z } from 'zod';
@@ -18,11 +18,13 @@ type AvailabilityRow = { day_of_week: number; start_time: string; end_time: stri
 type BookedInterval = { start_time: string; end_time: string };
 
 const bookingSchema = z.object({
-  service: z.string().uuid({ message: "Selecione um serviço." }), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Selecione uma data." }), time: z.string().regex(/^\d{2}:\d{2}$/, { message: "Selecione um horário." }),
-  name: z.string().trim().min(2, { message: "Informe seu nome completo." }).max(100, { message: "Nome muito longo (máx. 100 caracteres)." }),
-  email: z.string().trim().email({ message: "Informe um e-mail válido." }).max(255, { message: "E-mail muito longo." }),
-  phone: z.string().trim().min(8, { message: "Informe um telefone válido." }).max(20, { message: "Telefone muito longo." }).refine(v => { const digits = v.replace(/\D/g, '').length; return digits >= 8 && digits <= 15; }, { message: "Informe um telefone válido." }),
-  notes: z.string().trim().max(1000, { message: "Observações muito longas (máx. 1000 caracteres)." }).optional(),
+  service: z.string().uuid({ message: 'Selecione um serviço.' }),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Selecione uma data.' }),
+  time: z.string().regex(/^\d{2}:\d{2}$/, { message: 'Selecione um horário.' }),
+  name: z.string().trim().min(2, { message: 'Informe seu nome completo.' }).max(100, { message: 'Nome muito longo (máx. 100 caracteres).' }),
+  email: z.string().trim().email({ message: 'Informe um e-mail válido.' }).max(255, { message: 'E-mail muito longo.' }),
+  phone: z.string().trim().min(8, { message: 'Informe um telefone válido.' }).max(20, { message: 'Telefone muito longo.' }).refine(v => { const digits = v.replace(/\D/g, '').length; return digits >= 8 && digits <= 15; }, { message: 'Informe um telefone válido.' }),
+  notes: z.string().trim().max(1000, { message: 'Observações muito longas (máx. 1000 caracteres).' }).optional(),
 });
 
 const toMinutes = (value: string) => { const [h, m] = value.slice(0, 5).split(':').map(Number); return h * 60 + m; };
@@ -71,14 +73,53 @@ const BookingSlugPage = () => {
     const startDateTime = new Date(`${parsed.data.date}T${parsed.data.time}:00`); if (startDateTime.getTime() <= Date.now()) { toast({ title: 'Horário inválido', description: 'Escolha um horário no futuro.', variant: 'destructive' }); return; }
     setSubmitting(true);
     try {
-      const selectedServiceData = services.find(s => s.id === selectedService); if (!selectedServiceData || !profile) return; const endDateTime = new Date(startDateTime.getTime() + selectedServiceData.duration * 60000);
-      const { data: freshBooked, error: bookedError } = await supabase.rpc('get_public_booked_intervals', { p_user_id: profile.id, p_date: parsed.data.date }); if (bookedError) throw bookedError;
-      if ((freshBooked || []).some((b: BookedInterval) => startDateTime.getTime() < new Date(b.end_time).getTime() && endDateTime.getTime() > new Date(b.start_time).getTime())) { toast({ title: 'Horário indisponível', description: 'Este horário acabou de ser ocupado. Por favor, escolha outro horário.', variant: 'destructive' }); setSelectedTime(''); return; }
-      const appointmentData: Omit<Appointment, 'id' | 'created_at'> = { service_id: selectedService, service_name: selectedServiceData.name, customer_name: parsed.data.name, customer_email: parsed.data.email, customer_phone: parsed.data.phone, start_time: startDateTime.toISOString(), end_time: endDateTime.toISOString(), status: 'confirmed', notes: parsed.data.notes || undefined, user_id: profile.id };
-      const { error } = await supabase.from('appointments').insert([appointmentData]);
-      if (error) { if (error.message?.includes('APPOINTMENT_CONFLICT')) { toast({ title: 'Horário indisponível', description: 'Este horário acabou de ser ocupado. Por favor, escolha outro horário.', variant: 'destructive' }); setSelectedTime(''); return; } throw error; }
+      const selectedServiceData = services.find(s => s.id === selectedService);
+      if (!selectedServiceData || !profile) throw new Error('Serviço ou prestador não encontrado.');
+      const endDateTime = new Date(startDateTime.getTime() + selectedServiceData.duration * 60000);
+
+      const { data: freshBooked, error: bookedError } = await supabase.rpc('get_public_booked_intervals', { p_user_id: profile.id, p_date: parsed.data.date });
+      if (bookedError) throw bookedError;
+      if ((freshBooked || []).some((b: BookedInterval) => startDateTime.getTime() < new Date(b.end_time).getTime() && endDateTime.getTime() > new Date(b.start_time).getTime())) {
+        toast({ title: 'Horário indisponível', description: 'Este horário acabou de ser ocupado. Por favor, escolha outro horário.', variant: 'destructive' });
+        setSelectedTime(''); return;
+      }
+
+      // A criação definitiva é feita por RPC SECURITY DEFINER, que valida novamente
+      // o serviço, horário, disponibilidade e conflito dentro de uma única transação.
+      const { data, error } = await supabase.rpc('create_public_appointment', {
+        p_user_id: profile.id,
+        p_service_id: selectedServiceData.id,
+        p_service_name: selectedServiceData.name,
+        p_customer_name: parsed.data.name,
+        p_customer_email: parsed.data.email,
+        p_customer_phone: parsed.data.phone,
+        p_start_time: startDateTime.toISOString(),
+        p_end_time: endDateTime.toISOString(),
+        p_notes: parsed.data.notes || null,
+      });
+
+      if (error) {
+        console.error('Erro RPC create_public_appointment:', error);
+        if (error.message?.includes('APPOINTMENT_CONFLICT') || error.code === '23P01') {
+          toast({ title: 'Horário indisponível', description: 'Este horário acabou de ser ocupado. Por favor, escolha outro horário.', variant: 'destructive' });
+          setSelectedTime(''); return;
+        }
+        throw error;
+      }
+
+      if (!data?.success) {
+        if (data?.code === 'APPOINTMENT_CONFLICT') {
+          toast({ title: 'Horário indisponível', description: 'Este horário acabou de ser ocupado. Por favor, escolha outro horário.', variant: 'destructive' });
+          setSelectedTime(''); return;
+        }
+        throw new Error(data?.error || 'Não foi possível concluir o agendamento.');
+      }
+
       navigate('/agendamento-confirmado', { state: { serviceName: selectedServiceData.name, startTime: startDateTime.toISOString(), endTime: endDateTime.toISOString(), customerName: parsed.data.name, businessName: profile.business_name, whatsappNumber: profile.whatsapp_number, slug, price: selectedServiceData.price ?? null, duration: selectedServiceData.duration ?? null } });
-    } catch (error) { console.error('Error creating appointment:', error); toast({ title: 'Erro', description: 'Não foi possível realizar o agendamento. Tente novamente.', variant: 'destructive' }); } finally { setSubmitting(false); }
+    } catch (error) {
+      console.error('Error creating appointment:', error);
+      toast({ title: 'Erro ao concluir agendamento', description: error instanceof Error ? error.message : 'Não foi possível realizar o agendamento. Tente novamente.', variant: 'destructive' });
+    } finally { setSubmitting(false); }
   };
 
   if (loading) return <div className="min-h-screen bg-gradient-to-br from-kendrah-purple to-kendrah-black flex items-center justify-center"><div className="text-white text-xl">Carregando...</div></div>;
