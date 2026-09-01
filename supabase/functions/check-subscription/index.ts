@@ -6,21 +6,13 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
-
 const logStep = (step: string, details?: unknown) => console.log(`[CHECK-SUBSCRIPTION] ${step}${details ? ` - ${JSON.stringify(details)}` : ""}`);
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-
-  const supabaseClient = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-    { auth: { persistSession: false } },
-  );
+  const supabaseClient = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "", { auth: { persistSession: false } });
 
   try {
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header provided");
     const token = authHeader.replace("Bearer ", "");
@@ -28,52 +20,29 @@ serve(async (req) => {
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id });
 
-    const { data: profile, error: profileError } = await supabaseClient
-      .from("profiles")
-      .select("is_ambassador")
-      .eq("id", user.id)
-      .maybeSingle();
+    const { data: profile, error: profileError } = await supabaseClient.from("profiles").select("is_ambassador").eq("id", user.id).maybeSingle();
     if (profileError) throw profileError;
 
     const isAmbassador = profile?.is_ambassador === true;
     const trialEnd = new Date(new Date(user.created_at).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY") ?? "";
     const livemode = stripeKey.startsWith("sk_live_");
 
     if (isAmbassador) {
-      return new Response(JSON.stringify({
-        subscribed: true,
-        is_ambassador: true,
-        access_allowed: true,
-        access_reason: "ambassador",
-        product_id: "ambassador",
-        subscription_end: null,
-        cancel_at_period_end: false,
-        trial_end: trialEnd,
-        livemode,
-      }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 });
+      return new Response(JSON.stringify({ subscribed: true, is_ambassador: true, access_allowed: true, access_reason: "ambassador", product_id: "ambassador", subscription_end: null, cancel_at_period_end: false, trial_end: trialEnd, livemode }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 });
     }
 
+    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
 
     if (customers.data.length === 0) {
       const trialActive = Date.now() < new Date(trialEnd).getTime();
-      return new Response(JSON.stringify({
-        subscribed: false,
-        is_ambassador: false,
-        access_allowed: trialActive,
-        access_reason: trialActive ? "trial" : "expired",
-        product_id: null,
-        subscription_end: null,
-        trial_end: trialEnd,
-        livemode,
-      }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 });
+      return new Response(JSON.stringify({ subscribed: false, is_ambassador: false, access_allowed: trialActive, access_reason: trialActive ? "trial" : "expired", product_id: null, subscription_end: null, trial_end: trialEnd, livemode }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 });
     }
 
-    const customerId = customers.data[0].id;
-    const subscriptions = await stripe.subscriptions.list({ customer: customerId, status: "active", limit: 1 });
+    const subscriptions = await stripe.subscriptions.list({ customer: customers.data[0].id, status: "active", limit: 1 });
     const hasActiveSub = subscriptions.data.length > 0;
     let productId: string | null = null;
     let subscriptionEnd: string | null = null;
@@ -85,23 +54,13 @@ serve(async (req) => {
       subscriptionEnd = periodEnd ? new Date(periodEnd * 1000).toISOString() : null;
       cancelAtPeriodEnd = subscription.cancel_at_period_end;
       productId = String(subscription.items.data[0].price.product);
-      logStep("Active subscription found", { subscriptionEnd, productId });
     }
 
     const trialActive = Date.now() < new Date(trialEnd).getTime();
     const accessAllowed = hasActiveSub || trialActive;
+    logStep("Access check", { userId: user.id, accessAllowed, trialActive, hasActiveSub });
 
-    return new Response(JSON.stringify({
-      subscribed: hasActiveSub,
-      is_ambassador: false,
-      access_allowed: accessAllowed,
-      access_reason: hasActiveSub ? "subscription" : trialActive ? "trial" : "expired",
-      product_id: productId,
-      subscription_end: subscriptionEnd,
-      cancel_at_period_end: cancelAtPeriodEnd,
-      trial_end: trialEnd,
-      livemode,
-    }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 });
+    return new Response(JSON.stringify({ subscribed: hasActiveSub, is_ambassador: false, access_allowed: accessAllowed, access_reason: hasActiveSub ? "subscription" : trialActive ? "trial" : "expired", product_id: productId, subscription_end: subscriptionEnd, cancel_at_period_end: cancelAtPeriodEnd, trial_end: trialEnd, livemode }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message });
