@@ -8,8 +8,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const PRICE_ID = "price_1U2JcJCvDOqSNbLdySVcerSw";
-
 const logStep = (step: string, details?: unknown) => {
   console.log(`[CREATE-CHECKOUT] ${step}${details ? ` - ${JSON.stringify(details)}` : ""}`);
 };
@@ -21,7 +19,10 @@ serve(async (req) => {
 
   try {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
+    const priceId = Deno.env.get("STRIPE_PRICE_ID");
+
+    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY não configurada");
+    if (!priceId) throw new Error("STRIPE_PRICE_ID não configurado");
 
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -30,29 +31,51 @@ serve(async (req) => {
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header provided");
+
     const token = authHeader.replace("Bearer ", "");
     const { data, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+
+    if (userError) {
+      throw new Error(`Authentication error: ${userError.message}`);
+    }
+
     const user = data.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
+    if (!user?.email) {
+      throw new Error("User not authenticated or email not available");
+    }
+
     logStep("User authenticated", { userId: user.id });
 
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    const customerId = customers.data.length > 0 ? customers.data[0].id : undefined;
+    const stripe = new Stripe(stripeKey, {
+      apiVersion: "2025-08-27.basil",
+    });
+
+    const customers = await stripe.customers.list({
+      email: user.email,
+      limit: 1,
+    });
+
+    const customerId =
+      customers.data.length > 0 ? customers.data[0].id : undefined;
 
     const origin = req.headers.get("origin") || "http://localhost:8080";
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      line_items: [{ price: PRICE_ID, quantity: 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
       locale: "pt-BR",
       allow_promotion_codes: true,
       success_url: `${origin}/dashboard/subscription?checkout=success`,
       cancel_url: `${origin}/dashboard/subscription?checkout=cancelled`,
     });
-    logStep("Checkout session created", { sessionId: session.id });
+
+    logStep("Checkout session created", {
+      sessionId: session.id,
+      priceId,
+      stripeMode: stripeKey.startsWith("sk_live_") ? "live" : "test",
+    });
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -61,6 +84,7 @@ serve(async (req) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message });
+
     return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
