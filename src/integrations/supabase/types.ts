@@ -121,6 +121,8 @@ export type Database = {
           business_name: string | null
           created_at: string
           id: string
+          is_admin: boolean
+          is_ambassador: boolean
           slug: string | null
           updated_at: string
           whatsapp_number: string | null
@@ -130,6 +132,8 @@ export type Database = {
           business_name?: string | null
           created_at?: string
           id: string
+          is_admin?: boolean
+          is_ambassador?: boolean
           slug?: string | null
           updated_at?: string
           whatsapp_number?: string | null
@@ -139,6 +143,8 @@ export type Database = {
           business_name?: string | null
           created_at?: string
           id?: string
+          is_admin?: boolean
+          is_ambassador?: boolean
           slug?: string | null
           updated_at?: string
           whatsapp_number?: string | null
@@ -236,7 +242,43 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_list_providers: {
+        Args: never
+        Returns: {
+          business_name: string
+          id: string
+          is_admin: boolean
+          is_ambassador: boolean
+          whatsapp_number: string
+        }[]
+      }
+      admin_set_ambassador: {
+        Args: { p_is_ambassador: boolean; p_provider_id: string }
+        Returns: Json
+      }
+      create_public_appointment: {
+        Args: {
+          p_customer_email: string
+          p_customer_name: string
+          p_customer_phone: string
+          p_end_time: string
+          p_notes?: string
+          p_service_id: string
+          p_service_name: string
+          p_start_time: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       generate_slug: { Args: { input_text: string }; Returns: string }
+      get_public_booked_intervals: {
+        Args: { p_date: string; p_user_id: string }
+        Returns: {
+          end_time: string
+          start_time: string
+        }[]
+      }
+      get_subscription_access: { Args: never; Returns: Json }
     }
     Enums: {
       [_ in never]: never
