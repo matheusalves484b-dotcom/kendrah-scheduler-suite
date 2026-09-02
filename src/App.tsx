@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/Auth/LoginPage";
 import RegisterPage from "./pages/Auth/RegisterPage";
+import AcceptInvitePage from "./pages/Auth/AcceptInvitePage";
 import DashboardHome from "./pages/Dashboard/DashboardHome";
 import CalendarPage from "./pages/Dashboard/CalendarPage";
 import ServicesPage from "./pages/Dashboard/ServicesPage";
@@ -45,6 +46,7 @@ const App = () => (
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<div className="flex flex-col min-h-screen"><LoginPage /><Footer /></div>} />
               <Route path="/register" element={<div className="flex flex-col min-h-screen"><RegisterPage /><Footer /></div>} />
+              <Route path="/auth/accept-invite" element={<AcceptInvitePage />} />
               <Route path="/features" element={<FeaturesPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/contact" element={<ContactPage />} />
