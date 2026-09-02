@@ -3,7 +3,7 @@ import { Check, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const PricingSection = () => {
-  const features = ["Agendamentos ilimitados", "Notificações por WhatsApp", "Link de agendamento personalizado", "Cadastro ilimitado de serviços", "Horários personalizados", "Relatórios detalhados", "Suporte prioritário", "Atualizações e novidades"];
+  const features = ["Agendamentos ilimitados", "Notificações por WhatsApp", "Link de agendamento personalizado", "Cadastro ilimitado de serviços", "Horários personalizados", "Relatórios mensais detalhados", "Suporte prioritário", "Atualizações e novidades"];
 
   return (
     <section className="py-24 bg-transparent">
