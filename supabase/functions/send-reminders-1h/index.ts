@@ -4,8 +4,9 @@
 // Busca appointments que acontecem em ~1h e ainda não receberam o lembrete de 1h,
 // e dispara o template lembrete_1h_agendamento para o CLIENTE.
 //
-// Janela: 50 a 70 minutos de antecedência (margem para cobrir o intervalo
-// entre execuções do cron, já que ele roda a cada ~10-15 min).
+// CORRIGIDO: agora verifica o retorno real de whatsapp-send antes de marcar
+// reminder_1h_sent = true. Se a chamada falhar (ex: template ainda em análise),
+// o agendamento fica disponível para nova tentativa no próximo ciclo do cron.
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -55,21 +56,39 @@ Deno.serve(async (req: Request) => {
       const horaFormatada = formatarHoraBR(ag.start_time);
       const businessName = ag.profiles?.business_name ?? "";
 
-      await supabase.functions.invoke("whatsapp-send", {
-        body: {
-          to: ag.customer_phone,
-          templateName: "lembrete_1h_agendamento",
-          headerParams: [businessName],
-          bodyParams: [businessName, ag.customer_name, horaFormatada],
-        },
-      });
+      const { data: sendResult, error: sendError } = await supabase.functions.invoke(
+        "whatsapp-send",
+        {
+          body: {
+            to: ag.customer_phone,
+            templateName: "lembrete_1h_agendamento",
+            headerParams: [businessName],
+            bodyParams: [businessName, ag.customer_name, horaFormatada],
+          },
+        }
+      );
 
-      await supabase
-        .from("appointments")
-        .update({ reminder_1h_sent: true })
-        .eq("id", ag.id);
+      // Só marca como enviado se a chamada realmente teve sucesso.
+      const enviouComSucesso = !sendError && sendResult?.success === true;
 
-      resultados.push({ id: ag.id, status: "lembrete 1h enviado (cliente)" });
+      if (enviouComSucesso) {
+        await supabase
+          .from("appointments")
+          .update({ reminder_1h_sent: true })
+          .eq("id", ag.id);
+
+        resultados.push({ id: ag.id, status: "lembrete 1h enviado (cliente)" });
+      } else {
+        console.error(
+          `Falha ao enviar lembrete 1h para agendamento ${ag.id}:`,
+          sendError ?? sendResult
+        );
+        resultados.push({
+          id: ag.id,
+          status: "falha ao enviar - será tentado novamente",
+          erro: sendError ?? sendResult,
+        });
+      }
     }
 
     return new Response(JSON.stringify({ processados: resultados.length, resultados }), {
