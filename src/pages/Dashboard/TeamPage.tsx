@@ -66,26 +66,16 @@ const TeamPage = () => {
       if (!user) throw new Error('Sessão expirada. Faça login novamente.');
       if (normalizedEmail === user.email?.toLowerCase()) throw new Error('Você não pode adicionar seu próprio e-mail.');
 
-      const { error: insertError } = await (supabase as any)
-        .from('team_members')
-        .insert({ owner_id: user.id, invited_email: normalizedEmail, role: 'professional', status: 'pending' });
-      if (insertError) {
-        if (insertError.code === '23505') throw new Error('Sua conta já possui um profissional convidado ou ativo.');
-        throw insertError;
-      }
-
-      const { error: otpError } = await supabase.auth.signInWithOtp({
-        email: normalizedEmail,
-        options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      const { data, error } = await supabase.functions.invoke('invite-team-member', {
+        body: { email: normalizedEmail },
       });
-      if (otpError) {
-        await (supabase as any).from('team_members').delete().eq('owner_id', user.id).eq('invited_email', normalizedEmail).eq('status', 'pending');
-        throw otpError;
-      }
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Não foi possível enviar o convite.');
 
       setEmail('');
       await loadMember();
-      toast({ title: 'Convite enviado', description: `Enviamos um link de acesso para ${normalizedEmail}.` });
+      toast({ title: 'Convite enviado', description: `Enviamos um link seguro de acesso para ${normalizedEmail}.` });
     } catch (error) {
       toast({ title: 'Não foi possível convidar', description: error instanceof Error ? error.message : 'Tente novamente.', variant: 'destructive' });
     } finally { setSaving(false); }
