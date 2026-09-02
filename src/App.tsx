@@ -29,6 +29,7 @@ import ContactPage from "./pages/InstitutionalPages/ContactPage";
 import FAQPage from "./pages/InstitutionalPages/FAQPage";
 import TermsPage from "./pages/InstitutionalPages/TermsPage";
 import PrivacyPage from "./pages/InstitutionalPages/PrivacyPage";
+import { ThemeProvider } from "./components/ThemeProvider";
 
 const queryClient = new QueryClient();
 
@@ -38,33 +39,35 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <div className="flex flex-col min-h-screen">
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<div className="flex flex-col min-h-screen"><LoginPage /><Footer /></div>} />
-            <Route path="/register" element={<div className="flex flex-col min-h-screen"><RegisterPage /><Footer /></div>} />
-            <Route path="/features" element={<FeaturesPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/faq" element={<FAQPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="/agendar/:slug" element={<BookingSlugPage />} />
-            <Route path="/agendamento-confirmado" element={<BookingConfirmedPage />} />
-            <Route path="/dashboard" element={<ProtectedRoute><DashboardHome /></ProtectedRoute>} />
-            <Route path="/dashboard/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
-            <Route path="/dashboard/services" element={<ProtectedRoute><ServicesPage /></ProtectedRoute>} />
-            <Route path="/dashboard/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
-            <Route path="/dashboard/availability" element={<ProtectedRoute><AvailabilityPage /></ProtectedRoute>} />
-            <Route path="/dashboard/subscription" element={<ProtectedRoute><SubscriptionPage /></ProtectedRoute>} />
-            <Route path="/dashboard/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-            <Route path="/dashboard/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-            <Route path="/dashboard/public" element={<ProtectedRoute><PublicBookingPage /></ProtectedRoute>} />
-            <Route path="/admin/ambassadors" element={<ProtectedRoute><AdminAmbassadorsPage /></ProtectedRoute>} />
-            <Route path="*" element={<div className="flex flex-col min-h-screen"><NotFound /><Footer /></div>} />
-          </Routes>
-          <PwaInstallGuide />
-        </div>
+        <ThemeProvider>
+          <div className="flex flex-col min-h-screen">
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<div className="flex flex-col min-h-screen"><LoginPage /><Footer /></div>} />
+              <Route path="/register" element={<div className="flex flex-col min-h-screen"><RegisterPage /><Footer /></div>} />
+              <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/faq" element={<FAQPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/agendar/:slug" element={<BookingSlugPage />} />
+              <Route path="/agendamento-confirmado" element={<BookingConfirmedPage />} />
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardHome /></ProtectedRoute>} />
+              <Route path="/dashboard/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
+              <Route path="/dashboard/services" element={<ProtectedRoute><ServicesPage /></ProtectedRoute>} />
+              <Route path="/dashboard/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
+              <Route path="/dashboard/availability" element={<ProtectedRoute><AvailabilityPage /></ProtectedRoute>} />
+              <Route path="/dashboard/subscription" element={<ProtectedRoute><SubscriptionPage /></ProtectedRoute>} />
+              <Route path="/dashboard/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/dashboard/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+              <Route path="/dashboard/public" element={<ProtectedRoute><PublicBookingPage /></ProtectedRoute>} />
+              <Route path="/admin/ambassadors" element={<ProtectedRoute><AdminAmbassadorsPage /></ProtectedRoute>} />
+              <Route path="*" element={<div className="flex flex-col min-h-screen"><NotFound /><Footer /></div>} />
+            </Routes>
+            <PwaInstallGuide />
+          </div>
+        </ThemeProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
