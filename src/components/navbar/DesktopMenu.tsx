@@ -5,7 +5,7 @@ const DesktopMenu = () => {
   return <div className="hidden md:flex items-center space-x-8">
       <NavLinks />
       <Link to="/login">
-        <Button variant="outline" className="border-kendrah-purple text-kendrah-purple hover:bg-kendrah-purple/10 bg-zinc-800 hover:bg-zinc-700 text-zinc-50">
+        <Button variant="outline" className="border-gray-200 bg-gray-100 text-kendrah-purple hover:bg-gray-200 hover:text-kendrah-purple">
           Login
         </Button>
       </Link>
