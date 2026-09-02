@@ -25,7 +25,7 @@ export interface Service {
   id: string;
   name: string;
   description?: string;
-  duration: number; // in minutes
+  duration: number;
   price?: number;
   user_id: string;
   created_at: string;
@@ -44,24 +44,25 @@ export interface Appointment {
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   notes?: string;
   user_id: string;
+  professional_id?: string;
   created_at: string;
 }
 
 export interface TimeSlot {
   id: string;
   userId: string;
-  dayOfWeek: number; // 0-6, where 0 is Sunday
-  startTime: string; // HH:MM format
-  endTime: string; // HH:MM format
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
   isAvailable: boolean;
 }
 
 export interface AvailabilitySlot {
   id: string;
   user_id: string;
-  day_of_week: number; // 0-6, where 0 is Sunday
-  start_time: string; // HH:MM format
-  end_time: string; // HH:MM format
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
   is_available: boolean;
   created_at: string;
 }
