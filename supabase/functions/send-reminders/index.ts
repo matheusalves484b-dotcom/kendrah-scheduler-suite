@@ -1,12 +1,7 @@
 // supabase/functions/send-reminders/index.ts
 //
-// Chamada periodicamente por um pg_cron job (ex: a cada hora).
-// Busca appointments que acontecem em ~24h e ainda não receberam lembrete,
-// e dispara o template correspondente para cliente e prestador (via profiles).
-//
-// - lembrete_agendamento (cliente): TEM cabeçalho -> envia headerParams
-// - lembrete_atendimento_prestador (prestador): NÃO tem cabeçalho -> não envia headerParams
-// - Datas/horas formatadas no fuso America/Sao_Paulo
+// Lembrete de 24h ANTES apenas para o CLIENTE.
+// (O lembrete de 24h para o prestador foi removido por decisão do usuário.)
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -45,8 +40,7 @@ Deno.serve(async (req: Request) => {
         status,
         reminder_sent,
         profiles (
-          business_name,
-          whatsapp_number
+          business_name
         )
       `)
       .gte("start_time", windowStart.toISOString())
@@ -61,9 +55,8 @@ Deno.serve(async (req: Request) => {
     for (const ag of appointments ?? []) {
       const { dataFormatada, horaFormatada } = formatarDataHoraBR(ag.start_time);
       const businessName = ag.profiles?.business_name ?? "";
-      const providerPhone = ag.profiles?.whatsapp_number ?? "";
 
-      // Lembrete para o cliente (template COM cabeçalho)
+      // Lembrete 24h para o cliente (único lembrete deste job)
       await supabase.functions.invoke("whatsapp-send", {
         body: {
           to: ag.customer_phone,
@@ -73,29 +66,12 @@ Deno.serve(async (req: Request) => {
         },
       });
 
-      // Lembrete para o prestador (template SEM cabeçalho -> sem headerParams)
-      if (providerPhone) {
-        await supabase.functions.invoke("whatsapp-send", {
-          body: {
-            to: providerPhone,
-            templateName: "lembrete_atendimento_prestador",
-            bodyParams: [
-              businessName,
-              businessName,
-              ag.customer_name,
-              dataFormatada,
-              horaFormatada,
-            ],
-          },
-        });
-      }
-
       await supabase
         .from("appointments")
         .update({ reminder_sent: true })
         .eq("id", ag.id);
 
-      resultados.push({ id: ag.id, status: "lembrete enviado" });
+      resultados.push({ id: ag.id, status: "lembrete 24h enviado (cliente)" });
     }
 
     return new Response(JSON.stringify({ processados: resultados.length, resultados }), {
