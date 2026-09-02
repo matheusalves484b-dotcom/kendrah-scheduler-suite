@@ -22,8 +22,8 @@
 .calendar-container .rbc-calendar { @apply border-none bg-card text-foreground; }
 .calendar-container .rbc-toolbar { @apply bg-transparent text-foreground px-4 pt-4 pb-3; }
 .calendar-container .rbc-toolbar-label { @apply font-semibold text-foreground; }
-.calendar-container .rbc-toolbar button { @apply bg-background/70 hover:bg-white/10 text-muted-foreground hover:text-foreground border border-white/10 rounded-lg py-1.5 px-3 transition-colors; }
-.calendar-container .rbc-toolbar button.rbc-active { @apply bg-kendrah-purple text-white border-kendrah-purple font-medium; }
+.calendar-container .rbc-toolbar button { @apply bg-card hover:bg-white/[0.07] text-foreground border-2 border-white/25 hover:border-kendrah-purple/60 rounded-lg py-2 px-4 font-medium transition-all shadow-sm hover:shadow-md; }
+.calendar-container .rbc-toolbar button.rbc-active { @apply bg-kendrah-purple text-white border-2 border-kendrah-purple font-semibold shadow-md shadow-kendrah-purple/20; }
 .calendar-container .rbc-header { @apply py-3 px-2 font-semibold text-muted-foreground border-b border-white/10; }
 .calendar-container .rbc-header + .rbc-header { @apply border-l border-white/5; }
 .calendar-container .rbc-month-view, .calendar-container .rbc-time-view, .calendar-container .rbc-agenda-view { @apply border-white/10; }
