@@ -4,7 +4,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-device-id",
 };
 const logStep = (step: string, details?: unknown) => console.log(`[CHECK-SUBSCRIPTION] ${step}${details ? ` - ${JSON.stringify(details)}` : ""}`);
 
@@ -21,11 +21,24 @@ serve(async (req) => {
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
 
-    const { data: profile, error: profileError } = await supabaseClient.from("profiles").select("is_ambassador").eq("id", user.id).maybeSingle();
+    // A assinatura pertence ao proprietário da conta compartilhada.
+    const { data: membership } = await supabaseClient
+      .from("team_members")
+      .select("owner_id")
+      .eq("member_id", user.id)
+      .eq("status", "active")
+      .maybeSingle();
+
+    const workspaceOwnerId = membership?.owner_id ?? user.id;
+    const { data: ownerUser, error: ownerError } = await supabaseClient.auth.admin.getUserById(workspaceOwnerId);
+    if (ownerError) throw ownerError;
+    const billingEmail = ownerUser.user?.email ?? user.email;
+
+    const { data: profile, error: profileError } = await supabaseClient.from("profiles").select("is_ambassador").eq("id", workspaceOwnerId).maybeSingle();
     if (profileError) throw profileError;
 
     const isAmbassador = profile?.is_ambassador === true;
-    const trialEnd = new Date(new Date(user.created_at).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const trialEnd = new Date(new Date(ownerUser.user?.created_at ?? user.created_at).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY") ?? "";
     const livemode = stripeKey.startsWith("sk_live_");
 
@@ -35,7 +48,7 @@ serve(async (req) => {
 
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+    const customers = await stripe.customers.list({ email: billingEmail, limit: 1 });
 
     if (customers.data.length === 0) {
       const trialActive = Date.now() < new Date(trialEnd).getTime();
@@ -58,7 +71,7 @@ serve(async (req) => {
 
     const trialActive = Date.now() < new Date(trialEnd).getTime();
     const accessAllowed = hasActiveSub || trialActive;
-    logStep("Access check", { userId: user.id, accessAllowed, trialActive, hasActiveSub });
+    logStep("Access check", { userId: user.id, workspaceOwnerId, accessAllowed, trialActive, hasActiveSub });
 
     return new Response(JSON.stringify({ subscribed: hasActiveSub, is_ambassador: false, access_allowed: accessAllowed, access_reason: hasActiveSub ? "subscription" : trialActive ? "trial" : "expired", product_id: productId, subscription_end: subscriptionEnd, cancel_at_period_end: cancelAtPeriodEnd, trial_end: trialEnd, livemode }), { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 });
   } catch (error) {
