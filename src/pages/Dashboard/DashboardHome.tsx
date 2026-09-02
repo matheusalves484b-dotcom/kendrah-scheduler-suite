@@ -1,10 +1,9 @@
 import Sidebar from '@/components/Dashboard/Sidebar';
 import DashboardHeader from '@/components/Dashboard/DashboardHeader';
 import StatsCard from '@/components/Dashboard/StatsCard';
-import { currentUser } from '@/lib/fakeData';
 import { useProfile } from '@/hooks/useProfile';
 import { useAppointments } from '@/hooks/useAppointments';
-import { differenceInDays } from 'date-fns';
+import { differenceInDays, isSameDay } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -14,29 +13,34 @@ const DashboardHome = () => {
   const { appointments } = useAppointments();
   const { profile, loading: profileLoading } = useProfile();
 
-
-  // Calculate upcoming appointments (next 7 days)
   const today = new Date();
-  const upcomingAppointments = appointments.filter(appointment => 
-    appointment.status !== 'cancelled' && 
+
+  // Próximos agendamentos nos próximos 7 dias, excluindo cancelados.
+  const upcomingAppointments = appointments.filter(appointment =>
+    appointment.status !== 'cancelled' &&
     differenceInDays(new Date(appointment.start_time), today) >= 0 &&
     differenceInDays(new Date(appointment.start_time), today) <= 7
   );
 
+  // Indicadores realmente úteis para a rotina do prestador.
+  const confirmedAppointments = appointments.filter(a => a.status === 'confirmed').length;
+  const todayAppointments = appointments.filter(a =>
+    a.status !== 'cancelled' && isSameDay(new Date(a.start_time), today)
+  ).length;
+  const cancelledAppointments = appointments.filter(a => a.status === 'cancelled').length;
 
   return (
     <div className="flex min-h-screen bg-kendrah-gray/30">
       <Sidebar />
       <div className="flex-1 min-w-0 overflow-auto lg:pl-64 pt-14 lg:pt-0">
         <TrialBanner />
-        
-        <div className="p-4 sm:p-6 lg:p-8">
 
+        <div className="p-4 sm:p-6 lg:p-8">
           <DashboardHeader
             title={profileLoading ? 'Olá' : `Olá, ${profile?.displayName ?? 'Prestador'}`}
             subtitle="Bem-vindo ao seu painel de agendamentos"
           />
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatsCard
               title="Total de Agendamentos"
@@ -46,41 +50,39 @@ const DashboardHome = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               }
-              trend={{ value: 12, isPositive: true }}
             />
-            
+
             <StatsCard
               title="Confirmados"
-              value={appointments.filter(a => a.status === 'confirmed').length}
+              value={confirmedAppointments}
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-kendrah-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               }
             />
-            
+
             <StatsCard
-              title="Pendentes"
-              value={appointments.filter(a => a.status === 'pending').length}
+              title="Agendamentos Hoje"
+              value={todayAppointments}
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-kendrah-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               }
             />
-            
+
             <StatsCard
-              title="Taxa de Conversão"
-              value="87%"
+              title="Cancelados"
+              value={cancelledAppointments}
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-kendrah-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               }
-              trend={{ value: 5, isPositive: true }}
             />
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="lg:col-span-2">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -129,7 +131,7 @@ const DashboardHome = () => {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg font-bold">Links Rápidos</CardTitle>
@@ -144,7 +146,7 @@ const DashboardHome = () => {
                     <p className="text-sm text-gray-500">Veja todos os seus agendamentos</p>
                   </div>
                 </Link>
-                
+
                 <Link to="/dashboard/services" className="flex items-center p-3 rounded-md bg-kendrah-purple/5 hover:bg-kendrah-purple/10 transition-colors">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-kendrah-purple mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -154,10 +156,10 @@ const DashboardHome = () => {
                     <p className="text-sm text-gray-500">Configure seus serviços</p>
                   </div>
                 </Link>
-                
+
                 <Link to="/dashboard/settings" className="flex items-center p-3 rounded-md bg-kendrah-purple/5 hover:bg-kendrah-purple/10 transition-colors">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-kendrah-purple mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-.2.37a1.724 1.724 0 00-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-.94 1.543-.826 3.31.37 2.37a1.724 1.724 0 001.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   <div>
@@ -165,7 +167,7 @@ const DashboardHome = () => {
                     <p className="text-sm text-gray-500">Integração com WhatsApp e Webhooks</p>
                   </div>
                 </Link>
-                
+
                 <Link to="/dashboard/public" className="flex items-center p-3 rounded-md bg-kendrah-purple/5 hover:bg-kendrah-purple/10 transition-colors">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-kendrah-purple mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
