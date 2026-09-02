@@ -15,19 +15,7 @@ const diasSemanaAbrev = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 
 const messages = {
-  allDay: 'Dia inteiro',
-  previous: 'Anterior',
-  next: 'Próximo',
-  today: 'Hoje',
-  month: 'Mês',
-  week: 'Semana',
-  day: 'Dia',
-  agenda: 'Lista',
-  date: 'Data',
-  time: 'Horário',
-  event: 'Agendamento',
-  noEventsInRange: 'Nenhum agendamento neste período.',
-  showMore: (total: number) => `+${total} agendamento${total === 1 ? '' : 's'}`,
+  allDay: 'Dia inteiro', previous: 'Anterior', next: 'Próximo', today: 'Hoje', month: 'Mês', week: 'Semana', day: 'Dia', agenda: 'Lista', date: 'Data', time: 'Horário', event: 'Agendamento', noEventsInRange: 'Nenhum agendamento neste período.', showMore: (total: number) => `+${total} agendamento${total === 1 ? '' : 's'}`,
 };
 
 const formats = {
@@ -43,10 +31,7 @@ const formats = {
   dayRangeHeaderFormat: ({ start, end }: { start: Date; end: Date }) => `${String(start.getDate()).padStart(2, '0')}/${String(start.getMonth() + 1).padStart(2, '0')} – ${String(end.getDate()).padStart(2, '0')}/${String(end.getMonth() + 1).padStart(2, '0')}/${end.getFullYear()}`,
 };
 
-interface AppointmentCalendarProps {
-  events: CalendarEvent[];
-  onEventClick?: (event: CalendarEvent) => void;
-}
+interface AppointmentCalendarProps { events: CalendarEvent[]; onEventClick?: (event: CalendarEvent) => void; }
 
 const AppointmentCalendar = ({ events, onEventClick }: AppointmentCalendarProps) => {
   const isMobile = useIsMobile();
@@ -54,72 +39,29 @@ const AppointmentCalendar = ({ events, onEventClick }: AppointmentCalendarProps)
   const [date, setDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
-  useEffect(() => {
-    setView(isMobile ? Views.DAY : Views.WEEK);
-  }, [isMobile]);
-
-  const handleEventClick = useCallback((event: CalendarEvent) => {
-    setSelectedEvent(event);
-    onEventClick?.(event);
-  }, [onEventClick]);
-
+  useEffect(() => { setView(isMobile ? Views.DAY : Views.WEEK); }, [isMobile]);
+  const handleEventClick = useCallback((event: CalendarEvent) => { setSelectedEvent(event); onEventClick?.(event); }, [onEventClick]);
   const closeModal = useCallback(() => setSelectedEvent(null), []);
 
-  const eventStyleGetter = useCallback(() => ({
-    className: 'bg-kendrah-purple',
-    style: {
-      borderRadius: '7px',
-      opacity: 1,
-      color: 'white',
-      border: '0',
-      fontSize: '0.84rem',
-      fontWeight: 500,
-      padding: '3px 7px',
-      boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
-    },
-  }), []);
+  const eventStyleGetter = useCallback((event: CalendarEvent) => {
+    const status = event.resource?.status;
+    const palette: Record<string, { background: string; border: string; text: string }> = {
+      confirmed: { background: 'rgba(16,185,129,.14)', border: 'rgba(16,185,129,.45)', text: '#6ee7b7' },
+      pending: { background: 'rgba(245,158,11,.14)', border: 'rgba(245,158,11,.45)', text: '#fcd34d' },
+      cancelled: { background: 'rgba(239,68,68,.14)', border: 'rgba(239,68,68,.45)', text: '#fca5a5' },
+      completed: { background: 'rgba(139,92,246,.16)', border: 'rgba(139,92,246,.48)', text: '#c4b5fd' },
+    };
+    const colors = palette[status] || palette.completed;
+    return { className: `rbc-kendrah-${status || 'default'}`, style: { borderRadius: '9px', opacity: 1, color: colors.text, backgroundColor: colors.background, border: `1px solid ${colors.border}`, borderLeft: `3px solid ${colors.text}`, fontSize: '0.82rem', fontWeight: 600, padding: '4px 7px', boxShadow: '0 4px 14px rgba(0,0,0,.16)' } };
+  }, []);
 
-  const minTime = new Date();
-  minTime.setHours(6, 0, 0, 0);
-  const maxTime = new Date();
-  maxTime.setHours(23, 0, 0, 0);
+  const minTime = new Date(); minTime.setHours(6, 0, 0, 0);
+  const maxTime = new Date(); maxTime.setHours(23, 0, 0, 0);
 
   return (
-    <div className="calendar-container rounded-xl border border-kendrah-gray/40 bg-white shadow-sm h-[560px] sm:h-[650px] lg:h-[720px] flex flex-col overflow-hidden">
-      <Calendar
-        localizer={localizer}
-        culture="pt-BR"
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: '100%', minWidth: isMobile ? '320px' : undefined }}
-        views={isMobile ? [Views.DAY, Views.WEEK] : [Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
-        defaultView={Views.WEEK}
-        onView={setView}
-        view={view}
-        date={date}
-        onNavigate={setDate}
-        onSelectEvent={handleEventClick}
-        eventPropGetter={eventStyleGetter}
-        tooltipAccessor={(event) => event.title}
-        popup
-        messages={messages}
-        formats={formats}
-        min={minTime}
-        max={maxTime}
-        step={30}
-        timeslots={2}
-        showMultiDayTimes
-        selectable={false}
-      />
-
-      {selectedEvent && (
-        <AppointmentModal
-          appointment={selectedEvent.resource}
-          isOpen={Boolean(selectedEvent)}
-          onClose={closeModal}
-        />
-      )}
+    <div className="calendar-container rounded-2xl border border-white/10 bg-card shadow-2xl shadow-black/20 h-[560px] sm:h-[650px] lg:h-[720px] flex flex-col overflow-hidden">
+      <Calendar localizer={localizer} culture="pt-BR" events={events} startAccessor="start" endAccessor="end" style={{ height: '100%', minWidth: isMobile ? '320px' : undefined }} views={isMobile ? [Views.DAY, Views.WEEK] : [Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]} defaultView={Views.WEEK} onView={setView} view={view} date={date} onNavigate={setDate} onSelectEvent={handleEventClick} eventPropGetter={eventStyleGetter} tooltipAccessor={(event) => `${event.title}${event.resource?.professional_name ? ` • ${event.resource.professional_name}` : ''}`} popup messages={messages} formats={formats} min={minTime} max={maxTime} step={30} timeslots={2} showMultiDayTimes selectable={false} />
+      {selectedEvent && <AppointmentModal appointment={selectedEvent.resource} isOpen={Boolean(selectedEvent)} onClose={closeModal} />}
     </div>
   );
 };
