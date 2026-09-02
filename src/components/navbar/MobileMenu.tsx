@@ -29,7 +29,7 @@ const MobileMenu = () => {
               <NavLink to="/faq">FAQ</NavLink>
             </Link>
             <Link to="/login" className="py-2" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button variant="outline" className="border-kendrah-purple text-kendrah-purple hover:bg-kendrah-purple/10 w-full text-zinc-50 bg-gray-900 hover:bg-gray-800">
+              <Button variant="outline" className="border-gray-200 bg-gray-100 text-kendrah-purple hover:bg-gray-200 hover:text-kendrah-purple w-full">
                 Login
               </Button>
             </Link>
