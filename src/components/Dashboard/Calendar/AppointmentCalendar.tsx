@@ -8,10 +8,14 @@ import { CalendarEvent } from '@/types';
 import AppointmentModal from './AppointmentModal';
 
 // Calendário sempre apresentado no padrão brasileiro.
-// O react-big-calendar usa o fuso horário local do navegador para os objetos Date,
-// portanto no Brasil os horários são exibidos no horário local (UTC-3).
 moment.locale('pt-br');
 const localizer = momentLocalizer(moment);
+
+// Tradução explícita para evitar que os nomes dos dias/meses dependam
+// da localização configurada pelo navegador ou pelo ambiente da Vercel.
+const diasSemana = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+const diasSemanaAbrev = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 
 const messages = {
   allDay: 'Dia inteiro',
@@ -30,19 +34,18 @@ const messages = {
 };
 
 const formats = {
-  // Formato brasileiro de data e horário.
   dateFormat: 'DD/MM/YYYY',
-  dayFormat: 'ddd DD',
-  weekdayFormat: 'ddd',
+  dayFormat: (date: Date) => `${diasSemanaAbrev[date.getDay()]} ${String(date.getDate()).padStart(2, '0')}`,
+  weekdayFormat: (date: Date) => diasSemanaAbrev[date.getDay()],
   timeGutterFormat: 'HH:mm',
   eventTimeRangeFormat: ({ start, end }: { start: Date; end: Date }) =>
     `${moment(start).format('HH:mm')} – ${moment(end).format('HH:mm')}`,
   agendaTimeFormat: 'HH:mm',
-  agendaDateFormat: 'ddd, DD/MM',
-  monthHeaderFormat: 'MMMM [de] YYYY',
-  dayHeaderFormat: 'dddd, DD [de] MMMM [de] YYYY',
+  agendaDateFormat: (date: Date) => `${diasSemanaAbrev[date.getDay()]}, ${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`,
+  monthHeaderFormat: (date: Date) => `${meses[date.getMonth()]} de ${date.getFullYear()}`,
+  dayHeaderFormat: (date: Date) => `${diasSemana[date.getDay()]}, ${String(date.getDate()).padStart(2, '0')} de ${meses[date.getMonth()]} de ${date.getFullYear()}`,
   dayRangeHeaderFormat: ({ start, end }: { start: Date; end: Date }) =>
-    `${moment(start).format('DD/MM')} – ${moment(end).format('DD/MM/YYYY')}`,
+    `${String(start.getDate()).padStart(2, '0')}/${String(start.getMonth() + 1).padStart(2, '0')} – ${String(end.getDate()).padStart(2, '0')}/${String(end.getMonth() + 1).padStart(2, '0')}/${end.getFullYear()}`,
 };
 
 interface AppointmentCalendarProps {
@@ -72,23 +75,20 @@ const AppointmentCalendar = ({ events, onEventClick }: AppointmentCalendarProps)
     setSelectedEvent(null);
   }, []);
 
-  const eventStyleGetter = useCallback(() => {
-    return {
-      className: 'bg-kendrah-purple',
-      style: {
-        borderRadius: '7px',
-        opacity: 1,
-        color: 'white',
-        border: '0',
-        fontSize: '0.84rem',
-        fontWeight: 500,
-        padding: '3px 7px',
-        boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
-      },
-    };
-  }, []);
+  const eventStyleGetter = useCallback(() => ({
+    className: 'bg-kendrah-purple',
+    style: {
+      borderRadius: '7px',
+      opacity: 1,
+      color: 'white',
+      border: '0',
+      fontSize: '0.84rem',
+      fontWeight: 500,
+      padding: '3px 7px',
+      boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+    },
+  }), []);
 
-  // Mantém a grade focada no horário comercial e evita uma coluna enorme de horários vazios.
   const minTime = new Date();
   minTime.setHours(6, 0, 0, 0);
   const maxTime = new Date();
@@ -98,7 +98,7 @@ const AppointmentCalendar = ({ events, onEventClick }: AppointmentCalendarProps)
     <div className="calendar-container rounded-xl border border-kendrah-gray/40 bg-white shadow-sm h-[560px] sm:h-[650px] lg:h-[720px] flex flex-col overflow-hidden">
       <Calendar
         localizer={localizer}
-        culture="pt-br"
+        culture="pt-BR"
         events={events}
         startAccessor="start"
         endAccessor="end"
