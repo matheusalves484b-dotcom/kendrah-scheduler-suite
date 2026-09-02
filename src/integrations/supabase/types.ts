@@ -23,6 +23,7 @@ export type Database = {
           end_time: string
           id: string
           notes: string | null
+          professional_id: string | null
           reminder_sent: boolean
           service_id: string
           service_name: string
@@ -38,6 +39,7 @@ export type Database = {
           end_time: string
           id?: string
           notes?: string | null
+          professional_id?: string | null
           reminder_sent?: boolean
           service_id: string
           service_name: string
@@ -53,6 +55,7 @@ export type Database = {
           end_time?: string
           id?: string
           notes?: string | null
+          professional_id?: string | null
           reminder_sent?: boolean
           service_id?: string
           service_name?: string
@@ -237,11 +240,60 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          created_at: string
+          id: string
+          invited_email: string
+          member_id: string | null
+          owner_id: string
+          role: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_email: string
+          member_id?: string | null
+          owner_id: string
+          role?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_email?: string
+          member_id?: string | null
+          owner_id?: string
+          role?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      accept_team_invitation: { Args: never; Returns: string }
       admin_list_providers: {
         Args: never
         Returns: {
@@ -279,6 +331,8 @@ export type Database = {
         }[]
       }
       get_subscription_access: { Args: never; Returns: Json }
+      get_workspace_owner_id: { Args: never; Returns: string }
+      revoke_team_member: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
