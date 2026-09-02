@@ -49,7 +49,12 @@ export const useAppointments = () => {
 
     const { data: { user } } = await supabase.auth.getUser();
     const professionalList: ProfessionalLabel[] = [
-      { id: ownerId, name: ownerId === user?.id ? (user?.user_metadata?.name || user?.email || 'Profissional principal') : 'Profissional principal' },
+      {
+        id: ownerId,
+        name: ownerId === user?.id
+          ? (user?.user_metadata?.name || user?.email || 'Profissional principal')
+          : 'Profissional principal',
+      },
     ];
 
     (team || []).forEach((member: any) => {
@@ -90,7 +95,7 @@ export const useAppointments = () => {
 
     return {
       id: appointment.id,
-      title: `${appointment.service_name} - ${appointment.customer_name}`,
+      title: `${professionalName} • ${appointment.service_name} - ${appointment.customer_name}`,
       start: new Date(appointment.start_time),
       end: new Date(appointment.end_time),
       resource: { ...appointment, professional_name: professionalName },
