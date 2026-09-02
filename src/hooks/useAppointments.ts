@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Appointment, CalendarEvent } from '@/types';
+import { getWorkspaceOwnerId } from '@/hooks/useWorkspace';
 
 export const useAppointments = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -11,8 +12,8 @@ export const useAppointments = () => {
     setLoading(true);
     setError(null);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    const ownerId = await getWorkspaceOwnerId();
+    if (!ownerId) {
       setAppointments([]);
       setLoading(false);
       return;
@@ -21,7 +22,7 @@ export const useAppointments = () => {
     const { data, error: fetchError } = await supabase
       .from('appointments')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', ownerId)
       .order('start_time', { ascending: true });
 
     if (fetchError) {
