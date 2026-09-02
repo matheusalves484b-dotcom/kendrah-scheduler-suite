@@ -15,8 +15,8 @@ import SettingsPage from "./pages/Dashboard/SettingsPage";
 import ProfilePage from "./pages/Dashboard/ProfilePage";
 import SubscriptionPage from "./pages/Dashboard/SubscriptionPage";
 import PublicBookingPage from "./pages/Dashboard/PublicBookingPage";
+import TeamPage from "./pages/Dashboard/TeamPage";
 import AdminAmbassadorsPage from "./pages/AdminAmbassadorsPage";
-import BookingPage from "./pages/BookingPage";
 import BookingSlugPage from "./pages/BookingSlugPage";
 import BookingConfirmedPage from "./pages/BookingConfirmedPage";
 import NotFound from "./pages/NotFound";
@@ -61,6 +61,7 @@ const App = () => (
               <Route path="/dashboard/subscription" element={<ProtectedRoute><SubscriptionPage /></ProtectedRoute>} />
               <Route path="/dashboard/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
               <Route path="/dashboard/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+              <Route path="/dashboard/team" element={<ProtectedRoute><TeamPage /></ProtectedRoute>} />
               <Route path="/dashboard/public" element={<ProtectedRoute><PublicBookingPage /></ProtectedRoute>} />
               <Route path="/admin/ambassadors" element={<ProtectedRoute><AdminAmbassadorsPage /></ProtectedRoute>} />
               <Route path="*" element={<div className="flex flex-col min-h-screen"><NotFound /><Footer /></div>} />
