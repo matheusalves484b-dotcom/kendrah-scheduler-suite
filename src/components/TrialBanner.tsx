@@ -31,7 +31,7 @@ const TrialBanner = () => {
               variant="outline"
               className="text-xs h-8 border-white mr-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-50"
             >
-              Assinar R$ 39,90/mês
+              Assinar R$ 49,90/mês
             </Button>
           </Link>
           <button
