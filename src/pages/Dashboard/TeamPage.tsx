@@ -51,10 +51,12 @@ const TeamPage = () => {
   };
 
   const handleRevoke = async () => {
-    if (!workspace?.isOwner) return;
+    if (!workspace?.isOwner || !member?.id) return;
     setSaving(true);
     try {
-      const { data, error } = await supabase.functions.invoke('revoke-team-member', { body: {} });
+      const { data, error } = await supabase.functions.invoke('revoke-team-member', {
+        body: { team_member_id: member.id },
+      });
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || 'Não foi possível remover o profissional.');
       await loadMember(); await refetch();
