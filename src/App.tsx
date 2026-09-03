@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/Auth/LoginPage";
 import RegisterPage from "./pages/Auth/RegisterPage";
+import ForgotPasswordPage from "./pages/Auth/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/Auth/ResetPasswordPage";
 import AcceptInvitePage from "./pages/Auth/AcceptInvitePage";
 import DashboardHome from "./pages/Dashboard/DashboardHome";
 import CalendarPage from "./pages/Dashboard/CalendarPage";
@@ -46,6 +48,8 @@ const App = () => (
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<div className="flex flex-col min-h-screen"><LoginPage /><Footer /></div>} />
               <Route path="/register" element={<div className="flex flex-col min-h-screen"><RegisterPage /><Footer /></div>} />
+              <Route path="/forgot-password" element={<div className="flex flex-col min-h-screen"><ForgotPasswordPage /><Footer /></div>} />
+              <Route path="/reset-password" element={<div className="flex flex-col min-h-screen"><ResetPasswordPage /><Footer /></div>} />
               <Route path="/auth/accept-invite" element={<AcceptInvitePage />} />
               <Route path="/features" element={<FeaturesPage />} />
               <Route path="/pricing" element={<PricingPage />} />
