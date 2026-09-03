@@ -73,7 +73,7 @@ const PricingPage = () => {
                 <CardHeader className="text-center">
                   <CardTitle className="text-2xl font-bold">Plano Mensal</CardTitle>
                   <div className="mt-4 mb-2">
-                    <span className="text-4xl font-bold">R$ 39,90</span>
+                    <span className="text-4xl font-bold">R$ 49,90</span>
                     <span className="text-gray-500">/mês</span>
                   </div>
                   <CardDescription>Cobrado mensalmente</CardDescription>
