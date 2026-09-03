@@ -26,6 +26,21 @@ export const useAppointments = () => {
       return;
     }
 
+    // Garante que atendimentos cujo horário já terminou sejam considerados
+    // concluídos imediatamente, sem depender exclusivamente do pg_cron.
+    // O job do banco continua existindo como garantia quando o app estiver fechado.
+    const nowIso = new Date().toISOString();
+    const { error: completeError } = await supabase
+      .from('appointments')
+      .update({ status: 'completed' })
+      .eq('user_id', ownerId)
+      .eq('status', 'confirmed')
+      .lte('end_time', nowIso);
+
+    if (completeError) {
+      console.warn('Não foi possível concluir automaticamente os atendimentos passados:', completeError);
+    }
+
     const [{ data, error: fetchError }, { data: team }] = await Promise.all([
       supabase
         .from('appointments')
@@ -82,8 +97,15 @@ export const useAppointments = () => {
       )
       .subscribe();
 
+    // Atualiza o status de atendimentos que terminarem enquanto o dashboard
+    // estiver aberto e, consequentemente, atualiza o faturamento sem reload.
+    const interval = window.setInterval(() => {
+      fetchAppointments();
+    }, 60_000);
+
     return () => {
       supabase.removeChannel(channel);
+      window.clearInterval(interval);
     };
   }, [fetchAppointments]);
 
