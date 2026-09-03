@@ -3,6 +3,7 @@ import { Download, Monitor, Share, Smartphone, X, PlusSquare } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -10,6 +11,9 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const INSTALL_SEEN_KEY = "kendrah-install-guide-seen";
+const FIRST_LOGIN_PENDING_PREFIX = "kendrah-first-login-install-pending-";
+const FIRST_LOGIN_SHOWN_PREFIX = "kendrah-first-login-install-shown-";
+const OPEN_INSTALL_EVENT = "kendrah:open-install-guide";
 
 const PwaInstallGuide = () => {
   const [open, setOpen] = useState(false);
@@ -17,6 +21,7 @@ const PwaInstallGuide = () => {
   const [isIos, setIsIos] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [isFirstLogin, setIsFirstLogin] = useState(false);
 
   useEffect(() => {
     const standalone = window.matchMedia("(display-mode: standalone)").matches ||
@@ -29,31 +34,58 @@ const PwaInstallGuide = () => {
     setIsIos(ios);
     setIsDesktop(desktop);
 
-    const alreadySeen = localStorage.getItem(INSTALL_SEEN_KEY) === "true";
-    if (!standalone && !alreadySeen) {
-      // Sempre apresenta a orientação em dispositivos não instalados.
-      // Se o navegador liberar o prompt nativo, o botão "Instalar agora"
-      // aparece automaticamente assim que beforeinstallprompt for disparado.
-      const timer = window.setTimeout(() => setOpen(true), 1500);
-
-      const handleInstallPrompt = (event: Event) => {
-        event.preventDefault();
-        setDeferredPrompt(event as BeforeInstallPromptEvent);
+    const openGuide = () => {
+      if (!standalone) {
+        setIsFirstLogin(false);
         setOpen(true);
-      };
+      }
+    };
 
-      window.addEventListener("beforeinstallprompt", handleInstallPrompt);
+    const handleInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setDeferredPrompt(event as BeforeInstallPromptEvent);
+    };
 
-      return () => {
-        window.clearTimeout(timer);
-        window.removeEventListener("beforeinstallprompt", handleInstallPrompt);
-      };
+    window.addEventListener(OPEN_INSTALL_EVENT, openGuide);
+    window.addEventListener("beforeinstallprompt", handleInstallPrompt);
+
+    const alreadySeen = localStorage.getItem(INSTALL_SEEN_KEY) === "true";
+    let timer: number | undefined;
+    if (!standalone && !alreadySeen) {
+      timer = window.setTimeout(() => setOpen(true), 1500);
     }
+
+    const showFirstLoginGuide = (userId: string) => {
+      const pendingKey = `${FIRST_LOGIN_PENDING_PREFIX}${userId}`;
+      const shownKey = `${FIRST_LOGIN_SHOWN_PREFIX}${userId}`;
+      if (localStorage.getItem(pendingKey) !== "true" || localStorage.getItem(shownKey) === "true") return;
+
+      localStorage.removeItem(pendingKey);
+      localStorage.setItem(shownKey, "true");
+      window.setTimeout(() => {
+        setIsFirstLogin(true);
+        setOpen(true);
+      }, 1200);
+    };
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user && !standalone) {
+        showFirstLoginGuide(session.user.id);
+      }
+    });
+
+    return () => {
+      if (timer) window.clearTimeout(timer);
+      window.removeEventListener(OPEN_INSTALL_EVENT, openGuide);
+      window.removeEventListener("beforeinstallprompt", handleInstallPrompt);
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const close = () => {
     localStorage.setItem(INSTALL_SEEN_KEY, "true");
     setOpen(false);
+    setIsFirstLogin(false);
   };
 
   const installPwa = async () => {
@@ -77,7 +109,7 @@ const PwaInstallGuide = () => {
       : "Celular — navegador compatível";
 
   return (
-    <div className="fixed inset-x-0 bottom-4 z-50 mx-auto w-[calc(100%-2rem)] max-w-lg sm:bottom-6">
+    <div className="fixed inset-x-0 bottom-4 z-[100] mx-auto w-[calc(100%-2rem)] max-w-lg sm:bottom-6">
       <Card className="border-kendrah-purple/30 bg-background/95 shadow-2xl backdrop-blur supports-[backdrop-filter]:bg-background/85">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-3">
@@ -86,8 +118,14 @@ const PwaInstallGuide = () => {
                 {isDesktop ? <Monitor className="h-6 w-6" /> : <Smartphone className="h-6 w-6" />}
               </div>
               <div>
-                <CardTitle className="text-base sm:text-lg">Instale o KENDRAH</CardTitle>
-                <CardDescription className="mt-1">Tenha seu sistema de agendamentos sempre à mão, no celular ou computador.</CardDescription>
+                <CardTitle className="text-base sm:text-lg">
+                  {isFirstLogin ? "Bem-vindo ao KENDRAH!" : "Instale o KENDRAH"}
+                </CardTitle>
+                <CardDescription className="mt-1">
+                  {isFirstLogin
+                    ? "Instale o KENDRAH como aplicativo para acessar seu sistema de agendamentos com mais rapidez."
+                    : "Tenha seu sistema de agendamentos sempre à mão, no celular ou computador."}
+                </CardDescription>
               </div>
             </div>
             <Button variant="ghost" size="icon" className="shrink-0" onClick={close} aria-label="Fechar orientação">
@@ -124,10 +162,10 @@ const PwaInstallGuide = () => {
           ) : (
             <div className="space-y-3 text-sm text-muted-foreground">
               <p className="font-medium text-foreground">O KENDRAH pode ser adicionado como aplicativo neste dispositivo.</p>
-              <p>Se o botão de instalação nativa ainda não estiver disponível, abra o menu do navegador e procure por <strong className="text-foreground">Instalar KENDRAH</strong> ou <strong className="text-foreground">Instalar aplicativo</strong>.</p>
+              <p>Abra o menu do navegador e procure por <strong className="text-foreground">Instalar KENDRAH</strong>, <strong className="text-foreground">Instalar aplicativo</strong> ou <strong className="text-foreground">Adicionar à tela inicial</strong>.</p>
               <div className="flex items-center gap-2 rounded-lg bg-muted p-3 text-xs">
                 <PlusSquare className="h-4 w-4 shrink-0" />
-                Quando o navegador liberar a instalação automática, o botão "Instalar agora" aparecerá aqui.
+                Em navegadores compatíveis, o botão "Instalar agora" aparecerá automaticamente.
               </div>
             </div>
           )}
