@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from 'react-router-dom';
 
 interface NavLinkProps {
@@ -8,16 +7,14 @@ interface NavLinkProps {
 
 export const NavLink = ({ to, children }: NavLinkProps) => {
   const location = useLocation();
-  
-  // Check if the current path is the path we're linking to
   const isActive = location.pathname === to;
-  
+
   return (
-    <Link 
-      to={to} 
-      className={`transition-colors ${isActive 
-        ? 'text-kendrah-purple font-medium' 
-        : 'text-kendrah-black hover:text-kendrah-purple'}`}
+    <Link
+      to={to}
+      className={`transition-colors ${isActive
+        ? 'text-kendrah-purple font-medium'
+        : 'text-foreground hover:text-kendrah-purple'}`}
     >
       {children}
     </Link>
