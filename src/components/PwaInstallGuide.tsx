@@ -3,6 +3,7 @@ import { Download, Monitor, Share, Smartphone, X, PlusSquare } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -29,8 +30,9 @@ const PwaInstallGuide = () => {
     setIsStandalone(standalone);
 
     const userAgent = window.navigator.userAgent.toLowerCase();
-    const ios = /iphone|ipad|ipod/.test(userAgent);
-    const desktop = !/android|iphone|ipad|ipod|mobile/i.test(userAgent);
+    const ios = /iphone|ipad|ipod/.test(userAgent) ||
+      (/macintosh/.test(userAgent) && window.navigator.maxTouchPoints > 1);
+    const desktop = !ios && !/android|mobile/i.test(userAgent);
     setIsIos(ios);
     setIsDesktop(desktop);
 
@@ -56,7 +58,7 @@ const PwaInstallGuide = () => {
       window.setTimeout(() => {
         setIsFirstLogin(true);
         setOpen(true);
-      }, 1200);
+      }, 800);
     };
 
     const handleFirstLoginEvent = (event: Event) => {
@@ -69,10 +71,9 @@ const PwaInstallGuide = () => {
     window.addEventListener("beforeinstallprompt", handleInstallPrompt);
 
     const alreadySeen = localStorage.getItem(INSTALL_SEEN_KEY) === "true";
-    let timer: number | undefined;
-    if (!standalone && !alreadySeen) {
-      timer = window.setTimeout(() => setOpen(true), 1500);
-    }
+    const timer = !standalone && !alreadySeen
+      ? window.setTimeout(() => setOpen(true), 1500)
+      : undefined;
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session?.user && !standalone) {
@@ -97,14 +98,10 @@ const PwaInstallGuide = () => {
 
   const installPwa = async () => {
     if (!deferredPrompt) return;
-
     await deferredPrompt.prompt();
     const choice = await deferredPrompt.userChoice;
     setDeferredPrompt(null);
-
-    if (choice.outcome === "accepted") {
-      close();
-    }
+    if (choice.outcome === "accepted") close();
   };
 
   if (!open || isStandalone) return null;
@@ -125,58 +122,40 @@ const PwaInstallGuide = () => {
                 {isDesktop ? <Monitor className="h-6 w-6" /> : <Smartphone className="h-6 w-6" />}
               </div>
               <div>
-                <CardTitle className="text-base sm:text-lg">
-                  {isFirstLogin ? "Bem-vindo ao KENDRAH!" : "Instale o KENDRAH"}
-                </CardTitle>
+                <CardTitle className="text-base sm:text-lg">{isFirstLogin ? "Bem-vindo ao KENDRAH!" : "Instale o KENDRAH"}</CardTitle>
                 <CardDescription className="mt-1">
-                  {isFirstLogin
-                    ? "Instale o KENDRAH como aplicativo para acessar seu sistema de agendamentos com mais rapidez."
-                    : "Tenha seu sistema de agendamentos sempre à mão, no celular ou computador."}
+                  {isFirstLogin ? "Instale o KENDRAH como aplicativo para acessar seu sistema de agendamentos com mais rapidez." : "Tenha seu sistema de agendamentos sempre à mão, no celular ou computador."}
                 </CardDescription>
               </div>
             </div>
-            <Button variant="ghost" size="icon" className="shrink-0" onClick={close} aria-label="Fechar orientação">
-              <X className="h-4 w-4" />
-            </Button>
+            <Button variant="ghost" size="icon" className="shrink-0" onClick={close} aria-label="Fechar orientação"><X className="h-4 w-4" /></Button>
           </div>
         </CardHeader>
-
         <CardContent className="space-y-4 pt-0">
           <Badge variant="secondary">{platformLabel}</Badge>
-
           {isIos ? (
             <div className="space-y-3 text-sm text-muted-foreground">
               <p className="font-medium text-foreground">Para adicionar o KENDRAH à tela de início:</p>
               <ol className="space-y-3">
-                <li className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-kendrah-purple text-xs font-bold text-white">1</span><span>Toque em <strong className="text-foreground">Compartilhar</strong> no Safari.</span></li>
-                <li className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-kendrah-purple text-xs font-bold text-white">2</span><span>Role o menu e toque em <strong className="text-foreground">Adicionar à Tela de Início</strong>.</span></li>
-                <li className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-kendrah-purple text-xs font-bold text-white">3</span><span>Toque em <strong className="text-foreground">Adicionar</strong> para concluir.</span></li>
+                <li className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-kendrah-purple text-xs font-bold text-white">1</span><span>Abra esta página no <strong className="text-foreground">Safari</strong>.</span></li>
+                <li className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-kendrah-purple text-xs font-bold text-white">2</span><span>Toque em <strong className="text-foreground">Compartilhar</strong> no Safari.</span></li>
+                <li className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-kendrah-purple text-xs font-bold text-white">3</span><span>Role e toque em <strong className="text-foreground">Adicionar à Tela de Início</strong>.</span></li>
+                <li className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-kendrah-purple text-xs font-bold text-white">4</span><span>Toque em <strong className="text-foreground">Adicionar</strong>.</span></li>
               </ol>
               <div className="flex items-center gap-2 rounded-lg bg-muted p-3 text-xs"><Share className="h-4 w-4 shrink-0" /> No iPhone/iPad, a instalação é feita pelo Safari.</div>
             </div>
           ) : deferredPrompt ? (
             <div className="space-y-3 text-sm text-muted-foreground">
               <p className="font-medium text-foreground">O KENDRAH está pronto para ser instalado neste dispositivo.</p>
-              <Button className="w-full" onClick={installPwa}>
-                <Download className="mr-2 h-4 w-4" />
-                Instalar agora
-              </Button>
-              <div className="flex items-center gap-2 rounded-lg bg-muted p-3 text-xs">
-                <PlusSquare className="h-4 w-4 shrink-0" />
-                O navegador abrirá a confirmação nativa de instalação.
-              </div>
+              <Button className="w-full" onClick={installPwa}><Download className="mr-2 h-4 w-4" />Instalar agora</Button>
+              <div className="flex items-center gap-2 rounded-lg bg-muted p-3 text-xs"><PlusSquare className="h-4 w-4 shrink-0" />O navegador abrirá a confirmação nativa de instalação.</div>
             </div>
           ) : (
             <div className="space-y-3 text-sm text-muted-foreground">
               <p className="font-medium text-foreground">O KENDRAH pode ser adicionado como aplicativo neste dispositivo.</p>
               <p>Abra o menu do navegador e procure por <strong className="text-foreground">Instalar KENDRAH</strong>, <strong className="text-foreground">Instalar aplicativo</strong> ou <strong className="text-foreground">Adicionar à tela inicial</strong>.</p>
-              <div className="flex items-center gap-2 rounded-lg bg-muted p-3 text-xs">
-                <PlusSquare className="h-4 w-4 shrink-0" />
-                Em navegadores compatíveis, o botão "Instalar agora" aparecerá automaticamente.
-              </div>
             </div>
           )}
-
           <Button variant="outline" className="w-full" onClick={close}>Agora não</Button>
         </CardContent>
       </Card>
