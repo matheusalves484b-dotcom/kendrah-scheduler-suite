@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { useToast } from '@/components/ui/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
+
+const FIRST_LOGIN_PENDING_PREFIX = "kendrah-first-login-install-pending-";
+const FIRST_LOGIN_EVENT = "kendrah:first-login-install";
 
 const RegisterPage = () => {
   const [name, setName] = useState('');
@@ -52,7 +54,7 @@ const RegisterPage = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data: signUpData, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
         options: {
@@ -73,6 +75,13 @@ const RegisterPage = () => {
         return;
       }
 
+      // Marca a conta recém-criada para que o primeiro login dispare
+      // a orientação de instalação do aplicativo.
+      const newUserId = signUpData.user?.id;
+      if (newUserId) {
+        localStorage.setItem(`${FIRST_LOGIN_PENDING_PREFIX}${newUserId}`, "true");
+      }
+
       const { data: sessionData } = await supabase.auth.getSession();
 
       toast({
@@ -83,6 +92,13 @@ const RegisterPage = () => {
       });
 
       if (sessionData.session) {
+        // Em contas com login imediato, o evento SIGNED_IN pode ter ocorrido
+        // antes do pending flag ser gravado. Disparamos um evento após gravá-lo.
+        if (newUserId) {
+          window.setTimeout(() => {
+            window.dispatchEvent(new CustomEvent(FIRST_LOGIN_EVENT, { detail: { userId: newUserId } }));
+          }, 100);
+        }
         navigate("/dashboard", { replace: true });
       } else {
         navigate("/login", { replace: true });
