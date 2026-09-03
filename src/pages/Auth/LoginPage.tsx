@@ -19,7 +19,6 @@ const LoginPage = () => {
   const location = useLocation();
   const queryClient = useQueryClient();
   const from = location.state?.from?.pathname || "/dashboard";
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) { toast({ title: "Campos obrigatórios", description: "Por favor, preencha todos os campos", variant: "destructive" }); return; }
@@ -32,7 +31,6 @@ const LoginPage = () => {
       navigate(from, { replace: true });
     } catch (error) { toast({ title: "Erro ao fazer login", description: "Verifique suas credenciais e tente novamente", variant: "destructive" }); setIsLoading(false); }
   };
-
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-kendrah-gray/30 p-4">
       <div className="mb-8 text-center"><Link to="/" className="text-3xl font-bold text-kendrah-purple">Kendrah</Link><p className="text-gray-500 mt-2">Automatize sua agenda. Simplifique sua rotina.</p></div>
