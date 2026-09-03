@@ -3,7 +3,6 @@ import { Download, Monitor, Share, Smartphone, X, PlusSquare } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -14,6 +13,7 @@ const INSTALL_SEEN_KEY = "kendrah-install-guide-seen";
 const FIRST_LOGIN_PENDING_PREFIX = "kendrah-first-login-install-pending-";
 const FIRST_LOGIN_SHOWN_PREFIX = "kendrah-first-login-install-shown-";
 const OPEN_INSTALL_EVENT = "kendrah:open-install-guide";
+const FIRST_LOGIN_EVENT = "kendrah:first-login-install";
 
 const PwaInstallGuide = () => {
   const [open, setOpen] = useState(false);
@@ -46,15 +46,6 @@ const PwaInstallGuide = () => {
       setDeferredPrompt(event as BeforeInstallPromptEvent);
     };
 
-    window.addEventListener(OPEN_INSTALL_EVENT, openGuide);
-    window.addEventListener("beforeinstallprompt", handleInstallPrompt);
-
-    const alreadySeen = localStorage.getItem(INSTALL_SEEN_KEY) === "true";
-    let timer: number | undefined;
-    if (!standalone && !alreadySeen) {
-      timer = window.setTimeout(() => setOpen(true), 1500);
-    }
-
     const showFirstLoginGuide = (userId: string) => {
       const pendingKey = `${FIRST_LOGIN_PENDING_PREFIX}${userId}`;
       const shownKey = `${FIRST_LOGIN_SHOWN_PREFIX}${userId}`;
@@ -68,6 +59,21 @@ const PwaInstallGuide = () => {
       }, 1200);
     };
 
+    const handleFirstLoginEvent = (event: Event) => {
+      const userId = (event as CustomEvent<{ userId?: string }>).detail?.userId;
+      if (userId && !standalone) showFirstLoginGuide(userId);
+    };
+
+    window.addEventListener(OPEN_INSTALL_EVENT, openGuide);
+    window.addEventListener(FIRST_LOGIN_EVENT, handleFirstLoginEvent);
+    window.addEventListener("beforeinstallprompt", handleInstallPrompt);
+
+    const alreadySeen = localStorage.getItem(INSTALL_SEEN_KEY) === "true";
+    let timer: number | undefined;
+    if (!standalone && !alreadySeen) {
+      timer = window.setTimeout(() => setOpen(true), 1500);
+    }
+
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session?.user && !standalone) {
         showFirstLoginGuide(session.user.id);
@@ -77,6 +83,7 @@ const PwaInstallGuide = () => {
     return () => {
       if (timer) window.clearTimeout(timer);
       window.removeEventListener(OPEN_INSTALL_EVENT, openGuide);
+      window.removeEventListener(FIRST_LOGIN_EVENT, handleFirstLoginEvent);
       window.removeEventListener("beforeinstallprompt", handleInstallPrompt);
       authListener.subscription.unsubscribe();
     };
