@@ -25,39 +25,30 @@ const PwaInstallGuide = () => {
 
     const userAgent = window.navigator.userAgent.toLowerCase();
     const ios = /iphone|ipad|ipod/.test(userAgent);
-    setIsIos(ios);
-
     const desktop = !/android|iphone|ipad|ipod|mobile/i.test(userAgent);
+    setIsIos(ios);
     setIsDesktop(desktop);
 
-    const handleInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setDeferredPrompt(event as BeforeInstallPromptEvent);
-    };
-    window.addEventListener("beforeinstallprompt", handleInstallPrompt);
-
     const alreadySeen = localStorage.getItem(INSTALL_SEEN_KEY) === "true";
+    if (!standalone && !alreadySeen) {
+      // Sempre apresenta a orientação em dispositivos não instalados.
+      // Se o navegador liberar o prompt nativo, o botão "Instalar agora"
+      // aparece automaticamente assim que beforeinstallprompt for disparado.
+      const timer = window.setTimeout(() => setOpen(true), 1500);
 
-    // On browsers that expose the native install prompt, wait for that event.
-    // On iOS, Safari does not expose it, so the manual instructions are shown.
-    let timer: number | undefined;
-    if (!standalone && !alreadySeen && ios) {
-      timer = window.setTimeout(() => setOpen(true), 1500);
-    }
-
-    const openWhenInstallable = () => {
-      if (!standalone && !alreadySeen) {
+      const handleInstallPrompt = (event: Event) => {
+        event.preventDefault();
+        setDeferredPrompt(event as BeforeInstallPromptEvent);
         setOpen(true);
-      }
-    };
+      };
 
-    window.addEventListener("beforeinstallprompt", openWhenInstallable);
+      window.addEventListener("beforeinstallprompt", handleInstallPrompt);
 
-    return () => {
-      if (timer) window.clearTimeout(timer);
-      window.removeEventListener("beforeinstallprompt", handleInstallPrompt);
-      window.removeEventListener("beforeinstallprompt", openWhenInstallable);
-    };
+      return () => {
+        window.clearTimeout(timer);
+        window.removeEventListener("beforeinstallprompt", handleInstallPrompt);
+      };
+    }
   }, []);
 
   const close = () => {
@@ -130,7 +121,16 @@ const PwaInstallGuide = () => {
                 O navegador abrirá a confirmação nativa de instalação.
               </div>
             </div>
-          ) : null}
+          ) : (
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p className="font-medium text-foreground">O KENDRAH pode ser adicionado como aplicativo neste dispositivo.</p>
+              <p>Se o botão de instalação nativa ainda não estiver disponível, abra o menu do navegador e procure por <strong className="text-foreground">Instalar KENDRAH</strong> ou <strong className="text-foreground">Instalar aplicativo</strong>.</p>
+              <div className="flex items-center gap-2 rounded-lg bg-muted p-3 text-xs">
+                <PlusSquare className="h-4 w-4 shrink-0" />
+                Quando o navegador liberar a instalação automática, o botão "Instalar agora" aparecerá aqui.
+              </div>
+            </div>
+          )}
 
           <Button variant="outline" className="w-full" onClick={close}>Agora não</Button>
         </CardContent>
