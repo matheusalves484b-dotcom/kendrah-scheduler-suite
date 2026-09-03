@@ -11,7 +11,7 @@ import { Check, RefreshCw } from 'lucide-react';
 
 const INCLUDED = ['Agendamentos ilimitados', 'Cadastro de clientes', 'Configuração de disponibilidade', 'Notificações via WhatsApp', 'Suporte por email'];
 const SUPABASE_URL = 'https://opqzywvuasgiyubwqtgh.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wcXp5d3Z1YXNnaXl1YndxdGdoIiwiaWF0IjoxNzQ3ODgwMDcyLCJleHAiOjIwNjM0NTYwNzJ9.tczJsQ_4-eDv0jdPVITs_HErO96isZ8B2yRWB-zDmbA';
+const SUPABASE_PUBLISHABLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wcXp5d3Z1YXNnaXl1YndxdGdoIiwiaWF0IjoxNzQ3ODgwMDcyLCJleHAiOjIwNjM0NTYwNzJ9.tczJsQ_4-eDv0jdPVITs_HErO96isZ8B2yRWB-zDmbA';
 
 const SubscriptionPage = () => {
   const { data, isLoading, refetch, isFetching } = useSubscription();
@@ -92,7 +92,7 @@ const SubscriptionPage = () => {
           <Card className="max-w-2xl">
             <CardHeader>
               <div className="flex justify-between items-start gap-4">
-                <div><CardTitle className="text-xl">{status === 'ambassador' ? 'Plano Embaixador' : 'Plano Mensal'}</CardTitle><CardDescription className="text-lg font-medium mt-1">{status === 'ambassador' ? 'Gratuito vitalício' : 'R$ 39,90/mês'}</CardDescription></div>
+                <div><CardTitle className="text-xl">{status === 'ambassador' ? 'Plano Embaixador' : 'Plano Mensal'}</CardTitle><CardDescription className="text-lg font-medium mt-1">{status === 'ambassador' ? 'Gratuito vitalício' : 'R$ 49,90/mês'}</CardDescription></div>
                 <div>{statusBadge}</div>
               </div>
             </CardHeader>
@@ -104,7 +104,7 @@ const SubscriptionPage = () => {
               <div className="mt-6"><h3 className="font-medium mb-2">O que está incluso:</h3><ul className="space-y-2">{INCLUDED.map(item => <li key={item} className="flex items-center text-sm"><Check className="w-4 h-4 text-kendrah-purple mr-2 shrink-0" />{item}</li>)}</ul></div>
             </CardContent>
             <CardFooter>
-              {status === 'ambassador' ? <div className="w-full text-center text-sm text-muted-foreground">Você não precisa realizar nenhum pagamento.</div> : status === 'active' ? <Button variant="outline" className="w-full border-kendrah-purple text-kendrah-purple hover:bg-kendrah-purple/10" disabled={busy} onClick={() => invokeFn('customer-portal')}>Gerenciar assinatura</Button> : <Button className="w-full bg-kendrah-purple hover:bg-kendrah-purple/90" disabled={busy} onClick={() => invokeFn('create-checkout')}>{busy ? 'Abrindo pagamento...' : 'Assinar por R$ 39,90/mês'}</Button>}
+              {status === 'ambassador' ? <div className="w-full text-center text-sm text-muted-foreground">Você não precisa realizar nenhum pagamento.</div> : status === 'active' ? <Button variant="outline" className="w-full border-kendrah-purple text-kendrah-purple hover:bg-kendrah-purple/10" disabled={busy} onClick={() => invokeFn('customer-portal')}>Gerenciar assinatura</Button> : <Button className="w-full bg-kendrah-purple hover:bg-kendrah-purple/90" disabled={busy} onClick={() => invokeFn('create-checkout')}>{busy ? 'Abrindo pagamento...' : 'Assinar por R$ 49,90/mês'}</Button>}
             </CardFooter>
           </Card>
         )}
