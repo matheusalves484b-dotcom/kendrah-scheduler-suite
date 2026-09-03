@@ -68,7 +68,7 @@ const testimonials: TestimonialProps[] = [
     name: 'Bruno Tavares',
     role: 'Barbeiro',
     quote:
-      'Coloquei o link na bio do Instagram e no primeiro fim de semana fechei 23 cortes sem trocar uma única mensagem. Foi o melhor R$ 39,90 que já gastei.',
+      'Coloquei o link na bio do Instagram e no primeiro fim de semana fechei 23 cortes sem trocar uma única mensagem. Foi o melhor R$ 49,90 que já gastei.',
   },
   {
     name: 'Patrícia Nunes',
