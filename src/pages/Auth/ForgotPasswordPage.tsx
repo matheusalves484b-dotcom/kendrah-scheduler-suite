@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
+const RESET_PASSWORD_REDIRECT = 'https://kendrah-scheduler-suite.lovable.app/reset-password';
+
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +29,7 @@ const ForgotPasswordPage = () => {
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: RESET_PASSWORD_REDIRECT,
       });
 
       if (error) throw error;
