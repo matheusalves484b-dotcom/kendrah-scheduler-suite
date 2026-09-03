@@ -93,14 +93,14 @@ const ProfilePage = () => {
     if (file.size > MAX_FILE_SIZE) { toast({ title: "Imagem muito grande", description: "O limite é 3 MB.", variant: "destructive" }); return; }
     const setBusy = kind === "cover" ? setUploadingCover : setUploading;
     const oldPath = kind === "cover" ? profile.coverPath : profile.logoPath;
-    const column = kind === "cover" ? "business_cover_url" : "business_logo_url";
     setBusy(true);
     try {
       const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
       const path = `${profile.id}/${kind}-${Date.now()}.${extension}`;
       const { error: uploadError } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
       if (uploadError) throw uploadError;
-      const { error: updateError } = await supabase.from("profiles").update({ [column]: path, updated_at: new Date().toISOString() }).eq("id", profile.id);
+      const payload = kind === "cover" ? { business_cover_url: path } : { business_logo_url: path };
+      const { error: updateError } = await supabase.from("profiles").update({ ...payload, updated_at: new Date().toISOString() }).eq("id", profile.id);
       if (updateError) throw updateError;
       if (oldPath && !oldPath.startsWith("http")) await supabase.storage.from("avatars").remove([oldPath]);
       const url = await resolveStorageUrl(path);
@@ -119,11 +119,11 @@ const ProfilePage = () => {
     const path = kind === "cover" ? profile.coverPath : profile.logoPath;
     if (!path) return;
     const setBusy = kind === "cover" ? setUploadingCover : setUploading;
-    const column = kind === "cover" ? "business_cover_url" : "business_logo_url";
     setBusy(true);
     try {
       if (!path.startsWith("http")) await supabase.storage.from("avatars").remove([path]);
-      const { error } = await supabase.from("profiles").update({ [column]: null, updated_at: new Date().toISOString() }).eq("id", profile.id);
+      const payload = kind === "cover" ? { business_cover_url: null } : { business_logo_url: null };
+      const { error } = await supabase.from("profiles").update({ ...payload, updated_at: new Date().toISOString() }).eq("id", profile.id);
       if (error) throw error;
       if (kind === "cover") setCoverUrl(null); else setPhotoUrl(null);
       queryClient.invalidateQueries({ queryKey: ["provider-profile-page"] }); queryClient.invalidateQueries({ queryKey: ["provider-profile"] });

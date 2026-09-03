@@ -28,6 +28,7 @@ export type Database = {
           reminder_sent: boolean
           service_id: string
           service_name: string
+          service_price: number | null
           start_time: string
           status: string | null
           user_id: string
@@ -45,6 +46,7 @@ export type Database = {
           reminder_sent?: boolean
           service_id: string
           service_name: string
+          service_price?: number | null
           start_time: string
           status?: string | null
           user_id: string
@@ -62,6 +64,7 @@ export type Database = {
           reminder_sent?: boolean
           service_id?: string
           service_name?: string
+          service_price?: number | null
           start_time?: string
           status?: string | null
           user_id?: string
@@ -123,6 +126,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          business_cover_url: string | null
           business_logo_url: string | null
           business_name: string | null
           created_at: string
@@ -134,6 +138,7 @@ export type Database = {
           whatsapp_number: string | null
         }
         Insert: {
+          business_cover_url?: string | null
           business_logo_url?: string | null
           business_name?: string | null
           created_at?: string
@@ -145,6 +150,7 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Update: {
+          business_cover_url?: string | null
           business_logo_url?: string | null
           business_name?: string | null
           created_at?: string
@@ -311,13 +317,15 @@ export type Database = {
         Args: { p_is_ambassador: boolean; p_provider_id: string }
         Returns: Json
       }
+      auto_complete_appointments: { Args: never; Returns: undefined }
       create_public_appointment: {
         Args: {
           p_customer_email: string
           p_customer_name: string
           p_customer_phone: string
           p_end_time: string
-          p_notes?: string
+          p_notes: string
+          p_professional_id: string
           p_service_id: string
           p_service_name: string
           p_start_time: string
@@ -326,11 +334,30 @@ export type Database = {
         Returns: Json
       }
       generate_slug: { Args: { input_text: string }; Returns: string }
-      get_public_booked_intervals: {
-        Args: { p_date: string; p_user_id: string }
+      get_public_booked_intervals:
+        | {
+            Args: { p_date: string; p_user_id: string }
+            Returns: {
+              end_time: string
+              start_time: string
+            }[]
+          }
+        | {
+            Args: {
+              p_date: string
+              p_professional_id?: string
+              p_user_id: string
+            }
+            Returns: {
+              end_time: string
+              start_time: string
+            }[]
+          }
+      get_public_booking_professionals: {
+        Args: { p_user_id: string }
         Returns: {
-          end_time: string
-          start_time: string
+          id: string
+          name: string
         }[]
       }
       get_subscription_access: { Args: never; Returns: Json }
