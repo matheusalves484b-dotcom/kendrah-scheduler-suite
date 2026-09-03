@@ -28,7 +28,7 @@ const PricingSection = () => {
               <h3 className="text-xl font-bold text-kendrah-black">Plano Premium</h3>
               <p className="mt-1 text-sm text-zinc-500">Tudo o que a sua agenda precisa</p>
               <div className="mt-5 flex items-end justify-center gap-2">
-                <span className="text-5xl font-bold text-kendrah-purple">R$ 39,90</span>
+                <span className="text-5xl font-bold text-kendrah-purple">R$ 49,90</span>
                 <span className="pb-2 text-zinc-500">/mês</span>
               </div>
               <p className="mt-2 text-sm text-zinc-500">Cobrado mensalmente. Cancele quando quiser.</p>
