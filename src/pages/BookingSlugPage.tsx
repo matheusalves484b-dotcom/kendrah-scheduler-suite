@@ -18,17 +18,7 @@ type AvailabilityRow = { day_of_week: number; start_time: string; end_time: stri
 type BookedInterval = { start_time: string; end_time: string };
 type Professional = { id: string; name: string };
 
-const schema = z.object({
-  service: z.string().uuid('Selecione um serviço.'),
-  professional: z.string().uuid('Selecione um profissional.'),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Selecione uma data.'),
-  time: z.string().regex(/^\d{2}:\d{2}$/, 'Selecione um horário.'),
-  name: z.string().trim().min(2, 'Informe seu nome completo.').max(100, 'Nome muito longo.'),
-  email: z.string().trim().email('Informe um e-mail válido.').max(255, 'E-mail muito longo.'),
-  phone: z.string().trim().refine(v => { const n = v.replace(/\D/g, ''); return n.length >= 8 && n.length <= 15; }, 'Informe um WhatsApp válido.'),
-  notes: z.string().trim().max(1000, 'Observações muito longas.').optional(),
-});
-
+const schema = z.object({ service: z.string().uuid('Selecione um serviço.'), professional: z.string().uuid('Selecione um profissional.'), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Selecione uma data.'), time: z.string().regex(/^\d{2}:\d{2}$/, 'Selecione um horário.'), name: z.string().trim().min(2, 'Informe seu nome completo.').max(100, 'Nome muito longo.'), email: z.string().trim().email('Informe um e-mail válido.').max(255, 'E-mail muito longo.'), phone: z.string().trim().refine(v => { const n = v.replace(/\D/g, ''); return n.length >= 8 && n.length <= 15; }, 'Informe um WhatsApp válido.'), notes: z.string().trim().max(1000, 'Observações muito longas.').optional() });
 const minutes = (v: string) => { const [h, m] = v.slice(0, 5).split(':').map(Number); return h * 60 + m; };
 const hhmm = (v: number) => `${String(Math.floor(v / 60)).padStart(2, '0')}:${String(v % 60).padStart(2, '0')}`;
 
@@ -37,6 +27,7 @@ const BookingSlugPage = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [availability, setAvailability] = useState<AvailabilityRow[]>([]);
@@ -57,22 +48,22 @@ const BookingSlugPage = () => {
 
   useEffect(() => { if (slug) load(); }, [slug]);
 
+  const resolveImage = async (value: string | null | undefined) => {
+    if (!value) return null;
+    if (/^https?:\/\//i.test(value)) return value;
+    const { data } = await supabase.storage.from('avatars').createSignedUrl(value, 60 * 60);
+    return data?.signedUrl ?? null;
+  };
+
   const load = async () => {
     setLoading(true);
     try {
       const { data: p, error: pe } = await supabase.from('profiles').select('*').eq('slug', slug).maybeSingle();
       if (pe || !p) { setNotFound(true); return; }
       setProfile(p as Profile);
-
-      // business_logo_url pode guardar tanto uma URL completa quanto o caminho do arquivo no bucket avatars.
-      if (p.business_logo_url) {
-        if (/^https?:\/\//i.test(p.business_logo_url)) setLogoUrl(p.business_logo_url);
-        else {
-          const { data } = await supabase.storage.from('avatars').createSignedUrl(p.business_logo_url, 60 * 60);
-          setLogoUrl(data?.signedUrl ?? null);
-        }
-      } else setLogoUrl(null);
-
+      const [logo, cover] = await Promise.all([resolveImage(p.business_logo_url), resolveImage(p.business_cover_url)]);
+      setLogoUrl(logo);
+      setCoverUrl(cover);
       const [sr, ar, pr] = await Promise.all([
         supabase.from('services').select('*').eq('user_id', p.id).order('name'),
         supabase.from('availability_slots').select('day_of_week,start_time,end_time,is_available').eq('user_id', p.id).eq('is_available', true).order('day_of_week').order('start_time'),
@@ -90,10 +81,7 @@ const BookingSlugPage = () => {
     } finally { setLoading(false); }
   };
 
-  const availableDates = useMemo(() => Array.from({ length: 30 }, (_, i) => {
-    const d = addDays(startOfDay(new Date()), i);
-    return { value: format(d, 'yyyy-MM-dd'), label: format(d, "EEEE, dd 'de' MMMM", { locale: ptBR }), day: d.getDay() };
-  }).filter(d => availability.some(a => a.day_of_week === d.day && a.is_available)), [availability]);
+  const availableDates = useMemo(() => Array.from({ length: 30 }, (_, i) => { const d = addDays(startOfDay(new Date()), i); return { value: format(d, 'yyyy-MM-dd'), label: format(d, "EEEE, dd 'de' MMMM", { locale: ptBR }), day: d.getDay() }; }).filter(d => availability.some(a => a.day_of_week === d.day && a.is_available)), [availability]);
 
   useEffect(() => {
     setTime(''); setBooked([]); setTimesError(false);
@@ -101,17 +89,10 @@ const BookingSlugPage = () => {
     let alive = true;
     (async () => {
       setLoadingTimes(true);
-      const { data, error } = await (supabase as any).rpc('get_public_booked_intervals', {
-        p_user_id: profile.id,
-        p_date: date,
-        p_professional_id: professionalId,
-      });
+      const { data, error } = await (supabase as any).rpc('get_public_booked_intervals', { p_user_id: profile.id, p_date: date, p_professional_id: professionalId });
       if (!alive) return;
-      if (error) {
-        console.error('Erro ao consultar horários:', error);
-        setTimesError(true);
-        toast({ title: 'Não foi possível verificar os horários', description: 'Atualize a página e tente novamente.', variant: 'destructive' });
-      } else setBooked((data ?? []) as BookedInterval[]);
+      if (error) { console.error('Erro ao consultar horários:', error); setTimesError(true); toast({ title: 'Não foi possível verificar os horários', description: 'Atualize a página e tente novamente.', variant: 'destructive' }); }
+      else setBooked((data ?? []) as BookedInterval[]);
       setLoadingTimes(false);
     })();
     return () => { alive = false; };
@@ -119,19 +100,13 @@ const BookingSlugPage = () => {
 
   const timeOptions = useMemo(() => {
     if (!date || !serviceId || !professionalId || timesError) return [];
-    const service = services.find(s => s.id === serviceId);
-    if (!service) return [];
-    const dow = new Date(`${date}T12:00:00`).getDay();
-    const result: { time: string; booked: boolean }[] = [];
-    const now = Date.now();
+    const service = services.find(s => s.id === serviceId); if (!service) return [];
+    const dow = new Date(`${date}T12:00:00`).getDay(); const result: { time: string; booked: boolean }[] = []; const now = Date.now();
     for (const slot of availability.filter(a => a.day_of_week === dow && a.is_available)) {
       for (let m = minutes(slot.start_time); m + service.duration <= minutes(slot.end_time); m += 30) {
-        const t = hhmm(m);
-        const start = new Date(`${date}T${t}:00`);
-        const end = new Date(start.getTime() + service.duration * 60000);
+        const t = hhmm(m); const start = new Date(`${date}T${t}:00`); const end = new Date(start.getTime() + service.duration * 60000);
         if (start.getTime() <= now) continue;
-        const isBooked = booked.some(b => start < new Date(b.end_time) && end > new Date(b.start_time));
-        result.push({ time: t, booked: isBooked });
+        result.push({ time: t, booked: booked.some(b => start < new Date(b.end_time) && end > new Date(b.start_time)) });
       }
     }
     return Array.from(new Map(result.map(x => [x.time, x])).values()).sort((a, b) => a.time.localeCompare(b.time));
@@ -142,46 +117,22 @@ const BookingSlugPage = () => {
     const parsed = schema.safeParse({ service: serviceId, professional: professionalId, date, time, name, email, phone, notes });
     if (!parsed.success) { toast({ title: 'Verifique os dados', description: parsed.error.issues[0].message, variant: 'destructive' }); return; }
     if (!profile) return;
-    const service = services.find(s => s.id === serviceId);
-    const professional = professionals.find(p => p.id === professionalId);
+    const service = services.find(s => s.id === serviceId); const professional = professionals.find(p => p.id === professionalId);
     if (!service || !professional) { toast({ title: 'Dados inválidos', description: 'Selecione novamente o serviço e o profissional.', variant: 'destructive' }); return; }
-    const start = new Date(`${date}T${time}:00`);
-    const end = new Date(start.getTime() + service.duration * 60000);
+    const start = new Date(`${date}T${time}:00`); const end = new Date(start.getTime() + service.duration * 60000);
     if (start.getTime() <= Date.now()) { toast({ title: 'Horário inválido', description: 'Escolha um horário futuro.', variant: 'destructive' }); return; }
-
     setSubmitting(true);
     try {
       const { data: fresh, error: fe } = await (supabase as any).rpc('get_public_booked_intervals', { p_user_id: profile.id, p_date: date, p_professional_id: professional.id });
       if (fe) throw fe;
-      if ((fresh ?? []).some((b: BookedInterval) => start < new Date(b.end_time) && end > new Date(b.start_time))) {
-        setTime('');
-        toast({ title: 'Horário indisponível', description: 'Este horário acabou de ser ocupado. Escolha outro.', variant: 'destructive' });
-        return;
-      }
-
-      const { data, error } = await (supabase as any).rpc('create_public_appointment', {
-        p_user_id: profile.id,
-        p_service_id: service.id,
-        p_service_name: service.name,
-        p_customer_name: parsed.data.name,
-        p_customer_email: parsed.data.email,
-        p_customer_phone: parsed.data.phone,
-        p_start_time: start.toISOString(),
-        p_end_time: end.toISOString(),
-        p_notes: parsed.data.notes || null,
-        p_professional_id: professional.id,
-      });
+      if ((fresh ?? []).some((b: BookedInterval) => start < new Date(b.end_time) && end > new Date(b.start_time))) { setTime(''); toast({ title: 'Horário indisponível', description: 'Este horário acabou de ser ocupado. Escolha outro.', variant: 'destructive' }); return; }
+      const { data, error } = await (supabase as any).rpc('create_public_appointment', { p_user_id: profile.id, p_service_id: service.id, p_service_name: service.name, p_customer_name: parsed.data.name, p_customer_email: parsed.data.email, p_customer_phone: parsed.data.phone, p_start_time: start.toISOString(), p_end_time: end.toISOString(), p_notes: parsed.data.notes || null, p_professional_id: professional.id });
       if (error) throw error;
       const result = data as { success?: boolean; code?: string; error?: string };
-      if (!result?.success) {
-        if (result?.code === 'APPOINTMENT_CONFLICT') { setTime(''); toast({ title: 'Horário indisponível', description: 'Escolha outro horário.', variant: 'destructive' }); return; }
-        throw new Error(result?.error || 'Não foi possível concluir o agendamento.');
-      }
+      if (!result?.success) { if (result?.code === 'APPOINTMENT_CONFLICT') { setTime(''); toast({ title: 'Horário indisponível', description: 'Escolha outro horário.', variant: 'destructive' }); return; } throw new Error(result?.error || 'Não foi possível concluir o agendamento.'); }
       navigate('/agendamento-confirmado', { state: { serviceName: service.name, professionalName: professional.name, startTime: start.toISOString(), endTime: end.toISOString(), customerName: parsed.data.name, businessName: profile.business_name, whatsappNumber: profile.whatsapp_number, slug, price: service.price ?? null, duration: service.duration ?? null } });
-    } catch (e) {
-      console.error('Erro ao criar agendamento:', e);
-      toast({ title: 'Erro ao concluir agendamento', description: e instanceof Error ? e.message : 'Tente novamente.', variant: 'destructive' });
-    } finally { setSubmitting(false); }
+    } catch (e) { console.error('Erro ao criar agendamento:', e); toast({ title: 'Erro ao concluir agendamento', description: e instanceof Error ? e.message : 'Tente novamente.', variant: 'destructive' }); }
+    finally { setSubmitting(false); }
   };
 
   if (loading) return <div className="min-h-screen bg-gradient-to-br from-kendrah-purple to-kendrah-black flex items-center justify-center"><span className="text-white text-xl">Carregando agendamento...</span></div>;
@@ -189,30 +140,33 @@ const BookingSlugPage = () => {
 
   return <div className="min-h-screen bg-gradient-to-br from-kendrah-purple to-kendrah-black py-6 sm:py-10">
     <div className="mx-auto max-w-3xl px-4">
-      <header className="text-center mb-6 sm:mb-8">
-        {logoUrl ? <img src={logoUrl} alt={profile?.business_name || 'Logo'} onError={() => setLogoUrl(null)} className="mx-auto mb-4 h-20 w-20 rounded-full object-cover bg-white shadow-lg" /> : <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white text-kendrah-purple text-2xl font-bold shadow-lg">{(profile?.business_name || 'K').charAt(0).toUpperCase()}</div>}
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{profile?.business_name || 'Agendamento Online'}</h1>
-        <p className="text-gray-200">Escolha o serviço, profissional, data e horário.</p>
-        {profile?.whatsapp_number && <a href={`https://wa.me/${profile.whatsapp_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-2 text-green-400 hover:text-green-300 text-sm"><MessageSquare className="h-4 w-4" />Falar pelo WhatsApp</a>}
+      <header className="mb-6 sm:mb-8 overflow-visible">
+        <div className="relative mx-auto w-full overflow-hidden rounded-2xl bg-white/10 shadow-2xl ring-1 ring-white/10">
+          <div className="h-36 w-full sm:h-48 md:h-56 lg:h-60">
+            {coverUrl ? <img src={coverUrl} alt="Capa do estabelecimento" onError={() => setCoverUrl(null)} className="h-full w-full object-cover" /> : <div className="h-full w-full bg-gradient-to-r from-kendrah-purple/80 via-kendrah-purple/40 to-black/50" />}
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
+          <div className="relative -mt-12 flex flex-col items-center px-4 pb-5 sm:-mt-14">
+            {logoUrl ? <img src={logoUrl} alt={profile?.business_name || 'Logo'} onError={() => setLogoUrl(null)} className="h-24 w-24 rounded-full border-4 border-white object-cover bg-white shadow-xl sm:h-28 sm:w-28" /> : <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-white bg-white text-3xl font-bold text-kendrah-purple shadow-xl sm:h-28 sm:w-28">{(profile?.business_name || 'K').charAt(0).toUpperCase()}</div>}
+            <h1 className="mt-3 text-center text-2xl font-bold text-white sm:text-3xl md:text-4xl">{profile?.business_name || 'Agendamento Online'}</h1>
+            <p className="mt-1 text-center text-sm text-gray-200 sm:text-base">Escolha o serviço, profissional, data e horário.</p>
+            {profile?.whatsapp_number && <a href={`https://wa.me/${profile.whatsapp_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-2 text-sm text-green-400 hover:text-green-300"><MessageSquare className="h-4 w-4" />Falar pelo WhatsApp</a>}
+          </div>
+        </div>
       </header>
-
       <Card className="shadow-xl">
-        <CardHeader><CardTitle className="text-xl sm:text-2xl text-center">Agende seu horário</CardTitle><div className="flex justify-center gap-2 pt-2 text-xs text-muted-foreground"><span className="flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-kendrah-purple" />1. Escolha</span><span>•</span><span>2. Dados</span><span>•</span><span>3. Confirme</span></div></CardHeader>
-        <CardContent>
-          <form onSubmit={submit} className="space-y-6">
-            <div className="space-y-2"><Label>Serviço *</Label><Select value={serviceId} onValueChange={v => { setServiceId(v); setProfessionalId(''); setDate(''); setTime(''); }}><SelectTrigger><SelectValue placeholder="Selecione um serviço" /></SelectTrigger><SelectContent>{services.map(s => <SelectItem key={s.id} value={s.id}>{s.name} — {s.duration} min{ s.price != null ? ` — R$ ${Number(s.price).toFixed(2).replace('.', ',')}` : ''}</SelectItem>)}</SelectContent></Select></div>
-            <div className="space-y-2"><Label className="flex items-center gap-2"><UserRound className="h-4 w-4" />Profissional *</Label><Select value={professionalId} onValueChange={v => { setProfessionalId(v); setDate(''); setTime(''); }} disabled={!serviceId || professionals.length === 0}><SelectTrigger><SelectValue placeholder={!serviceId ? 'Primeiro selecione um serviço' : 'Selecione o profissional'} /></SelectTrigger><SelectContent>{professionals.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent></Select></div>
-            <div className="space-y-2"><Label className="flex items-center gap-2"><CalendarDays className="h-4 w-4" />Data *</Label><Select value={date} onValueChange={v => { setDate(v); setTime(''); }} disabled={!professionalId}><SelectTrigger><SelectValue placeholder={!professionalId ? 'Primeiro selecione o profissional' : 'Selecione uma data'} /></SelectTrigger><SelectContent>{availableDates.map(d => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}</SelectContent></Select>{availability.length === 0 && <p className="text-sm text-destructive">O prestador ainda não configurou horários.</p>}</div>
-            <div className="space-y-2"><Label className="flex items-center gap-2"><Clock3 className="h-4 w-4" />Horário *</Label><Select value={time} onValueChange={setTime} disabled={!date || !serviceId || !professionalId || loadingTimes || timesError}><SelectTrigger><SelectValue placeholder={loadingTimes ? 'Verificando horários...' : timesError ? 'Erro ao verificar horários' : 'Selecione um horário'} /></SelectTrigger><SelectContent>{timeOptions.map(t => <SelectItem key={t.time} value={t.time} disabled={t.booked}>{t.time}{t.booked ? ' — Indisponível' : ' — Disponível'}</SelectItem>)}</SelectContent></Select>{date && !loadingTimes && !timesError && timeOptions.length === 0 && <p className="text-sm text-muted-foreground">Não há horários disponíveis nesta data.</p>}</div>
-
-            <div className="border-t pt-6 space-y-4"><div><h2 className="font-semibold text-lg">Seus dados</h2><p className="text-sm text-muted-foreground">Preencha os dados para confirmar seu agendamento.</p></div><div className="space-y-2"><Label>Nome completo *</Label><Input value={name} onChange={e => setName(e.target.value)} placeholder="Seu nome completo" autoComplete="name" /></div><div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div className="space-y-2"><Label>E-mail *</Label><Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seuemail@exemplo.com" autoComplete="email" /></div><div className="space-y-2"><Label>WhatsApp *</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="(11) 99999-9999" autoComplete="tel" /></div></div><div className="space-y-2"><Label>Observações</Label><Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Alguma observação? (opcional)" rows={3} /></div></div>
-
-            {serviceId && professionalId && date && time && <div className="rounded-xl border border-kendrah-purple/20 bg-kendrah-purple/5 p-4 space-y-1 text-sm"><p className="font-semibold mb-2">Resumo do agendamento</p><p><strong>Serviço:</strong> {services.find(s => s.id === serviceId)?.name}</p><p><strong>Profissional:</strong> {professionals.find(p => p.id === professionalId)?.name}</p><p><strong>Data:</strong> {format(new Date(`${date}T12:00:00`), 'dd/MM/yyyy')}</p><p><strong>Horário:</strong> {time}</p></div>}
-            <Button type="submit" className="w-full h-12 bg-kendrah-purple hover:bg-kendrah-purple/90" disabled={submitting || loadingTimes || timesError}>{submitting ? 'Confirmando agendamento...' : 'Confirmar agendamento'}</Button>
-          </form>
-        </CardContent>
+        <CardHeader><CardTitle className="text-center text-xl sm:text-2xl">Agende seu horário</CardTitle><div className="flex justify-center gap-2 pt-2 text-xs text-muted-foreground"><span className="flex items-center gap-1"><CheckCircle2 className="h-4 w-4 text-kendrah-purple" />1. Escolha</span><span>•</span><span>2. Dados</span><span>•</span><span>3. Confirme</span></div></CardHeader>
+        <CardContent><form onSubmit={submit} className="space-y-6">
+          <div className="space-y-2"><Label>Serviço *</Label><Select value={serviceId} onValueChange={v => { setServiceId(v); setProfessionalId(''); setDate(''); setTime(''); }}><SelectTrigger><SelectValue placeholder="Selecione um serviço" /></SelectTrigger><SelectContent>{services.map(s => <SelectItem key={s.id} value={s.id}>{s.name} — {s.duration} min{s.price != null ? ` — R$ ${Number(s.price).toFixed(2).replace('.', ',')}` : ''}</SelectItem>)}</SelectContent></Select></div>
+          <div className="space-y-2"><Label className="flex items-center gap-2"><UserRound className="h-4 w-4" />Profissional *</Label><Select value={professionalId} onValueChange={v => { setProfessionalId(v); setDate(''); setTime(''); }} disabled={!serviceId || professionals.length === 0}><SelectTrigger><SelectValue placeholder={!serviceId ? 'Primeiro selecione um serviço' : 'Selecione o profissional'} /></SelectTrigger><SelectContent>{professionals.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent></Select></div>
+          <div className="space-y-2"><Label className="flex items-center gap-2"><CalendarDays className="h-4 w-4" />Data *</Label><Select value={date} onValueChange={v => { setDate(v); setTime(''); }} disabled={!professionalId}><SelectTrigger><SelectValue placeholder={!professionalId ? 'Primeiro selecione o profissional' : 'Selecione uma data'} /></SelectTrigger><SelectContent>{availableDates.map(d => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}</SelectContent></Select>{availability.length === 0 && <p className="text-sm text-destructive">O prestador ainda não configurou horários.</p>}</div>
+          <div className="space-y-2"><Label className="flex items-center gap-2"><Clock3 className="h-4 w-4" />Horário *</Label><Select value={time} onValueChange={setTime} disabled={!date || !serviceId || !professionalId || loadingTimes || timesError}><SelectTrigger><SelectValue placeholder={loadingTimes ? 'Verificando horários...' : timesError ? 'Erro ao verificar horários' : 'Selecione um horário'} /></SelectTrigger><SelectContent>{timeOptions.map(t => <SelectItem key={t.time} value={t.time} disabled={t.booked}>{t.time}{t.booked ? ' — Indisponível' : ' — Disponível'}</SelectItem>)}</SelectContent></Select>{date && !loadingTimes && !timesError && timeOptions.length === 0 && <p className="text-sm text-muted-foreground">Não há horários disponíveis nesta data.</p>}</div>
+          <div className="border-t pt-6 space-y-4"><div><h2 className="font-semibold text-lg">Seus dados</h2><p className="text-sm text-muted-foreground">Preencha os dados para confirmar seu agendamento.</p></div><div className="space-y-2"><Label>Nome completo *</Label><Input value={name} onChange={e => setName(e.target.value)} placeholder="Seu nome completo" autoComplete="name" /></div><div className="grid grid-cols-1 gap-4 sm:grid-cols-2"><div className="space-y-2"><Label>E-mail *</Label><Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seuemail@exemplo.com" autoComplete="email" /></div><div className="space-y-2"><Label>WhatsApp *</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="(11) 99999-9999" autoComplete="tel" /></div></div><div className="space-y-2"><Label>Observações</Label><Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Alguma observação? (opcional)" rows={3} /></div></div>
+          {serviceId && professionalId && date && time && <div className="space-y-1 rounded-xl border border-kendrah-purple/20 bg-kendrah-purple/5 p-4 text-sm"><p className="mb-2 font-semibold">Resumo do agendamento</p><p><strong>Serviço:</strong> {services.find(s => s.id === serviceId)?.name}</p><p><strong>Profissional:</strong> {professionals.find(p => p.id === professionalId)?.name}</p><p><strong>Data:</strong> {format(new Date(`${date}T12:00:00`), 'dd/MM/yyyy')}</p><p><strong>Horário:</strong> {time}</p></div>}
+          <Button type="submit" className="h-12 w-full bg-kendrah-purple hover:bg-kendrah-purple/90" disabled={submitting || loadingTimes || timesError}>{submitting ? 'Confirmando agendamento...' : 'Confirmar agendamento'}</Button>
+        </form></CardContent>
       </Card>
-      <p className="text-center text-xs text-gray-300 mt-5">Agendamento online • KENDRAH</p>
+      <p className="mt-5 text-center text-xs text-gray-300">Agendamento online • KENDRAH</p>
     </div>
   </div>;
 };
