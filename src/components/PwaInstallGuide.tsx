@@ -40,17 +40,14 @@ const PwaInstallGuide = () => {
       setAuthenticated(isLoggedIn);
 
       const alreadySeen = localStorage.getItem(INSTALL_SEEN_KEY) === "true";
-      const isDashboard = window.location.pathname.startsWith("/dashboard");
-      if (isLoggedIn && isDashboard && !standalone && !alreadySeen) {
-        timer = window.setTimeout(() => setOpen(true), 1000);
+      if (!standalone && !alreadySeen) {
+        timer = window.setTimeout(() => setOpen(true), 1500);
       }
     };
     checkSession();
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      const isLoggedIn = Boolean(session);
-      setAuthenticated(isLoggedIn);
-      if (!isLoggedIn) setOpen(false);
+      setAuthenticated(Boolean(session));
     });
 
     return () => {
@@ -73,7 +70,7 @@ const PwaInstallGuide = () => {
     if (choice.outcome === "accepted") close();
   };
 
-  if (!open || !authenticated || isStandalone) return null;
+  if (!open || isStandalone) return null;
 
   return (
     <div className="fixed inset-x-0 bottom-4 z-50 mx-auto w-[calc(100%-2rem)] max-w-lg sm:bottom-6">
