@@ -39,15 +39,18 @@ const DashboardHome = () => {
   const todayAppointments = appointments.filter((a) => a.status !== 'cancelled' && isSameDay(new Date(a.start_time), today)).length;
   const cancelledAppointments = appointments.filter((a) => a.status === 'cancelled').length;
 
-  // Faturamento = valor do serviço x quantidade de atendimentos concluídos.
-  // O service_price é gravado no agendamento para preservar o valor praticado
-  // mesmo que o prestador altere o preço do serviço depois.
+  // Faturamento realizado = soma do preço registrado em cada atendimento concluído.
+  // O valor fica congelado no agendamento, preservando o histórico mesmo após
+  // o prestador alterar o preço do serviço.
   const priceByService = new Map(services.map((service) => [service.id, Number(service.price ?? 0)]));
   const completedAppointments = appointments.filter((a) => a.status === 'completed');
-  const revenue = completedAppointments.reduce(
-    (total, appointment) => total + Number((appointment as any).service_price ?? priceByService.get(appointment.service_id) ?? 0),
-    0
-  );
+  const revenue = completedAppointments.reduce((total, appointment) => {
+    const appointmentPrice = Number((appointment as any).service_price);
+    const historicalPrice = Number.isFinite(appointmentPrice)
+      ? appointmentPrice
+      : (priceByService.get(appointment.service_id) ?? 0);
+    return total + historicalPrice;
+  }, 0);
   const formattedRevenue = revenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   const professionalNameById = new Map(professionals.map((professional) => [professional.id, professional.name]));
