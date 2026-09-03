@@ -26,16 +26,10 @@ export const useAppointments = () => {
       return;
     }
 
-    // Garante que atendimentos cujo horário já terminou sejam considerados
-    // concluídos imediatamente, sem depender exclusivamente do pg_cron.
-    // O job do banco continua existindo como garantia quando o app estiver fechado.
-    const nowIso = new Date().toISOString();
-    const { error: completeError } = await supabase
-      .from('appointments')
-      .update({ status: 'completed' })
-      .eq('user_id', ownerId)
-      .eq('status', 'confirmed')
-      .lte('end_time', nowIso);
+    // Conclui atendimentos encerrados via RPC SECURITY DEFINER para não depender
+    // de uma política de UPDATE na tabela appointments. O pg_cron continua como garantia.
+    const { error: completeError } = await (supabase as any)
+      .rpc('complete_workspace_appointments', { p_owner_id: ownerId });
 
     if (completeError) {
       console.warn('Não foi possível concluir automaticamente os atendimentos passados:', completeError);
@@ -97,8 +91,7 @@ export const useAppointments = () => {
       )
       .subscribe();
 
-    // Atualiza o status de atendimentos que terminarem enquanto o dashboard
-    // estiver aberto e, consequentemente, atualiza o faturamento sem reload.
+    // Verifica a cada minuto para atualizar o faturamento sem recarregar a página.
     const interval = window.setInterval(() => {
       fetchAppointments();
     }, 60_000);
