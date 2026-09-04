@@ -62,7 +62,7 @@
 .bg-soft-gradient { background: var(--gradient-soft); }
 .shadow-elegant { box-shadow: var(--shadow-elegant); }
 .shadow-glow { box-shadow: var(--shadow-glow); }
-.text-gradient { background: none; -webkit-background-clip: initial; background-clip: initial; color: #ffffff; -webkit-text-fill-color: #ffffff; text-shadow: 0 1px 10px hsl(0 0% 0% / .18); }
+.text-gradient { background: linear-gradient(90deg, #7D3C98 0%, #9B59B6 50%, #D8A7E8 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; text-shadow: none; } .dark .text-gradient { background: none; -webkit-background-clip: initial; background-clip: initial; color: #ffffff; -webkit-text-fill-color: #ffffff; text-shadow: 0 1px 10px hsl(0 0% 0% / .18); }
 .grid-pattern { background-image: linear-gradient(hsl(0 0% 100% / .06) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100% / .06) 1px, transparent 1px); background-size: 48px 48px; }
 .glass-card { background: hsl(0 0% 100% / .08); border: 1px solid hsl(0 0% 100% / .15); backdrop-filter: blur(12px); }
 @keyframes float-slow { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
