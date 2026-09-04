@@ -10,17 +10,16 @@ const CTASection = () => {
 
       <div className="container relative mx-auto px-6 text-center">
         <h2 className="mx-auto max-w-3xl text-3xl font-bold tracking-tight md:text-4xl">
-          Pronto para simplificar sua rotina?
+          Pare de perder tempo organizando agendamentos
         </h2>
         <p className="mx-auto mt-5 max-w-2xl text-lg text-white/80">
-          Comece agora com 7 dias grátis, cancele quando quiser. Configure sua agenda em minutos
-          e receba o primeiro agendamento ainda hoje.
+          Coloque sua agenda online, compartilhe seu link e deixe seus clientes encontrarem o melhor horário. Comece com 7 dias grátis e cancele quando quiser.
         </p>
 
         <div className="mt-9 flex justify-center">
           <Link to="/register">
             <Button size="lg" className="group h-14 bg-white px-8 text-base font-semibold text-kendrah-purple hover:bg-white/90">
-              Criar minha conta grátis
+              Começar 7 dias grátis
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
