@@ -30,32 +30,32 @@ const FeaturesSection = () => {
     {
       icon: <CalendarDays className="h-6 w-6" />,
       title: 'Agenda Online',
-      description: 'Calendário completo e personalizável para gerenciar seus compromissos com facilidade.',
+      description: 'Tenha uma visão clara dos seus compromissos e saiba exatamente como está sua rotina de atendimentos.',
     },
     {
       icon: <MessageCircle className="h-6 w-6" />,
-      title: 'Contato por WhatsApp',
-      description: 'Fale com o cliente em um clique e envie lembretes e confirmações sem sair do painel.',
+      title: 'WhatsApp',
+      description: 'Entre em contato com seus clientes em um clique e facilite confirmações e lembretes da sua agenda.',
     },
     {
       icon: <Link2 className="h-6 w-6" />,
       title: 'Link Personalizado',
-      description: 'Receba agendamentos por um link próprio que você compartilha onde quiser.',
+      description: 'Compartilhe um único link e permita que seus clientes encontrem horários disponíveis sem depender de você.',
     },
     {
       icon: <ClipboardList className="h-6 w-6" />,
-      title: 'Cadastro de Serviços',
-      description: 'Registre serviços, duração e preços para o cliente escolher na hora de agendar.',
+      title: 'Serviços e Preços',
+      description: 'Cadastre seus serviços, duração e preços para deixar o cliente escolher exatamente o que deseja agendar.',
     },
     {
       icon: <Clock className="h-6 w-6" />,
       title: 'Horários Personalizados',
-      description: 'Configure sua disponibilidade com flexibilidade para cada dia da semana.',
+      description: 'Defina sua disponibilidade de acordo com sua rotina e mantenha o controle sobre quando atender.',
     },
     {
       icon: <BarChart3 className="h-6 w-6" />,
-      title: 'Relatórios e Histórico',
-      description: 'Acompanhe seu histórico de atendimentos e enxergue a saúde da sua agenda.',
+      title: 'Histórico e Relatórios',
+      description: 'Consulte seus atendimentos e tenha mais clareza para acompanhar o movimento da sua agenda.',
     },
   ];
 
@@ -67,10 +67,10 @@ const FeaturesSection = () => {
             Funcionalidades
           </span>
           <h2 className="mt-4 text-3xl font-bold tracking-tight text-kendrah-black md:text-4xl">
-            Tudo o que sua agenda precisa, em um só lugar
+            Tudo para sua agenda funcionar sem complicação
           </h2>
           <p className="mt-4 text-lg text-gray-600">
-            Recursos pensados para quem atende pessoas e não tem tempo a perder com burocracia.
+            Ferramentas simples para organizar seus horários, facilitar o agendamento e acompanhar seus clientes.
           </p>
         </div>
 
