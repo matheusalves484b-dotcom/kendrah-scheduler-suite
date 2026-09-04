@@ -3,7 +3,6 @@ import Footer from '@/components/Footer';
 import HeroSection from '@/components/landing/HeroSection';
 import PainSolutionSection from '@/components/landing/PainSolutionSection';
 import HowItWorksSection from '@/components/landing/HowItWorksSection';
-import BookingFlowSection from '@/components/landing/BookingFlowSection';
 import FeaturesSection from '@/components/landing/FeaturesSection';
 import PricingSection from '@/components/landing/PricingSection';
 import TestimonialsSection from '@/components/landing/TestimonialsSection';
@@ -17,7 +16,6 @@ const LandingPage = () => {
         <HeroSection />
         <PainSolutionSection />
         <HowItWorksSection />
-        <BookingFlowSection />
         <FeaturesSection />
         <PricingSection />
         <TestimonialsSection />
