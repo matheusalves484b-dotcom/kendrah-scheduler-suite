@@ -23,8 +23,7 @@ const HeroSection = () => {
             </h1>
 
             <p className="mt-6 max-w-xl text-lg text-white/80 md:text-xl">
-              Com a Kendrah, você compartilha seu link de agendamento e deixa seus clientes escolherem
-              serviço, profissional, data e horário. Você cuida do atendimento; a agenda cuida do resto.
+              A Kendrah organiza seus horários, confirma clientes pelo WhatsApp e transforma seu link de agendamento em uma forma simples de receber novos atendimentos.
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -36,7 +35,7 @@ const HeroSection = () => {
               </Link>
               <Link to="/login">
                 <Button size="lg" variant="outline" className="h-14 w-full border-white/40 bg-white/5 px-8 text-base font-semibold text-white backdrop-blur hover:bg-white/15 hover:text-white sm:w-auto">
-                  Entrar na minha conta
+                  Área do cliente
                 </Button>
               </Link>
             </div>
