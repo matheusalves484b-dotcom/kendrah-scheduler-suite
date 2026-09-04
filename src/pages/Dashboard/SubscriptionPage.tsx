@@ -50,10 +50,7 @@ const SubscriptionPage = () => {
       let res: { url?: string; error?: string } = {};
       try { res = JSON.parse(responseText); } catch { /* resposta não-JSON */ }
 
-      if (!response.ok) {
-        throw new Error(res.error || `Erro ao iniciar pagamento (${response.status}).`);
-      }
-
+      if (!response.ok) throw new Error(res.error || `Erro ao iniciar pagamento (${response.status}).`);
       if (res.url) window.location.href = res.url;
       else throw new Error('Não foi possível gerar o checkout. Tente novamente.');
     } catch (e) {
@@ -62,13 +59,7 @@ const SubscriptionPage = () => {
   };
 
   const trialDays = daysLeft(data?.trial_end ?? null);
-  const status: 'active' | 'trial' | 'expired' | 'ambassador' = data?.is_ambassador
-    ? 'ambassador'
-    : data?.subscribed
-      ? 'active'
-      : trialDays > 0
-        ? 'trial'
-        : 'expired';
+  const status: 'active' | 'trial' | 'expired' | 'ambassador' = data?.is_ambassador ? 'ambassador' : data?.subscribed ? 'active' : trialDays > 0 ? 'trial' : 'expired';
 
   const statusBadge = {
     active: <Badge className="bg-green-600">Ativa</Badge>,
@@ -82,9 +73,7 @@ const SubscriptionPage = () => {
       <div className="p-4 sm:p-6">
         <div className="flex items-center justify-between mb-6 gap-3">
           <h1 className="text-2xl font-bold">Assinatura</h1>
-          <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />Atualizar
-          </Button>
+          <Button variant="ghost" size="sm" onClick={() => refetch()} disabled={isFetching}><RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />Atualizar</Button>
         </div>
         {isLoading ? (
           <div className="flex justify-center items-center h-48"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-kendrah-purple" /></div>
@@ -92,7 +81,7 @@ const SubscriptionPage = () => {
           <Card className="max-w-2xl">
             <CardHeader>
               <div className="flex justify-between items-start gap-4">
-                <div><CardTitle className="text-xl">{status === 'ambassador' ? 'Plano Embaixador' : 'Plano Mensal'}</CardTitle><CardDescription className="text-lg font-medium mt-1">{status === 'ambassador' ? 'Gratuito vitalício' : 'R$ 49,90/mês'}</CardDescription></div>
+                <div><CardTitle className="text-xl">{status === 'ambassador' ? 'Plano Embaixador' : 'Plano Mensal'}</CardTitle><CardDescription className="text-lg font-medium mt-1">{status === 'ambassador' ? 'Gratuito vitalício' : 'R$ 39,90/mês'}</CardDescription></div>
                 <div>{statusBadge}</div>
               </div>
             </CardHeader>
@@ -104,7 +93,7 @@ const SubscriptionPage = () => {
               <div className="mt-6"><h3 className="font-medium mb-2">O que está incluso:</h3><ul className="space-y-2">{INCLUDED.map(item => <li key={item} className="flex items-center text-sm"><Check className="w-4 h-4 text-kendrah-purple mr-2 shrink-0" />{item}</li>)}</ul></div>
             </CardContent>
             <CardFooter>
-              {status === 'ambassador' ? <div className="w-full text-center text-sm text-muted-foreground">Você não precisa realizar nenhum pagamento.</div> : status === 'active' ? <Button variant="outline" className="w-full border-kendrah-purple text-kendrah-purple hover:bg-kendrah-purple/10" disabled={busy} onClick={() => invokeFn('customer-portal')}>Gerenciar assinatura</Button> : <Button className="w-full bg-kendrah-purple hover:bg-kendrah-purple/90" disabled={busy} onClick={() => invokeFn('create-checkout')}>{busy ? 'Abrindo pagamento...' : 'Assinar por R$ 49,90/mês'}</Button>}
+              {status === 'ambassador' ? <div className="w-full text-center text-sm text-muted-foreground">Você não precisa realizar nenhum pagamento.</div> : status === 'active' ? <Button variant="outline" className="w-full border-kendrah-purple text-kendrah-purple hover:bg-kendrah-purple/10" disabled={busy} onClick={() => invokeFn('customer-portal')}>Gerenciar assinatura</Button> : <Button className="w-full bg-kendrah-purple hover:bg-kendrah-purple/90" disabled={busy} onClick={() => invokeFn('create-checkout')}>{busy ? 'Abrindo pagamento...' : 'Assinar por R$ 39,90/mês'}</Button>}
             </CardFooter>
           </Card>
         )}
