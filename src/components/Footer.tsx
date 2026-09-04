@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
+import { Instagram } from 'lucide-react';
 import FooterSection from './footer/FooterSection';
 import CopyrightInfo from './footer/CopyrightInfo';
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const quickLinks = [{
@@ -32,6 +34,7 @@ const Footer = () => {
     label: 'Política de Privacidade',
     url: '/privacy'
   }];
+
   return <footer className="text-white py-8 mt-auto bg-gray-950">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -42,6 +45,16 @@ const Footer = () => {
             <p className="mt-4 text-gray-300 max-w-md">
               Automatize sua agenda. Simplifique sua rotina. Sistema de agendamentos profissional para prestadores de serviço.
             </p>
+            <a
+              href="https://www.instagram.com/kendrahagendamentos/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram do Kendrah"
+              className="mt-5 inline-flex items-center gap-2 text-gray-300 transition-colors hover:text-white"
+            >
+              <Instagram className="h-5 w-5" />
+              <span>Instagram</span>
+            </a>
           </div>
           
           <FooterSection title="Links Rápidos" links={quickLinks} />
@@ -52,4 +65,5 @@ const Footer = () => {
       </div>
     </footer>;
 };
+
 export default Footer;
