@@ -18,13 +18,13 @@ const HeroSection = () => {
             </span>
 
             <h1 className="mt-6 text-4xl font-bold leading-[1.1] tracking-tight md:text-5xl xl:text-6xl">
-              Automatize sua agenda.
-              <span className="block text-gradient">Simplifique sua rotina.</span>
+              Sua agenda organizada.
+              <span className="block text-gradient">Seus clientes agendando sozinhos.</span>
             </h1>
 
             <p className="mt-6 max-w-xl text-lg text-white/80 md:text-xl">
-              A Kendrah organiza seus horários, confirma clientes pelo WhatsApp e transforma
-              seu link de agendamento em uma máquina silenciosa de novos atendimentos.
+              Com a Kendrah, você compartilha seu link de agendamento e deixa seus clientes escolherem
+              serviço, profissional, data e horário. Você cuida do atendimento; a agenda cuida do resto.
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -36,23 +36,16 @@ const HeroSection = () => {
               </Link>
               <Link to="/login">
                 <Button size="lg" variant="outline" className="h-14 w-full border-white/40 bg-white/5 px-8 text-base font-semibold text-white backdrop-blur hover:bg-white/15 hover:text-white sm:w-auto">
-                  Área do cliente
+                  Entrar na minha conta
                 </Button>
               </Link>
             </div>
 
-            <dl className="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-white/15 pt-8">
-              {[
-                { value: '+60 horas', label: 'economizadas por mês' },
-                { value: '‑42%', label: 'de faltas com lembretes' },
-                { value: '24/7', label: 'agenda aberta online' },
-              ].map((stat) => (
-                <div key={stat.label}>
-                  <dt className="text-2xl font-bold md:text-3xl">{stat.value}</dt>
-                  <dd className="mt-1 text-xs text-white/65 md:text-sm">{stat.label}</dd>
-                </div>
-              ))}
-            </dl>
+            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/70">
+              <span>✓ Agenda online 24h</span>
+              <span>✓ Link personalizado</span>
+              <span>✓ WhatsApp</span>
+            </div>
           </div>
 
           <div className="relative">
@@ -77,7 +70,7 @@ const HeroSection = () => {
               <MessageCircle className="h-5 w-5" />
               <div>
                 <p className="text-sm font-semibold">Lembrete enviado</p>
-                <p className="text-xs text-white/70">WhatsApp · 1 dia antes</p>
+                <p className="text-xs text-white/70">WhatsApp · automático</p>
               </div>
             </div>
           </div>
