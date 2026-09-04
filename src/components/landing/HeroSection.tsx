@@ -80,10 +80,10 @@ const HeroSection = () => {
                 preserveAspectRatio="xMidYMid meet"
               >
                 <defs>
-                  <linearGradient id="heroCalendarGradient" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-                    <stop offset="0" stopColor="#E9B6FF" />
-                    <stop offset="0.48" stopColor="#B65CFF" />
-                    <stop offset="1" stopColor="#7D3C98" />
+                  <linearGradient id="heroCalendarGradient" x1="2" y1="12" x2="22" y2="12" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stopColor="#7D3C98" />
+                    <stop offset="0.5" stopColor="#9B59B6" />
+                    <stop offset="1" stopColor="#D8A7E8" />
                   </linearGradient>
                 </defs>
                 <path
