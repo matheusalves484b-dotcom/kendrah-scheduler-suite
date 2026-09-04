@@ -3,7 +3,7 @@ import { Check, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const PricingSection = () => {
-  const features = ["1 a 2 profissionais", "Agendamentos ilimitados", "Notificações por WhatsApp", "Link de agendamento personalizado", "Cadastro ilimitado de serviços", "Horários personalizados", "Relatórios mensais detalhados", "Suporte prioritário", "Atualizações e novidades"];
+  const features = ["1 a 2 profissionais", "Agendamentos ilimitados", "Lembretes automáticos por WhatsApp 24h e 1h antes", "Link de agendamento personalizado", "Cadastro ilimitado de serviços", "Horários personalizados", "Relatórios mensais detalhados", "Suporte prioritário", "Atualizações e novidades"];
 
   return (
     <section className="py-24 bg-transparent">
@@ -11,13 +11,13 @@ const PricingSection = () => {
         <div className="text-center mb-14">
           <span className="inline-flex items-center gap-2 rounded-full border border-kendrah-purple/20 bg-kendrah-purple/5 px-4 py-1.5 text-sm font-medium text-kendrah-purple">
             <ShieldCheck className="h-4 w-4" />
-            Simples e transparente
+            Plano simples e transparente
           </span>
           <h2 className="mt-5 text-3xl font-bold tracking-tight text-kendrah-black md:text-4xl">
-            Tudo isso por R$ 39,90 por mês
+            Tenha tudo por R$ 39,90 por mês
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-zinc-600">
-            Comece com 7 dias grátis para conhecer a Kendrah na prática. Sem planos complicados e sem compromisso de permanência.
+            Experimente a Kendrah por 7 dias grátis e veja como ela pode simplificar sua rotina. Depois, R$ 39,90/mês, sem fidelidade.
           </p>
         </div>
 
@@ -25,13 +25,13 @@ const PricingSection = () => {
           <div className="relative w-full max-w-lg rounded-3xl border border-kendrah-purple/25 bg-background/70 p-8 shadow-elegant backdrop-blur-sm">
             <div className="text-center">
               <h3 className="text-xl font-bold text-kendrah-black">Plano Premium</h3>
-              <p className="mt-1 text-sm text-zinc-500">Tudo o que a sua agenda precisa em um só plano</p>
+              <p className="mt-1 text-sm text-zinc-500">Tudo o que você precisa para organizar seus atendimentos</p>
               <div className="mt-5 flex items-end justify-center gap-2">
                 <span className="text-5xl font-bold text-kendrah-purple">R$ 39,90</span>
                 <span className="pb-2 text-zinc-500">/mês</span>
               </div>
-              <p className="mt-2 text-sm font-medium text-kendrah-purple">7 dias grátis para testar</p>
-              <p className="mt-1 text-sm text-zinc-500">Depois, R$ 39,90/mês. Cancele quando quiser.</p>
+              <p className="mt-2 text-sm font-medium text-kendrah-purple">7 dias grátis</p>
+              <p className="mt-1 text-sm text-zinc-500">Cancele quando quiser.</p>
             </div>
 
             <div className="mt-8 space-y-3">
@@ -52,7 +52,7 @@ const PricingSection = () => {
                 </Button>
               </Link>
               <p className="mt-3 text-center text-sm text-zinc-500">
-                Sem compromisso. Cancele quando quiser.
+                Sem fidelidade. Cancele quando quiser.
               </p>
             </div>
           </div>
