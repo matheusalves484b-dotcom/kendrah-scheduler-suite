@@ -35,11 +35,7 @@ const HeroSection = () => {
                 </Button>
               </Link>
               <Link to="/login">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="h-14 w-full border-white/40 bg-white/5 px-8 text-base font-semibold text-white backdrop-blur hover:bg-white/15 hover:text-white sm:w-auto"
-                >
+                <Button size="lg" variant="outline" className="h-14 w-full border-white/40 bg-white/5 px-8 text-base font-semibold text-white backdrop-blur hover:bg-white/15 hover:text-white sm:w-auto">
                   Área do cliente
                 </Button>
               </Link>
@@ -61,15 +57,13 @@ const HeroSection = () => {
 
           <div className="relative">
             <div className="absolute inset-0 rounded-3xl bg-white/10 blur-2xl" aria-hidden="true" />
-            <div className="relative rounded-3xl border border-white/10 bg-secondary/80 p-8 shadow-elegant backdrop-blur-sm">
-              <img
-                alt="Kendrah — sistema de agendamentos online"
-                className="relative w-full drop-shadow-[0_0_30px_rgba(255,255,255,0.25)]"
-                src="/lovable-uploads/logo-gradient.png"
-                width={1024}
-                height={640}
-              />
-            </div>
+            <img
+              alt="Kendrah — sistema de agendamentos online"
+              className="relative w-full rounded-2xl border border-white/15 shadow-elegant"
+              src="/lovable-uploads/3cb7ac49-9e22-4c45-83db-279995a935ba.png"
+              width={1024}
+              height={640}
+            />
 
             <div className="glass-card animate-float-slow absolute -left-4 bottom-8 hidden rounded-xl px-4 py-3 shadow-glow sm:flex sm:items-center sm:gap-3">
               <CalendarCheck className="h-5 w-5" />
