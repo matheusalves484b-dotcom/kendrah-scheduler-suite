@@ -61,15 +61,14 @@ const HeroSection = () => {
 
           <div className="relative">
             <div className="absolute inset-0 rounded-3xl bg-white/10 blur-2xl" aria-hidden="true" />
-            <div className="relative">
+            <div className="relative rounded-3xl border border-white/10 bg-secondary/80 p-8 shadow-elegant backdrop-blur-sm">
               <img
                 alt="Kendrah — sistema de agendamentos online"
-                className="relative w-full rounded-2xl border border-white/15 bg-white/10 p-6 shadow-elegant"
+                className="relative w-full drop-shadow-[0_0_30px_rgba(255,255,255,0.25)]"
                 src="/lovable-uploads/logo-gradient.png"
                 width={1024}
                 height={640}
               />
-
             </div>
 
             <div className="glass-card animate-float-slow absolute -left-4 bottom-8 hidden rounded-xl px-4 py-3 shadow-glow sm:flex sm:items-center sm:gap-3">
