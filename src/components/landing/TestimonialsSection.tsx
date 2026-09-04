@@ -80,7 +80,7 @@ const TestimonialsSection = () => (
     <div className="marquee-mask overflow-hidden">
       <div
         className="animate-marquee-left flex w-max gap-6 hover:[animation-play-state:paused]"
-        style={{ ['--marquee-duration' as string]: '90s' }}
+        style={{ ['--marquee-duration' as string]: '55s' }}
       >
         {[...testimonials, ...testimonials].map((t, i) => (
           <TestimonialCard key={`${t.name}-${i}`} {...t} />
