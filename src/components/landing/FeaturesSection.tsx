@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import {
   CalendarDays,
   MessageCircle,
+  BellRing,
   Link2,
   ClipboardList,
   Clock,
@@ -33,9 +34,9 @@ const FeaturesSection = () => {
       description: 'Tenha uma visão clara dos seus compromissos e saiba exatamente como está sua rotina de atendimentos.',
     },
     {
-      icon: <MessageCircle className="h-6 w-6" />,
-      title: 'WhatsApp',
-      description: 'Entre em contato com seus clientes em um clique e facilite confirmações e lembretes da sua agenda.',
+      icon: <BellRing className="h-6 w-6" />,
+      title: 'Lembretes Automáticos',
+      description: 'Envie lembretes automáticos pelo WhatsApp 24h e 1h antes do atendimento, ajudando a reduzir esquecimentos.',
     },
     {
       icon: <Link2 className="h-6 w-6" />,
