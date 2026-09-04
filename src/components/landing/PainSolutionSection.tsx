@@ -3,17 +3,17 @@ import dorImg from '@/assets/dor.jpg';
 import solucaoImg from '@/assets/solucao.jpg';
 
 const pains = [
-  'Mensagens de "tem horário?" chegando a qualquer hora do dia',
+  'Mensagens de “tem horário?” chegando a qualquer hora do dia',
   'Agenda espalhada entre caderno, print e memória',
   'Clientes que esquecem e simplesmente não aparecem',
   'Horas perdidas confirmando e remarcando manualmente',
 ];
 
 const solutions = [
-  'Seu link de agendamento trabalha por você, 24 horas por dia',
-  'Uma única agenda online, sempre atualizada e no seu bolso',
-  'Lembretes e confirmações automáticas pelo WhatsApp',
-  'Serviços, durações e horários configurados uma única vez',
+  'Seu cliente escolhe o serviço e o horário pelo seu link, sem precisar falar com você',
+  'Uma única agenda online para visualizar e organizar seus atendimentos',
+  'Lembretes e confirmações pelo WhatsApp para manter o cliente informado',
+  'Serviços, durações e horários configurados uma vez para sua rotina funcionar melhor',
 ];
 
 const PainSolutionSection = () => {
@@ -22,11 +22,10 @@ const PainSolutionSection = () => {
       <div className="container mx-auto px-6">
         <div className="mx-auto mb-14 max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-kendrah-black md:text-4xl">
-
-            Você não abriu seu negócio para virar secretária de si mesma
+            Sua agenda não deveria depender de você o dia inteiro
           </h2>
           <p className="mt-4 text-lg text-gray-600">
-            Veja o que muda quando a agenda deixa de depender de você para funcionar.
+            Quando o agendamento fica no automático, você ganha tempo para cuidar do seu negócio e dos seus clientes.
           </p>
         </div>
 
@@ -45,7 +44,7 @@ const PainSolutionSection = () => {
               <span className="inline-flex items-center gap-2 rounded-full bg-kendrah-black/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-kendrah-black/70">
                 Sem a Kendrah
               </span>
-              <h3 className="mt-4 text-xl font-bold text-kendrah-black">A rotina que trava seu crescimento</h3>
+              <h3 className="mt-4 text-xl font-bold text-kendrah-black">Menos tempo atendendo, mais tempo organizando</h3>
               <ul className="mt-6 space-y-4">
                 {pains.map((item) => (
                   <li key={item} className="flex gap-3 text-gray-600">
@@ -73,7 +72,7 @@ const PainSolutionSection = () => {
               <span className="inline-flex items-center gap-2 rounded-full bg-kendrah-purple/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-kendrah-purple">
                 Com a Kendrah
               </span>
-              <h3 className="mt-4 text-xl font-bold text-kendrah-black">A agenda que se organiza sozinha</h3>
+              <h3 className="mt-4 text-xl font-bold text-kendrah-black">Seu cliente agenda. Você acompanha.</h3>
               <ul className="mt-6 space-y-4">
                 {solutions.map((item) => (
                   <li key={item} className="flex gap-3 text-gray-700">
