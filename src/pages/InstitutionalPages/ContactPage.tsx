@@ -95,7 +95,7 @@ const ContactPage = () => {
                       <Mail className="h-6 w-6 text-kendrah-purple mt-1" />
                       <div>
                         <h3 className="font-medium text-lg">E-mail</h3>
-                        <p className="text-gray-600 mt-1">sac@kendrah.com</p>
+                        <p className="text-gray-600 mt-1">agendamentoskendrah@gmail.com</p>
                         <p className="text-gray-500 text-sm mt-1">Respondemos em até 24 horas</p>
                       </div>
                     </CardContent>
