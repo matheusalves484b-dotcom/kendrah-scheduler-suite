@@ -9,7 +9,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center">
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
-              <span className="text-2xl font-bold text-gradient">KENDRAH</span>
+              <span className="text-2xl font-bold text-kendrah-purple">KENDRAH</span>
             </Link>
           </div>
 
