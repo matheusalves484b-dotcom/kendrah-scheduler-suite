@@ -70,37 +70,6 @@ const HeroSection = () => {
                 height={640}
               />
 
-              {/* Gradiente aplicado somente ao ícone de agenda/verificado do logo. */}
-              <svg
-                className="pointer-events-none absolute left-[4.5%] top-[30.5%] h-[34%] w-[20%]"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-                preserveAspectRatio="xMidYMid meet"
-              >
-                <defs>
-                  <linearGradient id="heroCalendarGradient" x1="2" y1="12" x2="22" y2="12" gradientUnits="userSpaceOnUse">
-                    <stop offset="0" stopColor="#7D3C98" />
-                    <stop offset="0.5" stopColor="#9B59B6" />
-                    <stop offset="1" stopColor="#D8A7E8" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M6 3V6M18 3V6M4 9H20M6 5H18C19.1046 5 20 5.89543 20 7V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V7C4 5.89543 4.89543 5 6 5Z"
-                  stroke="url(#heroCalendarGradient)"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M8 14L11 17L17 11"
-                  stroke="url(#heroCalendarGradient)"
-                  strokeWidth="2.1"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
             </div>
 
             <div className="glass-card animate-float-slow absolute -left-4 bottom-8 hidden rounded-xl px-4 py-3 shadow-glow sm:flex sm:items-center sm:gap-3">
