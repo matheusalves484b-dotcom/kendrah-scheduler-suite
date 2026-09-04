@@ -64,8 +64,8 @@ const HeroSection = () => {
             <div className="relative">
               <img
                 alt="Kendrah — sistema de agendamentos online"
-                className="relative w-full rounded-2xl border border-white/15 shadow-elegant"
-                src="/lovable-uploads/3cb7ac49-9e22-4c45-83db-279995a935ba.png"
+                className="relative w-full rounded-2xl border border-white/15 bg-white/10 p-6 shadow-elegant"
+                src="/lovable-uploads/logo-gradient.png"
                 width={1024}
                 height={640}
               />
