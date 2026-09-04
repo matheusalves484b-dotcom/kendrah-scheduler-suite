@@ -1,19 +1,19 @@
 const steps = [
   {
-    title: 'Configure seus serviços',
-    description: 'Cadastre o que você oferece, a duração e o preço de cada atendimento em poucos minutos.',
+    title: 'Crie sua agenda',
+    description: 'Cadastre seus serviços, duração e preços e deixe sua agenda pronta em poucos minutos.',
   },
   {
-    title: 'Defina sua disponibilidade',
-    description: 'Escolha os dias e horários em que aceita agendamentos. A Kendrah respeita seus limites.',
+    title: 'Defina seus horários',
+    description: 'Escolha os dias e horários disponíveis. Você continua no controle da sua rotina.',
   },
   {
     title: 'Compartilhe seu link',
-    description: 'Envie seu link personalizado na bio, no WhatsApp ou no story e deixe o cliente escolher o horário.',
+    description: 'Coloque seu link na bio, no WhatsApp ou onde seus clientes já estão e facilite o agendamento.',
   },
   {
-    title: 'Receba e confirme',
-    description: 'Acompanhe tudo no painel, com lembretes automáticos e histórico completo de cada cliente.',
+    title: 'Deixe o cliente agendar',
+    description: 'O cliente escolhe o serviço e o horário disponível. Você acompanha tudo pelo painel da Kendrah.',
   },
 ];
 
@@ -26,7 +26,7 @@ const HowItWorksSection = () => {
             Como funciona
           </span>
           <h2 className="mt-4 text-3xl font-bold tracking-tight text-kendrah-black md:text-4xl">
-            Pronto para receber agendamentos hoje mesmo
+            Configure uma vez. Sua agenda começa a trabalhar por você.
           </h2>
         </div>
 
